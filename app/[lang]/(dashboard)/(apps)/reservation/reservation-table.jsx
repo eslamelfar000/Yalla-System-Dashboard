@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 
-import { ArrowUpDown, ChevronDown, EyeIcon, MoreHorizontal } from "lucide-react";
+import {  EyeIcon } from "lucide-react";
 import {
   flexRender,
   getCoreRowModel,
@@ -30,7 +30,6 @@ import {
 import { ReservationDrawer } from "./reservation-drawer";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
