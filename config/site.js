@@ -1,8 +1,9 @@
 export const siteConfig = {
-  name: "DashTail Next js Admin Template",
+  // site name
+  name: "Yalla System",
   description: null,
-  theme: "violet",
-  layout: "vertical",
+  theme: "primary",
+  layout: "semi-box",
   // semi-box, horizontal, vertical
   hideSideBar: false,
   sidebarType: "module",
@@ -13,5 +14,5 @@ export const siteConfig = {
   footerType: "static",
   // sticky,  static, hidden
   sidebarBg: "none",
-  radius: 0.5,
+  radius: 0.75,
 };
