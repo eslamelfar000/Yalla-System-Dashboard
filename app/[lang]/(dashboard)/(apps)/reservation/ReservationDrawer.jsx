@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import { FilterIcon, Minus, Plus } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer } from "recharts";

@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 
-import {  EyeIcon } from "lucide-react";
+import { EyeIcon } from "lucide-react";
 import {
   flexRender,
   getCoreRowModel,
@@ -27,7 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ReservationDrawer } from "./reservation-drawer.jsx";
+import { ReservationDrawer } from "./ReservationDrawer";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { data } from "../../(tables)/data-table/data";
@@ -124,7 +124,7 @@ const columns = [
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-            <EyeIcon className="w-6 h-6 text-primary hover:text-black" />
+          <EyeIcon className="w-6 h-6 text-primary hover:text-black" />
         </div>
       </div>
     ),
@@ -207,21 +207,24 @@ export function ReservationDataTable() {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              )).slice(0, 4)
+              table
+                .getRowModel()
+                .rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+                .slice(0, 4)
             ) : (
               <TableRow>
                 <TableCell
