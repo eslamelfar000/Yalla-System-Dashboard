@@ -70,7 +70,7 @@ const VerticalHeader = ({ handleOpenSearch }) => {
   );
   const SearchButton = (
     <div>
-      <button
+      {/* <button
         className=" inline-flex  gap-2 items-center text-default-600 text-sm"
         onClick={handleOpenSearch}
       >
@@ -78,7 +78,7 @@ const VerticalHeader = ({ handleOpenSearch }) => {
           <Search className=" h-4 w-4" />
         </span>
         <span className=" md:block hidden"> Search...</span>
-      </button>
+      </button> */}
     </div>
   );
   if (layout === "semibox" && !isDesktop) {

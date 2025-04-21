@@ -5,13 +5,13 @@ import React from "react";
 const SidebarLogo = ({ hovered }) => {
   const { sidebarType, setCollapsed, collapsed } = useSidebar();
   return (
-    <div className="px-4 py-4 ">
+    <div className={`px-4 py-2 ${collapsed ? "py-3" : ""}`}>
       <div className=" flex items-center">
         <div className="flex flex-1 items-center gap-x-3  ">
           {/* <SiteLogo className="text-primary h-8 w-8" /> */}
-          <img src={SiteLogo} alt="yalla" className="" />
+          <img src={SiteLogo?.src} alt="yalla" className="w-12" />
           {(!collapsed || hovered) && (
-            <div className="flex-1  text-xl text-primary  font-semibold">
+            <div className="flex-1  text-lg text-primary font-semibold">
               Yalla System
             </div>
           )}

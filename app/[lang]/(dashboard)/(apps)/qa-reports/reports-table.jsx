@@ -90,7 +90,7 @@ const ReportsTableStatus = () => {
 
               <TableCell className="flex gap-3 ">
                 <Button
-                  className="px-5 text-xs"
+                  className="px-5 text-xs h-8 rounded-full"
                   color="primary"
                 >
                   Send
