@@ -27,7 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ReservationDrawer } from "./reservation-drawer";
+import { ReservationDrawer } from "./reservation-drawer.jsx";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { data } from "../../(tables)/data-table/data";
