@@ -1115,7 +1115,7 @@ export const menusConfig = {
       //     // },
       //   ],
       // },
-                {
+          {
             title: "Home",
             href: "/dashboard",
             icon: Graph,
@@ -1195,9 +1195,9 @@ export const menusConfig = {
       //   href: "/task",
       // },
       {
-        title: "Lesson Board",
+        title: "Lessons Board",
         icon: Box,
-        href: "/lesson-board",
+        href: "/lessons-board",
       },
       {
         title: "Income",
