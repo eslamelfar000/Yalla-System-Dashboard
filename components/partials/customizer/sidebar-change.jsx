@@ -8,14 +8,14 @@ import { cn } from "@/lib/utils";
 import { VerticalSvg, HorizontalSvg, SemiBoxSvg } from "@/components/svg";
 import { Icon } from "@iconify/react";
 const sidebarOptions = [
-  {
-    key: "module",
-    label: "Module",
-    disabled: (layout) => layout === "semibox" || layout === "horizontal",
-    svg: (
-      <VerticalSvg className="[&>rect]:fill-default-300 [&>circle]:fill-default-400 [&>path]:fill-default-400" />
-    ),
-  },
+  // {
+  //   key: "module",
+  //   label: "Module",
+  //   disabled: (layout) => layout === "semibox" || layout === "horizontal",
+  //   svg: (
+  //     <VerticalSvg className="[&>rect]:fill-default-300 [&>circle]:fill-default-400 [&>path]:fill-default-400" />
+  //   ),
+  // },
   {
     key: "classic",
     label: "Classic",

@@ -28,7 +28,7 @@ const CreatePasswordPage = () => {
               <div>
                 <Button
                   className="bg-transparent hover:bg-transparent h-fit w-fit p-0"
-                  onClick={() => setOpenVideo(true)}
+                  // onClick={() => setOpenVideo(true)}
                 >
                   <Icon
                     icon="heroicons:play-solid"

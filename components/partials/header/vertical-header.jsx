@@ -1,9 +1,8 @@
 import React from "react";
 import { useSidebar, useThemeStore } from "@/store";
 import { cn } from "@/lib/utils";
-import { Icon } from "@iconify/react";
-import { Search } from "lucide-react";
 import { SiteLogo } from "@/components/svg";
+import logo from '../../../public/yallalogo.png';
 import Link from "next/link";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
@@ -65,7 +64,8 @@ const VerticalHeader = ({ handleOpenSearch }) => {
 
   const MainLogo = (
     <Link href="/dashboard" className=" text-primary ">
-      <SiteLogo className="h-7 w-7" />
+      {/* <SiteLogo className="h-7 w-7" /> */}
+      <img src={logo?.src} alt={logo?.src} className="w-10"/>
     </Link>
   );
   const SearchButton = (

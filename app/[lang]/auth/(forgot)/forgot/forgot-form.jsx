@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { SiteLogo } from "@/components/svg";
+import logo from "@/public/yallalogo.png";
+import Image from "next/image";
 const schema = z.object({
   email: z.string().email({ message: "Your email is invalid." }),
 });
@@ -43,7 +44,7 @@ const ForgotForm = () => {
   return (
     <div className="w-full">
       <Link href="/dashboard" className="inline-block">
-        <SiteLogo className="h-10 w-10 2xl:w-14 2xl:h-14 text-primary" />
+        <Image src={logo} alt={logo} className="w-20" />
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
         Forget Your Password?

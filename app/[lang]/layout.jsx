@@ -8,6 +8,7 @@ import TanstackProvider from "@/provider/providers.client";
 import AuthProvider from "@/provider/auth.provider";
 import "flatpickr/dist/themes/light.css";
 import DirectionProvider from "@/provider/direction.provider";
+import logo from "@/public/yallalogo.png";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -16,6 +17,10 @@ export const metadata = {
     template: `%s - ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  icons: {
+    icon: "/yallalogo.png", // or use a PNG like '/favicon-32x32.png'
+    shortcut: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({ children, params: { lang } }) {

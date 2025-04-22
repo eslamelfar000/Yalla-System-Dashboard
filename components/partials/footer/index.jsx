@@ -83,9 +83,9 @@ const FooterContent = () => {
   return (
     <div className="block md:flex md:justify-between text-muted-foreground">
       <p className="sm:mb-0 text-xs md:text-sm">
-        COPYRIGHT © {new Date().getFullYear()} DashTail All rights Reserved
+        COPYRIGHT © {new Date().getFullYear()} Yalla All rights Reserved
       </p>
-      <p className="mb-0 text-xs md:text-sm">
+      {/* <p className="mb-0 text-xs md:text-sm">
         Hand-crafted & Made by{" "}
         <a
           className="text-primary"
@@ -94,7 +94,7 @@ const FooterContent = () => {
         >
           Codeshaper
         </a>
-      </p>
+      </p> */}
     </div>
   );
 };

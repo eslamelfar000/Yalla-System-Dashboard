@@ -11,17 +11,21 @@ import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import Image from "next/image";
+import { SiteLogo } from "@/components/svg";
 import { Icon } from "@iconify/react";
 import { Checkbox } from "@/components/ui/checkbox";
-import logo from "@/public/yallalogo.png";
 
+import googleIcon from "@/public/images/auth/google.png";
+import facebook from "@/public/images/auth/facebook.png";
+import twitter from "@/public/images/auth/twitter.png";
+import GithubIcon from "@/public/images/auth/github.png";
 
 const schema = z.object({
   email: z.string().email({ message: "Your email is invalid." }),
   password: z.string().min(4),
 });
 import { useMediaQuery } from "@/hooks/use-media-query";
-import Image from "next/image";
 
 const LogInForm = () => {
   const [isPending, startTransition] = React.useTransition();
@@ -70,9 +74,8 @@ const LogInForm = () => {
   };
   return (
     <div className="w-full py-10">
-      <Link href="/" className="inline-block">
-        {/* <SiteLogo className="h-10 w-10 2xl:w-14 2xl:h-14 text-primary" /> */}
-        <Image src={logo} alt={logo} className="w-20" />
+      <Link href="/dashboard" className="inline-block">
+        <SiteLogo className="h-10 w-10 2xl:w-14 2xl:h-14 text-primary" />
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
         Hey, Hello 👋
@@ -169,6 +172,53 @@ const LogInForm = () => {
           {isPending ? "Loading..." : "Sign In"}
         </Button>
       </form>
+      <div className="mt-6 xl:mt-8 flex flex-wrap justify-center gap-4">
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          className="rounded-full  border-default-300 hover:bg-transparent"
+          disabled={isPending}
+          onClick={() =>
+            signIn("google", {
+              callbackUrl: "/dashboard",
+            })
+          }
+        >
+          <Image src={googleIcon} alt="google" className="w-5 h-5" />
+        </Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          className="rounded-full  border-default-300 hover:bg-transparent"
+          disabled={isPending}
+          onClick={() =>
+            signIn("github", {
+              callbackUrl: "/dashboard",
+              redirect: false,
+            })
+          }
+        >
+          <Image src={GithubIcon} alt="google" className="w-5 h-5" />
+        </Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          className="rounded-full border-default-300 hover:bg-transparent"
+        >
+          <Image src={facebook} alt="google" className="w-5 h-5" />
+        </Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          className="rounded-full  border-default-300 hover:bg-transparent"
+        >
+          <Image src={twitter} alt="google" className="w-5 h-5" />
+        </Button>
+      </div>
       <div className="mt-5 2xl:mt-8 text-center text-base text-default-600">
         Don't have an account?{" "}
         <Link href="/auth/register" className="text-primary">

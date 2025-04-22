@@ -13,6 +13,7 @@ import MobileSidebar from "@/components/partials/sidebar/mobile-sidebar";
 import HeaderSearch from "@/components/header-search";
 import { useMounted } from "@/hooks/use-mounted";
 import LayoutLoader from "@/components/layout-loader";
+import Head from "next/head";
 const DashBoardLayoutProvider = ({ children, trans }) => {
   const { collapsed, sidebarType, setCollapsed, subMenu } = useSidebar();
   const [open, setOpen] = React.useState(false);
@@ -184,7 +185,6 @@ const LayoutWrapper = ({ children, isMobile, setOpen, open, location }) => {
       >
         <main>{children}</main>
       </motion.div>
-
       <MobileSidebar className="left-[300px]" />
       <HeaderSearch open={open} setOpen={setOpen} />
     </>

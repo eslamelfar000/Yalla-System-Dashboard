@@ -15,12 +15,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Icon } from "@iconify/react";
 import { Checkbox } from "@/components/ui/checkbox";
-import googleIcon from "@/public/images/auth/google.png";
-import facebook from "@/public/images/auth/facebook.png";
-import apple from "@/public/images/auth/apple.png";
-import twitter from "@/public/images/auth/twitter.png";
-import { SiteLogo } from "@/components/svg";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import logo from "@/public/yallalogo.png";
 
 const schema = z.object({
   name: z.string().min(3, { message: "Name must be at least 3 characters." }),
@@ -67,7 +63,7 @@ const RegForm = () => {
   return (
     <div className="w-full">
       <Link href="/dashboard" className="inline-block">
-        <SiteLogo className="h-10 w-10 2xl:w-14 2xl:h-14 text-primary" />
+        <Image src={logo} alt={logo} className="w-20" />
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
         Hey, Hello 👋
@@ -184,40 +180,6 @@ const RegForm = () => {
           {isPending ? "Registering..." : "Create an Account"}
         </Button>
       </form>
-      <div className="mt-8 flex flex-wrap justify-center gap-4">
-        <Button
-          type="button"
-          size="icon"
-          variant="outline"
-          className="rounded-full  border-default-300 hover:bg-transparent"
-        >
-          <Image src={googleIcon} alt="google icon" className="w-6 h-6" />
-        </Button>
-        <Button
-          type="button"
-          size="icon"
-          variant="outline"
-          className="rounded-full border-default-300 hover:bg-transparent"
-        >
-          <Image src={facebook} alt="google icon" className="w-6 h-6" />
-        </Button>
-        <Button
-          type="button"
-          size="icon"
-          variant="outline"
-          className="rounded-full  border-default-300 hover:bg-transparent"
-        >
-          <Image src={apple} alt="google icon" className="w-6 h-6" />
-        </Button>
-        <Button
-          type="button"
-          size="icon"
-          variant="outline"
-          className="rounded-full  border-default-300 hover:bg-transparent"
-        >
-          <Image src={twitter} alt="google icon" className="w-6 h-6" />
-        </Button>
-      </div>
       <div className="mt-5 2xl:mt-8 text-center text-base text-default-600">
         Already Registered?{" "}
         <Link href="/auth/login" className="text-primary">
