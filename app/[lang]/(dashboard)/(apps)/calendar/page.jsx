@@ -1,3 +1,4 @@
+"use client";
 import { getCategories, getEvents } from "@/config/calendar.config";
 import CalendarView from "./calender-view";
 import dynamic from "next/dynamic";
