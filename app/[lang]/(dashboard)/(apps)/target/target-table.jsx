@@ -17,13 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
@@ -117,7 +110,7 @@ const columns = [
   },
 ];
 
-export function ReportsDataTable() {
+export function TargetDataTable() {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
@@ -144,38 +137,6 @@ export function ReportsDataTable() {
 
   return (
     <>
-      <div className="flex items-center flex-wrap gap-2 mb-5">
-        <Select className="w-[280px]">
-          <SelectTrigger className="w-[200px]">
-            <SelectValue
-              placeholder="Select Teacher"
-              className="whitespace-nowrap"
-            />
-          </SelectTrigger>
-          <SelectContent className="h-[300px] overflow-y-auto ">
-            {data?.map((item) => (
-              <SelectItem key={item?.user?.name} value={item?.user?.name}>
-                {item?.user?.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select className="w-[280px]">
-          <SelectTrigger className="w-[200px]">
-            <SelectValue
-              placeholder="Select Month"
-              className="whitespace-nowrap"
-            />
-          </SelectTrigger>
-          <SelectContent className="h-[300px] overflow-y-auto ">
-            {data?.map((item) => (
-              <SelectItem key={item?.user?.name} value={item?.user?.name}>
-                {item?.user?.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
       <Card title="Simple">
         <Table>
           <TableHeader>
@@ -230,7 +191,7 @@ export function ReportsDataTable() {
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4 px-4 pb-5">
+      <div className="flex items-center flex-wrap gap-4 px-4 py-4">
         <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -283,4 +244,4 @@ export function ReportsDataTable() {
   );
 }
 
-export default ReportsDataTable;
+export default TargetDataTable;

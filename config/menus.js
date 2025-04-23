@@ -1145,6 +1145,11 @@ export const menusConfig = {
         href: "/qa-reports",
       },
       {
+        title: "Reports",
+        icon: Files,
+        href: "/reports",
+      },
+      {
         title: "Completed Sessions",
         icon: CheckSquare,
         href: "/compelete-sessions",

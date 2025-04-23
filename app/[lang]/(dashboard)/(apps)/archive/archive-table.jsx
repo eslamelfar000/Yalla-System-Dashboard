@@ -1,5 +1,7 @@
 "use client";
 import * as React from "react";
+
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 import {
   flexRender,
   getCoreRowModel,
@@ -8,7 +10,15 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -17,41 +27,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+import { Badge } from "@/components/ui/badge";
 import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { ArrowBigRightDash } from "lucide-react";
-import Link from "next/link";
+import { ArchiveDrawer } from "./archive-drawer";
 
 const columns = [
   {
-    accessorKey: "session",
-    header: "Session",
+    accessorKey: "name",
+    header: "Name",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
-          </span>
-        </div>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "student-name",
-    header: "Student Name",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
+          <span className=" text-sm   text-card-foreground whitespace-nowrap">
             {row?.original?.user.name}
           </span>
         </div>
@@ -64,7 +55,7 @@ const columns = [
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+          <span className=" text-sm  text-card-foreground whitespace-nowrap">
             {row?.original?.id}
           </span>
         </div>
@@ -72,52 +63,38 @@ const columns = [
     ),
   },
   {
-    accessorKey: "date",
-    header: "Date",
+    accessorKey: "booked",
+    header: "Booked",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+          <span className=" text-sm  text-card-foreground whitespace-nowrap">
+            {row?.original?.id}
           </span>
         </div>
       </div>
     ),
   },
   {
-    accessorKey: "target",
-    header: "Target",
+    accessorKey: "type",
+    header: "Type",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
-          </span>
-        </div>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "report",
-    header: "Report",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            <Link href={""} className="">
-              <button className="text-primary flex items-center text-[12px] border px-4 py-1 border-solid border-primary rounded-full">
-                <span className="text-sm font-bold">Check</span>
-                <ArrowBigRightDash className="inline-block ml-1 w-6 h-6" />
-              </button>
-            </Link>{" "}
-          </span>
-        </div>
-      </div>
+      <Badge
+        variant="soft"
+        color={
+          (row.getValue("status") === "failed" && "destructive") ||
+          (row.getValue("status") === "success" && "success") ||
+          (row.getValue("status") === "processing" && "info")
+        }
+        className=" capitalize"
+      >
+        {row.getValue("status")}
+      </Badge>
     ),
   },
 ];
 
-export function ReportsDataTable() {
+export function ArchiveDataTable() {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
@@ -145,6 +122,14 @@ export function ReportsDataTable() {
   return (
     <>
       <div className="flex items-center flex-wrap gap-2 mb-5">
+        <Input
+          placeholder="Filter emails..."
+          value={table.getColumn("email")?.getFilterValue() || ""}
+          onChange={(event) =>
+            table.getColumn("email")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm min-w-[200px] h-10"
+        />
         <Select className="w-[280px]">
           <SelectTrigger className="w-[200px]">
             <SelectValue
@@ -160,47 +145,33 @@ export function ReportsDataTable() {
             ))}
           </SelectContent>
         </Select>
-        <Select className="w-[280px]">
-          <SelectTrigger className="w-[200px]">
-            <SelectValue
-              placeholder="Select Month"
-              className="whitespace-nowrap"
-            />
-          </SelectTrigger>
-          <SelectContent className="h-[300px] overflow-y-auto ">
-            {data?.map((item) => (
-              <SelectItem key={item?.user?.name} value={item?.user?.name}>
-                {item?.user?.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+
+        <ArchiveDrawer />
       </div>
-      <Card title="Simple">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table
-                .getRowModel()
-                .rows.map((row) => (
+      <div>
+        <Card >
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
@@ -215,22 +186,21 @@ export function ReportsDataTable() {
                     ))}
                   </TableRow>
                 ))
-                .slice(0, 8)
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </Card>
-
-      <div className="flex items-center flex-wrap gap-4 px-4 pb-5">
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </Card>
+      </div>
+      <div className="flex items-center flex-wrap gap-4 px-4 py-4">
         <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -283,4 +253,4 @@ export function ReportsDataTable() {
   );
 }
 
-export default ReportsDataTable;
+export default ArchiveDataTable;

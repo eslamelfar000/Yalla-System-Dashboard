@@ -47,9 +47,7 @@ function page() {
         </div>
       </div>
 
-      <Card>
         <LessonBoardTable />
-      </Card>
     </div>
   );
 }

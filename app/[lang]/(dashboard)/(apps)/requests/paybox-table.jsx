@@ -89,7 +89,7 @@ const columns = [
           <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
             <Link href={""} className="">
               <button className="text-primary flex items-center text-[12px] border px-4 py-1 border-solid border-primary rounded-full">
-                <span className="text-sm font-medium">Check</span>
+                <span className="text-sm font-bold">Check</span>
                 <ArrowBigRightDash className="inline-block ml-1 w-6 h-6" />
               </button>
             </Link>
