@@ -45,7 +45,7 @@ function page() {
           </div>
         </div>
 
-        <div className="cover space-y-20">
+        <div className="cover space-y-10">
           {/* payrolls table */}
           <div className="cover">
             <PayrollsrDataTable />

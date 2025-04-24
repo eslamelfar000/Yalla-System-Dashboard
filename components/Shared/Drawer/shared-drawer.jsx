@@ -1,6 +1,7 @@
 "use client";
+
 import * as React from "react";
-import { FilterIcon, Minus, Plus } from "lucide-react";
+import { Edit, FilterIcon, Minus, Plus } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer } from "recharts";
 
 import { Button } from "@/components/ui/button";
@@ -57,7 +58,7 @@ const data = [
   },
 ];
 
-export function ReservationDrawer() {
+export function SharedDrawer() {
   const [goal, setGoal] = React.useState(350);
 
   function onClick(adjustment) {
@@ -68,11 +69,11 @@ export function ReservationDrawer() {
     <Drawer>
       <DrawerTrigger asChild>
         <Button variant="outline" size="sm" className="text-[12px]">
-          <FilterIcon className="mr-2 h-4 w-4" />
-          Filter Results
+          <Edit className="mr-2 h-4 w-4" />
+          Edit
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="w-[400px] h-full right-0 left-auto rounded-t-[0px]">
+      <DrawerContent className="w-[400px] h-full right-0 left-0 rounded-t-[0px]">
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
             <DrawerTitle>Filter Results</DrawerTitle>

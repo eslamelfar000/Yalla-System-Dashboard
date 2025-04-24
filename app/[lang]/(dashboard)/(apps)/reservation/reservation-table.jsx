@@ -27,7 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ReservationDrawer } from "./ReservationDrawer";
+import { SharedDrawer } from "../../../../../components/Shared/Drawer/shared-drawer";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { data } from "../../(tables)/data-table/data";
@@ -183,7 +183,7 @@ export function ReservationDataTable() {
           </SelectContent>
         </Select>
 
-        <ReservationDrawer />
+        <SharedDrawer />
       </div>
       <Card title="Simple">
         <Table>

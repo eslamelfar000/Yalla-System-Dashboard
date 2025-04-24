@@ -23,7 +23,7 @@ import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { SummaryDrawer } from "./symmary-drawer";
+import { SharedDrawer } from "../../../../../components/Shared/Drawer/shared-drawer";
 
 const columns = [
   {
@@ -118,7 +118,7 @@ export function SummaryTable() {
           </h3>
         </div>
 
-        <SummaryDrawer />
+        <SharedDrawer />
       </div>
       <Card title="Simple">
         <Table>

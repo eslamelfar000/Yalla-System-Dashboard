@@ -100,8 +100,10 @@ const LessonBoardTable = () => {
               <Fragment key={item.id}>
                 <TableRow
                   onClick={() => toggleRow(item.id)}
-                  className={`cursor-pointer hover:bg-gray-100 transition-all duration-300 ${
-                    collapsedRows.includes(item.id) ? "bg-gray-100" : ""
+                  className={`cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ${
+                    collapsedRows.includes(item.id)
+                      ? "bg-gray-100 dark:bg-gray-700"
+                      : ""
                   }`}
                 >
                   <TableCell>
@@ -124,7 +126,7 @@ const LessonBoardTable = () => {
                   <TableCell>{item.role}</TableCell>
                   <TableCell>8 Sessions</TableCell>
                   <TableCell>
-                    <span className="text-sm bg-gray-100 text-primary border border-primary rounded-full px-4 py-1 font-medium select-none">
+                    <span className="text-sm bg-gray-100 dark:bg-gray-900 text-primary border border-primary rounded-full px-4 py-1 font-medium select-none">
                       1 o 8 is done
                     </span>
                   </TableCell>

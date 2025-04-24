@@ -27,7 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { StudentsDrawer } from "./students-drawer";
+import { SharedDrawer } from "../../../../../components/Shared/Drawer/shared-drawer";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -160,7 +160,7 @@ export function StudentsDataTable() {
           </SelectContent>
         </Select>
 
-        <StudentsDrawer />
+        <SharedDrawer />
       </div>
       <Card title="Simple">
         <Table>

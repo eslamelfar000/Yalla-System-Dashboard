@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import React from 'react'
-import UserTableStatus from '../../(tables)/tailwindui-table/user-table-status';
+import UserTableStatus from './users-table';
 
 function page() {
   return (

@@ -1,8 +1,7 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import React from "react";
-import UserTableStatus from "../../(tables)/tailwindui-table/user-table-status";
+import BoradTableStatus from "./board-table";
 import {
   Select,
   SelectContent,
@@ -38,7 +37,7 @@ function page() {
           </div>
         </div>
         <Card title="Simple">
-          <UserTableStatus />
+          <BoradTableStatus />
         </Card>
       </div>
     </div>

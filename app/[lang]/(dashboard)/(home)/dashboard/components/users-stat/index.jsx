@@ -33,7 +33,7 @@ const UsersStat = () => {
     },
   ];
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="border-none pb-0 mb-5">
         <div className="flex items-center gap-1">
           <div className="flex-1">

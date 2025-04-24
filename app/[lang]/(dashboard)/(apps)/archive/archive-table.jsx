@@ -1,7 +1,6 @@
 "use client";
 import * as React from "react";
 
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 import {
   flexRender,
   getCoreRowModel,
@@ -33,7 +32,7 @@ import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { ArchiveDrawer } from "./archive-drawer";
+import { SharedDrawer } from "../../../../../components/Shared/Drawer/shared-drawer";
 
 const columns = [
   {
@@ -146,10 +145,10 @@ export function ArchiveDataTable() {
           </SelectContent>
         </Select>
 
-        <ArchiveDrawer />
+        <SharedDrawer />
       </div>
       <div>
-        <Card >
+        <Card>
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (

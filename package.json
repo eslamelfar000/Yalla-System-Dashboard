@@ -2,6 +2,7 @@
   "name": "dash-tail",
   "version": "1.0.0",
   "private": true,
+  "homepage": "https://eslam-saber.makkah.tech/",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -120,6 +121,7 @@
     "reactflow": "^11.10.4",
     "recharts": "^2.9.3",
     "sass": "^1.66.1",
+    "sharp": "^0.34.1",
     "simplebar-react": "^3.2.4",
     "sonner": "^1.3.1",
     "styled-components": "^6.1.1",
