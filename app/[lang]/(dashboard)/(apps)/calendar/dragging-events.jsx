@@ -1,4 +1,3 @@
-"use client";
 import { cn } from "@/lib/utils";
 const ExternalDraggingevent = ({ event }) => {
   const { title, id, tag } = event;
