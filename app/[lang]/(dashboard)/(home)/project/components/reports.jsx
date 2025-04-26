@@ -9,7 +9,7 @@ const ReportsCard = () => {
   const reports = [
     {
       id: 1,
-      name: "Total Project",
+      name: "Teachers",
       count: "1206",
       rate: "8.2",
       icon: <Docs className="w-6 h-6 text-primary" />,
@@ -17,7 +17,7 @@ const ReportsCard = () => {
     },
     {
       id: 2,
-      name: "Completed",
+      name: "Meating",
       count: "240",
       rate: "8.2",
       icon: <Docs className="w-6 h-6 text-success" />,
@@ -25,7 +25,7 @@ const ReportsCard = () => {
     },
     {
       id: 3,
-      name: "In Progress",
+      name: "Coaching",
       count: "96",
       rate: "8.2",
       icon: <Docs className="w-6 h-6 text-destructive" />,
@@ -33,7 +33,7 @@ const ReportsCard = () => {
     },
     {
       id: 4,
-      name: "Active Project",
+      name: "Scheduled Reviews",
       count: "18",
       rate: "8.2",
       icon: <Docs className="w-6 h-6 text-info" />,

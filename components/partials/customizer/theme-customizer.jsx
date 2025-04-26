@@ -58,9 +58,9 @@ const ThemeCustomize = ({
             <ThemeChange />
             <SidebarChange />
             <SidebarImage />
-            <RadiusInit />
-            <HeaderStyle />
-            <FooterStyle />
+            {/* <RadiusInit /> */}
+            {/* <HeaderStyle /> */}
+            {/* <FooterStyle /> */}
           </div>
         </ScrollArea>
         {/* <SheetFooter className="py-4 gap-3 lg:flex justify-between hidden  ">

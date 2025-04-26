@@ -21,16 +21,16 @@ import avatar5 from "@/public/images/avatar/avatar-5.jpg";
 
 const columns = [
   {
-    key: "employee",
-    label: "employee",
+    key: "teacher name",
+    label: "Teacher Name",
   },
   {
-    key: "task name",
-    label: "task name",
+    key: "reviewed",
+    label: "Reviewed",
   },
   {
-    key: "deadline",
-    label: "deadline",
+    key: "pending",
+    label: "Pending",
   },
   {
     key: "workload",
@@ -93,9 +93,9 @@ const UpcomingDeadline = () => {
     <Card>
       <CardHeader className="flex-row justify-between items-center mb-0">
         <CardTitle>Upcoming Deadlines</CardTitle>
-        <Button type="button" color="secondary" >
+        {/* <Button type="button" color="secondary" >
           View all
-        </Button>
+        </Button> */}
       </CardHeader>
       <CardContent className="px-0 overflow-x-auto pb-0">
         <Table>

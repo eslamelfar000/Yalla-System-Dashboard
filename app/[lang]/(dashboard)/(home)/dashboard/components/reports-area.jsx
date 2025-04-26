@@ -46,7 +46,7 @@ const ReportsArea = () => {
   return (
     <>
       {reports.map((item, index) => (
-        <Card key={`report-card-${index}`} >
+        <Card key={`report-card-${index}`} className="h-full">
           <CardHeader className="flex-col-reverse sm:flex-row flex-wrap gap-2  border-none mb-0 pb-0">
             <span className="text-sm font-medium text-default-900 flex-1">{item.name}</span>
             <span className={cn("flex-none h-9 w-9 flex justify-center items-center bg-default-100 rounded-full", {
@@ -56,7 +56,7 @@ const ReportsArea = () => {
               "bg-destructive bg-opacity-10 text-destructive": item.color === "destructive",
             })}>{item.icon}</span>
           </CardHeader>
-          <CardContent className="pb-4 px-4">
+          <CardContent className="pb-4 px-4 h-full">
             <div className="text-2xl font-semibold text-default-900 mb-2.5">{item.count}</div>
             <div className="flex items-center font-semibold gap-1">
               {

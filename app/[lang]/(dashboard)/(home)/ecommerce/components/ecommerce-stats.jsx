@@ -7,25 +7,25 @@ import { Icon } from "@iconify/react";
 const EcommerceStats = () => {
   const data = [
     {
-      text: "Total Sales",
+      text: "Students",
       total: "42,750.98",
       color: "primary",
       icon: <CupBar className="w-3.5 h-3.5" />
     },
     {
-      text: "Today Orders",
+      text: "Schedules",
       total: "536,23,3",
       color: "warning",
       icon: <NoteIcon className="w-3.5 h-3.5" />
     },
     {
-      text: "Completed Orders",
+      text: "Teachers",
       total: "234,1",
       color: "success",
       icon: <CheckShape className="w-3.5 h-3.5" />
     },
     {
-      text: "Pending Orders",
+      text: "Quality",
       total: "332,34",
       color: "destructive",
       icon: <Spam className="w-3.5 h-3.5" />

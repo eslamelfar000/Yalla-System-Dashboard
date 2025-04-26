@@ -6,11 +6,11 @@ import { useThemeStore } from "@/store";
 import { useTheme } from "next-themes";
 import { themes } from "@/config/thems";
 
-const UserStats = ({ height = 250 }) => {
+const UserStats = ({ height = 350 }) => {
   const { theme: config, setTheme: setConfig,isRtl } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
-  const series = [1200, 1400];
+  const series = [1200, 1400, 600];
 
   const options = {
     chart: {
@@ -18,13 +18,14 @@ const UserStats = ({ height = 250 }) => {
         show: false,
       },
     },
-    labels: ["Old User", "New User"],
+    labels: ["Trial", "Pay Before", "Pay After"],
     dataLabels: {
       enabled: false,
     },
     colors: [
       `hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].primary})`,
       `hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].info})`,
+      `hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].warning})`,
     ],
     tooltip: {
       theme: mode === "dark" ? "dark" : "light",

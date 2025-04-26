@@ -7,10 +7,10 @@ import DetailsCard from "./details-card";
 
 const TopContributer = () => {
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="flex-row justify-between items-center gap-4 mb-0 border-none p-6">
         <CardTitle>Top Contributer</CardTitle>
-        <DashboardDropdown />
+        {/* <DashboardDropdown /> */}
       </CardHeader>
       <CardContent className="pt-0 ">
 

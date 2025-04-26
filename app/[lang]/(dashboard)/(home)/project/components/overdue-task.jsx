@@ -84,7 +84,7 @@ const users = [
 
 const OverdueTask = () => {
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="flex-row justify-between items-center mb-0">
         <CardTitle>Overdue Task</CardTitle>
         <Button
