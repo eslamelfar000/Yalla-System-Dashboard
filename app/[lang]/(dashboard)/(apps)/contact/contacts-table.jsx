@@ -89,6 +89,19 @@ const columns = [
       </div>
     ),
   },
+  {
+    accessorKey: "teacher",
+    header: "Teacher Name",
+    cell: ({ row }) => (
+      <div className="  font-medium  text-card-foreground/80">
+        <div className="flex space-x-3  rtl:space-x-reverse items-center">
+          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
+            {row?.original?.user.name}
+          </span>
+        </div>
+      </div>
+    ),
+  },
 ];
 
 export function ContactsDataTable() {
@@ -127,7 +140,7 @@ export function ContactsDataTable() {
           }
           className="max-w-sm min-w-[200px] h-10"
         />
-        <Select className="w-[280px]">
+        {/* <Select className="w-[280px]">
           <SelectTrigger className="w-[200px]">
             <SelectValue
               placeholder="Select Teacher"
@@ -141,7 +154,7 @@ export function ContactsDataTable() {
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
+        </Select> */}
 
         {/* <ReservationDrawer /> */}
       </div>
@@ -173,6 +186,7 @@ export function ContactsDataTable() {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    className="hover:bg-gray-100"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>

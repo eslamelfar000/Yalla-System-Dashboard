@@ -1144,11 +1144,11 @@ export const menusConfig = {
         icon: Files,
         href: "/qa-reports",
       },
-      {
-        title: "Reports",
-        icon: Files,
-        href: "/reports",
-      },
+      // {
+      //   title: "Reports",
+      //   icon: Files,
+      //   href: "/reports",
+      // },
       {
         title: "Completed Sessions",
         icon: CheckSquare,

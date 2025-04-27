@@ -68,6 +68,19 @@ const columns = [
     ),
   },
   {
+    accessorKey: "teacher",
+    header: "Teacher Name",
+    cell: ({ row }) => (
+      <div className="  font-medium  text-card-foreground/80">
+        <div className="flex space-x-3  rtl:space-x-reverse items-center">
+          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
+            {row?.original?.user.name}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+  {
     accessorKey: "should-pay",
     header: "Should Pay",
     cell: ({ row }) => (
@@ -86,18 +99,21 @@ const columns = [
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <ul className="flex gap-3">
-            <li>
-              <span className="text-primary cursor-pointer">
-                <PlusCircle className="size-10" />
-              </span>
-            </li>
-            <li>
-              <span className="text-red-500 cursor-pointer">
-                <PlusCircle className="size-10 rotate-45" />
-              </span>
-            </li>
-          </ul>
+          <Button
+            size="icon"
+            variant="outline"
+            className=" h-7 w-7"
+            color="success"
+          >
+            <Icon icon="heroicons:check" className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="outline"
+            className=" h-7 w-7 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500"
+          >
+            <Icon icon="heroicons:trash" className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     ),
@@ -140,7 +156,7 @@ export function PayAfterDataTable() {
           }
           className="max-w-sm min-w-[200px] h-10"
         />
-        <Select className="w-[280px]">
+        {/* <Select className="w-[280px]">
           <SelectTrigger className="w-[200px]">
             <SelectValue
               placeholder="Select Teacher"
@@ -154,8 +170,7 @@ export function PayAfterDataTable() {
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
-
+        </Select> */}
       </div>
       <Card title="Simple">
         <Table>
@@ -185,6 +200,7 @@ export function PayAfterDataTable() {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    className="hover:bg-gray-100"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>

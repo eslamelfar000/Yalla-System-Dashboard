@@ -144,10 +144,12 @@ export function SummaryTable() {
             {table.getRowModel().rows?.length ? (
               table
                 .getRowModel()
-                .rows.map((row) => (
+                .rows.slice(0, 2)
+                .map((row) => (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    className="hover:bg-gray-100"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
@@ -174,7 +176,7 @@ export function SummaryTable() {
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4 px-4 py-4">
+      {/* <div className="flex items-center flex-wrap gap-4 px-4 py-4">
         <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -222,7 +224,7 @@ export function SummaryTable() {
             />
           </Button>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

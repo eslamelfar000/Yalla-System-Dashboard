@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 
-import { ArrowBigRightDash, ArrowUpDown, Check, ChevronDown, MoreHorizontal, PlusCircle } from "lucide-react";
+import { ArrowBigRightDash, ArrowUpDown, Check, CheckCircle2, ChevronDown, MoreHorizontal, PlusCircle, Trash, Trash2 } from "lucide-react";
 import {
   flexRender,
   getCoreRowModel,
@@ -35,6 +35,7 @@ import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
+import { CheckCircle } from "lucide";
 
 const columns = [
   {
@@ -61,6 +62,19 @@ const columns = [
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row?.original?.user.name}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "teacher",
+    header: "Teacher Name",
+    cell: ({ row }) => (
+      <div className="  font-medium  text-card-foreground/80">
+        <div className="flex space-x-3  rtl:space-x-reverse items-center">
+          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
             {row?.original?.user.name}
           </span>
         </div>
@@ -104,18 +118,21 @@ const columns = [
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <ul className="flex gap-3">
-            <li>
-              <span className="text-primary cursor-pointer">
-                <PlusCircle className="size-10" />
-              </span>
-            </li>
-            <li>
-              <span className="text-red-500 cursor-pointer">
-                <PlusCircle className="size-10 rotate-45" />
-              </span>
-            </li>
-          </ul>
+          <Button
+            size="icon"
+            variant="outline"
+            className=" h-7 w-7"
+            color="success"
+          >
+            <Icon icon="heroicons:check" className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="outline"
+            className=" h-7 w-7 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500"
+          >
+            <Icon icon="heroicons:trash" className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     ),
@@ -158,7 +175,7 @@ export function PayBoxDataTable() {
           }
           className="max-w-sm min-w-[200px] h-10"
         />
-        <Select className="w-[280px]">
+        {/* <Select className="w-[280px]">
           <SelectTrigger className="w-[200px]">
             <SelectValue
               placeholder="Select Teacher"
@@ -172,7 +189,7 @@ export function PayBoxDataTable() {
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
+        </Select> */}
 
         {/* <ReservationDrawer /> */}
       </div>
@@ -204,6 +221,7 @@ export function PayBoxDataTable() {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    className="hover:bg-gray-100"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>

@@ -57,11 +57,9 @@ const columns = [
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
+      <div className="    text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm   text-card-foreground whitespace-nowrap">
-            {row?.original?.id}
-          </span>
+          <span className=" text-sm   text-gray-600">{row?.original?.id}</span>
         </div>
       </div>
     ),
@@ -70,9 +68,9 @@ const columns = [
     accessorKey: "booked",
     header: "Booked",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
+      <div className="  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm   text-card-foreground whitespace-nowrap">
+          <span className=" text-sm   text-gray-600">
             {row?.original?.user.name}
           </span>
         </div>
@@ -83,9 +81,9 @@ const columns = [
     accessorKey: "type",
     header: "Type",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
+      <div className="   text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm   text-card-foreground whitespace-nowrap">
+          <span className=" text-sm   text-gray-600">
             {row?.original?.user.name}
           </span>
         </div>
@@ -96,9 +94,9 @@ const columns = [
     accessorKey: "payed",
     header: "Payed",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
+      <div className="  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm   text-card-foreground whitespace-nowrap">
+          <span className=" text-sm   text-gray-600">
             {row?.original?.user.name}
           </span>
         </div>
@@ -109,9 +107,9 @@ const columns = [
     accessorKey: "mobile",
     header: "Phone Number",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
+      <div className="  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm   text-card-foreground whitespace-nowrap">
+          <span className=" text-sm   text-gray-600">
             {row?.original?.user.name}
           </span>
         </div>
@@ -211,6 +209,7 @@ export function SessionsDataTable() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="hover:bg-gray-100"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

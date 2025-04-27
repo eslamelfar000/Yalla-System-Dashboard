@@ -35,6 +35,7 @@ import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
+import { Toggle } from "@/components/ui/toggle";
 
 const columns = [
   {
@@ -81,6 +82,19 @@ const columns = [
     ),
   },
   {
+    accessorKey: "teacher",
+    header: "Teacher Name",
+    cell: ({ row }) => (
+      <div className="  font-medium  text-card-foreground/80">
+        <div className="flex space-x-3  rtl:space-x-reverse items-center">
+          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
+            {row?.original?.user.name}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+  {
     accessorKey: "should-pay",
     header: "Should Pay",
     cell: ({ row }) => (
@@ -111,10 +125,14 @@ const columns = [
     header: "Action",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
-        <div className="flex rtl:space-x-reverse items-center">
-          <span className="bg-primary text-white rounded-full p-1">
-            <Check className="w-3 h-3" />
-          </span>
+        <div className="rtl:space-x-reverse items-center">
+          <Toggle
+            aria-label="Toggle italic"
+            size="icon"
+            className="w-6 h-6 p-1 rounded-full bg-transparent text-primary border border-solid border-primary"
+          >
+            <Check className="w-6 h-6" />
+          </Toggle>
         </div>
       </div>
     ),
@@ -157,7 +175,7 @@ export function ReserveAfterDataTable() {
           }
           className="max-w-sm min-w-[200px] h-10"
         />
-        <Select className="w-[280px]">
+        {/* <Select className="w-[280px]">
           <SelectTrigger className="w-[200px]">
             <SelectValue
               placeholder="Select Teacher"
@@ -171,8 +189,7 @@ export function ReserveAfterDataTable() {
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
-
+        </Select> */}
       </div>
       <Card title="Simple">
         <Table>
@@ -202,6 +219,7 @@ export function ReserveAfterDataTable() {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    className="hover:bg-gray-100"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>

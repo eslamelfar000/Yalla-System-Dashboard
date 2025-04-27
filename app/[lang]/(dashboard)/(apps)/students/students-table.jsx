@@ -1,7 +1,12 @@
 "use client";
 import * as React from "react";
 
-import { ArrowUpDown, ChevronDown, EyeIcon, MoreHorizontal } from "lucide-react";
+import {
+  ArrowUpDown,
+  ChevronDown,
+  EyeIcon,
+  MoreHorizontal,
+} from "lucide-react";
 import {
   flexRender,
   getCoreRowModel,
@@ -35,6 +40,7 @@ import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 const columns = [
   {
@@ -94,14 +100,25 @@ const columns = [
     ),
   },
   {
-    accessorKey: "action",
-    header: "Action",
+    accessorKey: "progress",
+    header: "Progress",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
+      <div className="font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <Button className="text-xs rounded-full h-8 bg-transparent hover:bg-transparent text-primary hover:text-black">
+          {/* <Button className="text-xs rounded-full h-8 bg-transparent hover:bg-transparent text-primary hover:text-black">
             <EyeIcon className="w-6 h-6" />
-          </Button>
+          </Button> */}
+          <div className="cover w-full">
+            <div className="head text-gray-600">
+              <h2 className="text-sm">2 / 5</h2>
+            </div>
+            <Progress
+              value="50"
+              color="primary"
+              isStripe
+              isAnimate
+            />
+          </div>
         </div>
       </div>
     ),
@@ -188,6 +205,7 @@ export function StudentsDataTable() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="hover:bg-gray-100"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

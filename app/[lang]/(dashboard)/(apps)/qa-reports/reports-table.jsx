@@ -8,6 +8,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -28,23 +29,10 @@ import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { ArrowBigRightDash } from "lucide-react";
+import { ArrowBigRightDash, Check } from "lucide-react";
 import Link from "next/link";
 
 const columns = [
-  {
-    accessorKey: "session",
-    header: "Session",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
-          </span>
-        </div>
-      </div>
-    ),
-  },
   {
     accessorKey: "student-name",
     header: "Student Name",
@@ -98,8 +86,8 @@ const columns = [
     ),
   },
   {
-    accessorKey: "report",
-    header: "Report",
+    accessorKey: "admin report",
+    header: "Admin Report",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
@@ -111,6 +99,37 @@ const columns = [
               </button>
             </Link>{" "}
           </span>
+        </div>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "Teacher report",
+    header: "Teacher Report",
+    cell: ({ row }) => (
+      <div className="  font-medium  text-card-foreground/80">
+        <div className="flex space-x-3  rtl:space-x-reverse items-center">
+          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
+            <Link href={""} className="">
+              <button className="text-primary flex items-center text-[12px] border px-4 py-1 border-solid border-primary rounded-full">
+                <span className="text-sm font-bold">Check</span>
+                <ArrowBigRightDash className="inline-block ml-1 w-6 h-6" />
+              </button>
+            </Link>{" "}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "action",
+    header: "Action",
+    cell: ({ row }) => (
+      <div className="  font-medium  text-card-foreground/80">
+        <div className="rtl:space-x-reverse items-center">
+            <Toggle aria-label="Toggle italic" size="icon" className="w-6 h-6 p-1 rounded-full bg-transparent text-primary border border-solid border-primary">
+              <Check className="w-6 h-6" />
+            </Toggle>
         </div>
       </div>
     ),
@@ -200,10 +219,12 @@ export function ReportsDataTable() {
             {table.getRowModel().rows?.length ? (
               table
                 .getRowModel()
-                .rows.map((row) => (
+                .rows.slice(0, 4)
+                .map((row) => (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    className="hover:bg-gray-100"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
@@ -215,7 +236,6 @@ export function ReportsDataTable() {
                     ))}
                   </TableRow>
                 ))
-                .slice(0, 8)
             ) : (
               <TableRow>
                 <TableCell

@@ -93,6 +93,19 @@ const columns = [
     ),
   },
   {
+    accessorKey: "teacher",
+    header: "Teacher Name",
+    cell: ({ row }) => (
+      <div className="  font-medium  text-card-foreground/80">
+        <div className="flex space-x-3  rtl:space-x-reverse items-center">
+          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
+            {row?.original?.user.name}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+  {
     accessorKey: "payed",
     header: "Payed",
     cell: ({ row }) => (
@@ -114,17 +127,6 @@ const columns = [
           <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
             {row?.original?.user.name}
           </span>
-        </div>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "action",
-    header: "Action",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <EyeIcon className="w-6 h-6 text-primary hover:text-black" />
         </div>
       </div>
     ),
@@ -167,7 +169,7 @@ export function ReservationDataTable() {
           }
           className="max-w-sm min-w-[200px] h-10"
         />
-        <Select className="w-[280px]">
+        {/* <Select className="w-[280px]">
           <SelectTrigger className="w-[200px]">
             <SelectValue
               placeholder="Select Teacher"
@@ -181,9 +183,9 @@ export function ReservationDataTable() {
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
+        </Select> */}
 
-        <SharedDrawer />
+        {/* <SharedDrawer /> */}
       </div>
       <Card title="Simple">
         <Table>
@@ -213,6 +215,7 @@ export function ReservationDataTable() {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    className="hover:bg-gray-100"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>

@@ -115,13 +115,22 @@ const columns = [
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <ul className="flex gap-3">
-            <li>
-              <span className="text-primary cursor-pointer hover:text-black">
-                <Edit className="size-10" />
-              </span>
-            </li>
-          </ul>
+          <Button
+            size="icon"
+            variant="outline"
+            className=" h-7 w-7"
+            color="primary"
+          >
+            <Icon icon="heroicons:pencil" className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="outline"
+            className=" h-7 w-7 "
+            color="primary"
+          >
+            <Icon icon="heroicons:plus" className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     ),
@@ -183,6 +192,7 @@ export function PayrollsrDataTable() {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    className="hover:bg-gray-100"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>

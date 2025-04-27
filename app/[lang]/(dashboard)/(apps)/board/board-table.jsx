@@ -7,92 +7,162 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { users } from "../../(tables)/tailwindui-table/data";
+import {data} from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { PlusCircle } from "lucide-react";
 
 const BoradTableStatus = () => {
   const columns = [
     {
-      key: "Name",
-      label: "Name",
+      key: "Student Name",
+      label: "Student Name",
     },
     {
       key: "ID",
       label: "ID",
     },
     {
-      key: "Phone Number",
-      label: "Phone Number",
-    },
-    {
-      key: "Email",
-      label: "Email",
+      key: "Date",
+      label: "Date",
     },
     {
       key: "action",
       label: "action",
     },
   ];
-  return (
-    <Card>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {columns.map((column) => (
-              <TableHead key={column.key}> {column.label}</TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((item) => (
-            <TableRow key={item.email} className="hover:bg-default-100">
-              <TableCell className=" font-medium  text-card-foreground/80">
-                <div className="flex gap-3 items-center">
-                  <Avatar className="rounded-lg">
-                    <AvatarImage src={item.avatar} />
-                    <AvatarFallback>AB</AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm  text-default-600">{item.name}</span>
-                </div>
-              </TableCell>
-              <TableCell>{item.id}</TableCell>
-              <TableCell>{item.name}</TableCell>
-              <TableCell>{item.email}</TableCell>
 
-              <TableCell className="flex gap-3  justify-end">
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className=" h-7 w-7"
-                  color="secondary"
-                >
-                  <Icon icon="heroicons:pencil" className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className=" h-7 w-7"
-                  color="secondary"
-                >
-                  <Icon icon="heroicons:eye" className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className=" h-7 w-7"
-                  color="secondary"
-                >
-                  <Icon icon="heroicons:trash" className="h-4 w-4" />
-                </Button>
-              </TableCell>
+  const [sorting, setSorting] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [rowSelection, setRowSelection] = useState({});
+
+  const table = useReactTable({
+    data,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+  });
+
+
+
+
+  return (
+    <>
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {columns.map((column) => (
+                <TableHead key={column.key}> {column.label}</TableHead>
+              ))}
             </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.map((item) => (
+              <TableRow key={item.email} className="hover:bg-default-100">
+                <TableCell className=" font-medium  text-card-foreground/80">
+                  <div className="flex gap-3 items-center">
+                    <Avatar className="rounded-lg">
+                      <AvatarImage src={item.avatar} />
+                      <AvatarFallback>AB</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm  text-default-600">
+                      {item.name}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>{item.id}</TableCell>
+                <TableCell>{item.name}</TableCell>
+                <TableCell className="flex gap-3">
+                  <ul className="flex gap-3">
+                    <li>
+                      <span className="text-primary hover:text-black dark:hover:text-white cursor-pointer">
+                        <PlusCircle className="size-10" />
+                      </span>
+                    </li>
+                  </ul>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+
+      <div className="flex items-center flex-wrap gap-4">
+        <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
+
+        <div className="flex gap-2  items-center">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="h-8 w-8"
+          >
+            <Icon
+              icon="heroicons:chevron-left"
+              className="w-5 h-5 rtl:rotate-180"
+            />
+          </Button>
+
+          {table.getPageOptions().map((page, pageIdx) => (
+            <Button
+              key={`basic-data-table-${pageIdx}`}
+              onClick={() => table.setPageIndex(pageIdx)}
+              variant={`${
+                pageIdx === table.getState().pagination.pageIndex
+                  ? ""
+                  : "outline"
+              }`}
+              className={cn("w-8 h-8")}
+            >
+              {page + 1}
+            </Button>
           ))}
-        </TableBody>
-      </Table>
-    </Card>
+
+          <Button
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+          >
+            <Icon
+              icon="heroicons:chevron-right"
+              className="w-5 h-5 rtl:rotate-180"
+            />
+          </Button>
+        </div>
+      </div>
+    </>
   );
 };
 

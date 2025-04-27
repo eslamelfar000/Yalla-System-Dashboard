@@ -2,6 +2,8 @@
 import { Card } from "@/components/ui/card";
 import React from "react";
 import BoradTableStatus from "./board-table";
+import ReportsTableStatus from "./reports-table";
+import BoardStepsLineSpacs from "./board-steps";
 import {
   Select,
   SelectContent,
@@ -13,14 +15,16 @@ import {
 function page() {
   return (
     <div>
-      <div className=" space-y-6">
-        <div className="flex flex-wrap items-center gap-4 mb-1">
-          <div className="flex-1">
-            <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
-              Borad
-            </h3>
-          </div>
-          <div className="flex-none">
+      <div className=" space-y-10">
+        <BoardStepsLineSpacs/>
+        <div className="cover space-y-6">
+          <div className="flex flex-wrap items-center gap-4 mb-1">
+            <div className="flex-1">
+              <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
+                Borad
+              </h3>
+            </div>
+            <div className="flex-none">
             <Select>
               <SelectTrigger className="w-[180px]">
                 <SelectValue
@@ -35,10 +39,22 @@ function page() {
               </SelectContent>
             </Select>
           </div>
+          </div>
+            <BoradTableStatus />
         </div>
-        <Card title="Simple">
-          <BoradTableStatus />
-        </Card>
+
+        <div className="">
+          <div className="flex flex-wrap items-center gap-4 mb-1">
+            <div className="flex-1">
+              <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
+                Reports
+              </h3>
+            </div>
+          </div>
+          <Card title="Simple">
+            <ReportsTableStatus />
+          </Card>
+        </div>
       </div>
     </div>
   );
