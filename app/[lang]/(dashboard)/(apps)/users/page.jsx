@@ -1,7 +1,8 @@
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import React from 'react'
-import UserTableStatus from './users-table';
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import React from "react";
+import UserTableStatus from "./users-table";
+import { SharedSheet } from "../../../../../components/Shared/Drawer/shared-sheet";
 
 function page() {
   return (
@@ -16,11 +17,11 @@ function page() {
               </h3>
             </div>
             <div className="flex-none">
-              <Button type="button">Add Teacher</Button>
+              <SharedSheet type="add-teacher" />
             </div>
           </div>
           <Card title="Simple">
-            <UserTableStatus />
+            <UserTableStatus type="teacher" />
           </Card>
         </div>
 
@@ -33,11 +34,11 @@ function page() {
               </h3>
             </div>
             <div className="flex-none">
-              <Button type="button">Add Quality Assurance</Button>
+              <SharedSheet type="add-quality" />
             </div>
           </div>
           <Card title="Simple">
-            <UserTableStatus />
+            <UserTableStatus type="quality" />
           </Card>
         </div>
       </div>
@@ -45,4 +46,4 @@ function page() {
   );
 }
 
-export default page
+export default page;

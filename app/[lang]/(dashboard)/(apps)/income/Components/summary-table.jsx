@@ -9,7 +9,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -19,9 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { data } from "../../(tables)/data-table/data";
-import { Icon } from "@iconify/react";
-import { cn } from "@/lib/utils";
+import { data } from "../../../(tables)/data-table/data";
 import { Card } from "@/components/ui/card";
 
 const columns = [
@@ -83,7 +80,7 @@ const columns = [
   },
 ];
 
-export function SummaryTable() {
+export function IncomeSummaryTable() {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
@@ -117,6 +114,7 @@ export function SummaryTable() {
           </h3>
         </div>
 
+        {/* <SharedDrawer /> */}
       </div>
       <Card title="Simple">
         <Table>
@@ -227,4 +225,4 @@ export function SummaryTable() {
   );
 }
 
-export default SummaryTable;
+export default IncomeSummaryTable;

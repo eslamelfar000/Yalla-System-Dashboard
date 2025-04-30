@@ -1,6 +1,5 @@
 "use client";
-import { Card } from "@/components/ui/card";
-import React from "react";
+import React, { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -11,31 +10,55 @@ import {
 import PayrollReportsCard from "./payroll-report-card";
 import PayrollsrDataTable from "./payrolls-table";
 import SummaryTable from "./summary-table";
+import PayrollsTaps from "./index";
 
 function page() {
+  const [type, setType] = useState("teachers");
+
   return (
     <div>
       <div className="space-y-6">
+        <PayrollsTaps setType={setType} />
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex-1">
             <h3 className="text-xl font-medium text-default-700 opacity-60">
-              Payrolls
+              {type === "teachers" ? "Teachers" : "Quality"} Payrolls
             </h3>
           </div>
           <div className="flex-none">
-            <Select>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue
-                  placeholder="Select Teacher"
-                  className="whitespace-nowrap"
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="jan-12">Jan 12</SelectItem>
-                <SelectItem value="jan-13">Jan 13</SelectItem>
-                <SelectItem value="jan-14">Jan 14</SelectItem>
-              </SelectContent>
-            </Select>
+            {type === "teachers" ? (
+              <Select>
+                <SelectTrigger className="w-[250px]">
+                  <SelectValue placeholder="Select Teachers" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="teachers">All Teachers</SelectItem>
+                  <SelectItem value="active-teachers">
+                    Active Teachers
+                  </SelectItem>
+                  <SelectItem value="inactive-teachers">
+                    Inactive Teachers
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <Select>
+                <SelectTrigger className="w-[250px]">
+                  <SelectValue placeholder="Select Quality Assurance" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="quality-assurance">
+                    All Quality Assurance
+                  </SelectItem>
+                  <SelectItem value="active-quality-assurance">
+                    Active Quality Assurance
+                  </SelectItem>
+                  <SelectItem value="inactive-quality-assurance">
+                    Inactive Quality Assurance
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </div>
 

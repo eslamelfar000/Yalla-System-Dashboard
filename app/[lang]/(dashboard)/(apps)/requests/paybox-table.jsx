@@ -36,6 +36,7 @@ import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { CheckCircle } from "lucide";
+import { SharedAlertDialog } from "@/components/Shared/Drawer/shared-dialog";
 
 const columns = [
   {
@@ -118,21 +119,14 @@ const columns = [
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <Button
-            size="icon"
-            variant="outline"
-            className=" h-7 w-7"
-            color="success"
-          >
-            <Icon icon="heroicons:check" className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="outline"
-            className=" h-7 w-7 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500"
-          >
-            <Icon icon="heroicons:trash" className="h-4 w-4" />
-          </Button>
+          <SharedAlertDialog
+            type={`accept-paybox-request`}
+            info={row?.original?.user}
+          />
+          <SharedAlertDialog
+            type={`delete-paybox-request`}
+            info={row?.original?.user}
+          />
         </div>
       </div>
     ),

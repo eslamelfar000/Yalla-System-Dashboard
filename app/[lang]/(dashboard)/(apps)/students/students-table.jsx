@@ -32,7 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { SharedDrawer } from "../../../../../components/Shared/Drawer/shared-drawer";
+import { SharedSheet } from "../../../../../components/Shared/Drawer/shared-sheet";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -112,12 +112,7 @@ const columns = [
             <div className="head text-gray-600">
               <h2 className="text-sm">2 / 5</h2>
             </div>
-            <Progress
-              value="50"
-              color="primary"
-              isStripe
-              isAnimate
-            />
+            <Progress value="50" color="primary" isStripe isAnimate />
           </div>
         </div>
       </div>
@@ -168,16 +163,14 @@ export function StudentsDataTable() {
               className="whitespace-nowrap"
             />
           </SelectTrigger>
-          <SelectContent className="h-[300px] overflow-y-auto ">
-            {data?.map((item) => (
-              <SelectItem key={item?.user?.name} value={item?.user?.name}>
-                {item?.user?.name}
-              </SelectItem>
-            ))}
+          <SelectContent className="">
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="teacher">Teacher</SelectItem>
+            <SelectItem value="quality">Quality Assurance</SelectItem>
           </SelectContent>
         </Select>
 
-        <SharedDrawer />
+        <SharedSheet type={`filter-students`} />
       </div>
       <Card title="Simple">
         <Table>

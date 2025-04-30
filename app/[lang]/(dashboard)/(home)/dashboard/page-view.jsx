@@ -15,7 +15,7 @@ import EcommerceStats from "../ecommerce/components/ecommerce-stats";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import NotesTable from "./components/notes-table";
-import { SharedDrawer } from "../../../../../components/Shared/Drawer/shared-drawer";
+import { SharedSheet } from "../../../../../components/Shared/Drawer/shared-sheet";
 import { Button } from "@/components/ui/button";
 
 const DashboardPageView = ({ trans }) => {
@@ -109,7 +109,7 @@ const DashboardPageView = ({ trans }) => {
                     </h3>
                   </div>
                   <div className="flex-none">
-                    <SharedDrawer />
+                    <SharedSheet />
                   </div>
                 </div>
                 <CardContent className="h-[510px] overflow-y-auto">

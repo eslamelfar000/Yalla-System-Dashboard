@@ -1,7 +1,5 @@
 "use client";
 import * as React from "react";
-
-import { EyeIcon } from "lucide-react";
 import {
   flexRender,
   getCoreRowModel,
@@ -10,13 +8,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { SharedDrawer } from "../../../../../components/Shared/Drawer/shared-drawer";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { data } from "../../(tables)/data-table/data";

@@ -32,7 +32,7 @@ import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { SharedDrawer } from "../../../../../components/Shared/Drawer/shared-drawer";
+import { SharedSheet } from "../../../../../components/Shared/Drawer/shared-sheet";
 
 const columns = [
   {
@@ -145,7 +145,7 @@ export function ArchiveDataTable() {
           </SelectContent>
         </Select>
 
-        <SharedDrawer />
+        <SharedSheet />
       </div>
       <div>
         <Card>

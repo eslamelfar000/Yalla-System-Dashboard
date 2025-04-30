@@ -1,6 +1,16 @@
 "use client";
 import * as React from "react";
-import { PlusCircle } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   flexRender,
   getCoreRowModel,
@@ -9,7 +19,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -18,16 +27,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { data } from "../../(tables)/data-table/data";
+import { data } from "../../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 
 const columns = [
   {
-    accessorKey: "sessions",
-    header: "Sessions",
+    accessorKey: "name",
+    header: "Name",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
@@ -43,8 +53,21 @@ const columns = [
     ),
   },
   {
-    accessorKey: "type",
-    header: "Type",
+    accessorKey: "id",
+    header: "ID",
+    cell: ({ row }) => (
+      <div className="  font-medium  text-card-foreground/80">
+        <div className="flex space-x-3  rtl:space-x-reverse items-center">
+          <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row?.original?.id}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "booked",
+    header: "Booked",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
@@ -56,8 +79,8 @@ const columns = [
     ),
   },
   {
-    accessorKey: "session-price",
-    header: "Session price",
+    accessorKey: "type",
+    header: "Type",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
@@ -69,8 +92,21 @@ const columns = [
     ),
   },
   {
-    accessorKey: "sub-total",
-    header: "Sub Total",
+    accessorKey: "Ded-Raise",
+    header: "Ded. | Raise",
+    cell: ({ row }) => (
+      <div className="  font-medium  text-card-foreground/80">
+        <div className="flex space-x-3  rtl:space-x-reverse items-center">
+          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
+            {row?.original?.user.name}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "reason",
+    header: "Reason",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
@@ -83,7 +119,7 @@ const columns = [
   },
 ];
 
-export function SummaryTable() {
+export function IncomeRolesDataTable() {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
@@ -110,14 +146,6 @@ export function SummaryTable() {
 
   return (
     <>
-      <div className="flex items-center flex-wrap gap-2 mb-5">
-        <div className="flex-1">
-          <h3 className="text-xl font-medium text-default-700 opacity-60">
-            Summary
-          </h3>
-        </div>
-
-      </div>
       <Card title="Simple">
         <Table>
           <TableHeader>
@@ -142,8 +170,7 @@ export function SummaryTable() {
             {table.getRowModel().rows?.length ? (
               table
                 .getRowModel()
-                .rows.slice(0, 2)
-                .map((row) => (
+                .rows.map((row) => (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
@@ -174,7 +201,7 @@ export function SummaryTable() {
         </Table>
       </Card>
 
-      {/* <div className="flex items-center flex-wrap gap-4 px-4 py-4">
+      <div className="flex items-center flex-wrap gap-4 px-4 py-4">
         <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -222,9 +249,9 @@ export function SummaryTable() {
             />
           </Button>
         </div>
-      </div> */}
+      </div>
     </>
   );
 }
 
-export default SummaryTable;
+export default IncomeRolesDataTable;

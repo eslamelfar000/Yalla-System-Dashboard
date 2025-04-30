@@ -8,12 +8,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { users } from "../../(tables)/tailwindui-table/data";
-import { Icon } from "@iconify/react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SharedSheet } from "@/components/Shared/Drawer/shared-sheet";
+import { SharedAlertDialog } from "@/components/Shared/Drawer/shared-dialog";
 
-const UsersTableStatus = () => {
+const UsersTableStatus = ({type}) => {
   const columns = [
     {
       key: "Name",
@@ -63,30 +63,9 @@ const UsersTableStatus = () => {
               <TableCell>{item.email}</TableCell>
 
               <TableCell className="flex gap-3  justify-end">
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className=" h-7 w-7"
-                  color="secondary"
-                >
-                  <Icon icon="heroicons:pencil" className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className=" h-7 w-7"
-                  color="secondary"
-                >
-                  <Icon icon="heroicons:eye" className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className=" h-7 w-7"
-                  color="secondary"
-                >
-                  <Icon icon="heroicons:trash" className="h-4 w-4" />
-                </Button>
+                <SharedSheet type={`edit-${type}`} user={item} />
+                <SharedSheet type={`show-${type}`} user={item} />
+                <SharedAlertDialog type={`delete-${type}`} info={item} />
               </TableCell>
             </TableRow>
           ))}
