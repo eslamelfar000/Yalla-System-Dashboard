@@ -195,29 +195,6 @@ function AddQualityComponent() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="target"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-4">
-                  <div className="flex justify-between items-center">
-                    <FormLabel>Target</FormLabel>
-                    <span className="text-sm">{field.value}%</span>
-                  </div>
-
-                  <FormControl>
-                    <Slider
-                      value={[field.value ?? 0]} // set default safely
-                      onValueChange={(val) => field.onChange(val[0])} // update form value
-                      max={100}
-                      step={1}
-                      className="w-full"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}

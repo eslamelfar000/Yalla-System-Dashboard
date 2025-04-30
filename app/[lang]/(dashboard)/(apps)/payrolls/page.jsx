@@ -8,7 +8,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import PayrollReportsCard from "./payroll-report-card";
-import PayrollsrDataTable from "./payrolls-table";
+import PayrollsTeacherDataTable from "./payroll-teacher-table";
+import PayrollsQualityDataTable from "./payroll-quality-table";
 import SummaryTable from "./summary-table";
 import PayrollsTaps from "./index";
 
@@ -70,9 +71,16 @@ function page() {
 
         <div className="cover space-y-10">
           {/* payrolls table */}
-          <div className="cover">
-            <PayrollsrDataTable />
-          </div>
+
+          {type === "teachers" ? (
+            <div className="cover">
+              <PayrollsTeacherDataTable />
+            </div>
+          ) : (
+            <div className="cover">
+              <PayrollsQualityDataTable />
+            </div>
+          )}
 
           {/* summary table */}
           <div className="">

@@ -1,10 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import IncomeReportsCard from "./Components/income-cards";
-import IncomeRolesDataTable from "./Components/income-role-table";
+import IncomeTeacherDataTable from "./Components/income-teacher-table";
+import IncomeQualityDataTable from "./Components/income-quality-table";
 import IncomeSummaryTable from "./Components/summary-table";
 
-function RolePageView() {
+function RolePageView({role}) {
   return (
     <div>
       <div className="space-y-6">
@@ -25,9 +26,16 @@ function RolePageView() {
 
         <div className="cover space-y-10">
           {/* income table */}
-          <div className="cover">
-            <IncomeRolesDataTable />
-          </div>
+          {role === "quality" ? (
+            <div className="cover">
+              <IncomeQualityDataTable />
+            </div>
+          ) : (
+            <div className="cover">
+              <IncomeTeacherDataTable />
+            </div>
+          )}
+
 
           {/* summary table */}
           <div className="">

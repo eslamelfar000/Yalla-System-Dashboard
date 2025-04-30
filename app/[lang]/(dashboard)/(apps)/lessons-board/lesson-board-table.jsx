@@ -31,24 +31,20 @@ const LessonBoardTable = () => {
 
   const columns = [
     {
-      key: "user",
-      label: "user",
+      key: "student-name",
+      label: "Student Name",
     },
     {
-      key: "title",
-      label: "title",
+      key: "id",
+      label: "ID",
     },
     {
-      key: "role",
-      label: "role",
+      key: "type",
+      label: "Type",
     },
     {
-      key: "action",
-      label: "action",
-    },
-    {
-      key: "action",
-      label: "action",
+      key: "booked",
+      label: "Booked",
     },
     {
       key: "action",
@@ -88,14 +84,14 @@ const LessonBoardTable = () => {
     <>
       <Card title="Simple">
         <Table className="min-w-[150%] md:min-w-full">
-          {/* <TableHeader>
+          <TableHeader>
         <TableRow>
           {columns.map((column) => (
             <TableHead key={column.key}>{column.label}</TableHead>
           ))}
         </TableRow>
-      </TableHeader> */}
-          <TableBody>
+      </TableHeader>
+          <TableBody >
             {users.map((item) => (
               <Fragment key={item.id}>
                 <TableRow

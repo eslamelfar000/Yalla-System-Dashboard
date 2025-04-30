@@ -29,21 +29,6 @@ function page() {
             value={""}
             className="max-w-sm min-w-[200px] h-10"
           />
-          <Select className="w-[280px]">
-            <SelectTrigger className="w-[200px]">
-              <SelectValue
-                placeholder="Select Teacher"
-                className="whitespace-nowrap"
-              />
-            </SelectTrigger>
-            <SelectContent className="h-[300px] overflow-y-auto ">
-              {data?.map((item) => (
-                <SelectItem key={item?.user?.name} value={item?.user?.name}>
-                  {item?.user?.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
 

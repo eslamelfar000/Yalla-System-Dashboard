@@ -1,9 +1,16 @@
 "use client";
 import * as React from "react";
 
-import { PlusCircle } from "lucide-react";
-import {CircleX} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   flexRender,
   getCoreRowModel,
@@ -12,15 +19,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -31,16 +29,15 @@ import {
 } from "@/components/ui/table";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { data } from "../../(tables)/data-table/data";
+import { data } from "../../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { SharedAlertDialog } from "@/components/Shared/Drawer/shared-dialog";
 
 const columns = [
   {
-    accessorKey: "user",
-    header: "User",
+    accessorKey: "student-name",
+    header: "Student Name",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
@@ -50,6 +47,19 @@ const columns = [
           </Avatar>
           <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
             {row?.original?.user.name}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "id",
+    header: "ID",
+    cell: ({ row }) => (
+      <div className="  font-medium  text-card-foreground/80">
+        <div className="flex space-x-3  rtl:space-x-reverse items-center">
+          <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row?.original?.id}
           </span>
         </div>
       </div>
@@ -69,8 +79,8 @@ const columns = [
     ),
   },
   {
-    accessorKey: "teacher",
-    header: "Teacher Name",
+    accessorKey: "type",
+    header: "Type",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
@@ -82,8 +92,8 @@ const columns = [
     ),
   },
   {
-    accessorKey: "should-pay",
-    header: "Should Pay",
+    accessorKey: "Ded-Raise",
+    header: "Ded. | Raise",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
@@ -95,39 +105,21 @@ const columns = [
     ),
   },
   {
-    accessorKey: "payment-data",
-    header: "Payment Data",
+    accessorKey: "reason",
+    header: "Reason",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
             {row?.original?.user.name}
           </span>
-        </div>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "action",
-    header: "Action",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <SharedAlertDialog
-            type={`accept-paybox-request`}
-            info={row?.original?.user}
-          />
-          <SharedAlertDialog
-            type={`delete-after-pay-request`}
-            info={row?.original?.user}
-          />
         </div>
       </div>
     ),
   },
 ];
 
-export function PayAfterDataTable() {
+export function IncomeTeacherDataTable() {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
@@ -154,31 +146,6 @@ export function PayAfterDataTable() {
 
   return (
     <>
-      <div className="flex items-center flex-wrap gap-2 mb-5">
-        <Input
-          placeholder="Filter emails..."
-          value={table.getColumn("email")?.getFilterValue() || ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm min-w-[200px] h-10"
-        />
-        {/* <Select className="w-[280px]">
-          <SelectTrigger className="w-[200px]">
-            <SelectValue
-              placeholder="Select Teacher"
-              className="whitespace-nowrap"
-            />
-          </SelectTrigger>
-          <SelectContent className="h-[300px] overflow-y-auto ">
-            {data?.map((item) => (
-              <SelectItem key={item?.user?.name} value={item?.user?.name}>
-                {item?.user?.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select> */}
-      </div>
       <Card title="Simple">
         <Table>
           <TableHeader>
@@ -287,4 +254,4 @@ export function PayAfterDataTable() {
   );
 }
 
-export default PayAfterDataTable;
+export default IncomeTeacherDataTable;

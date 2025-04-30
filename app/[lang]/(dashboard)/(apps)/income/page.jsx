@@ -10,21 +10,33 @@ function page() {
   const [role, setRole] = useState("admin");
   return (
     <div className="space-y-6">
-
       <ul className="flex items-center space-x-4 mb-4">
         <li>
-          <Button onClick={
-            () => {
+          <Button
+            onClick={() => {
               setRole("admin");
-            }
-          }>Admin</Button>
+            }}
+          >
+            Admin
+          </Button>
         </li>
         <li>
-          <Button onClick={
-            () => {
+          <Button
+            onClick={() => {
               setRole("teacher");
-            }
-          }>Teacher</Button>
+            }}
+          >
+            Teacher
+          </Button>
+        </li>
+        <li>
+          <Button
+            onClick={() => {
+              setRole("quality");
+            }}
+          >
+            Quality
+          </Button>
         </li>
       </ul>
 
@@ -44,7 +56,7 @@ function page() {
           </div>
         </>
       ) : (
-        <RolePageView />
+        <RolePageView role={role} />
       )}
     </div>
   );

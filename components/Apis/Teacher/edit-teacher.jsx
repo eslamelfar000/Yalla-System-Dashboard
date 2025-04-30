@@ -238,38 +238,17 @@ function EditTeacherComponent({ user, info }) {
               control={form.control}
               name="target"
               render={({ field }) => (
-                <FormItem className={`flex flex-col ${!info && "gap-4"}`}>
-                  <div
-                    className={` ${
-                      !info && "flex justify-between items-center"
-                    }`}
-                  >
-                    <FormLabel>Target</FormLabel>
-                    <span className={`text-sm ${info && "hidden"}`}>
-                      {field.value}%
-                    </span>
-                  </div>
-
-                  {!info ? (
-                    <FormControl>
-                      <Slider
-                        value={[field.value ?? 0]} // set default safely
-                        onValueChange={(val) => field.onChange(val[0])} // update form value
-                        max={100}
-                        step={1}
-                        className="w-full"
-                        defaultValue={[field.value ?? 0]} // set default safely
-                      />
-                    </FormControl>
-                  ) : (
-                    <FormControl>
-                      <Input
-                        value={`${field.value}%`}
-                        readOnly={info}
-                        className={info ? "cursor-pointer select-none" : ""}
-                      />
-                    </FormControl>
-                  )}
+                <FormItem>
+                  <FormLabel>Target</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="target"
+                      {...field}
+                      type="number"
+                      readOnly={info}
+                      className={info ? "cursor-pointer select-none" : ""}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

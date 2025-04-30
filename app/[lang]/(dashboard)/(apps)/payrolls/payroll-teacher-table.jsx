@@ -1,16 +1,16 @@
 "use client";
 import * as React from "react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea";
 
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui/popover"
 import {
   flexRender,
   getCoreRowModel,
@@ -29,15 +29,15 @@ import {
 } from "@/components/ui/table";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { data } from "../../../(tables)/data-table/data";
+import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 
 const columns = [
   {
-    accessorKey: "name",
-    header: "Name",
+    accessorKey: "student-name",
+    header: "Student Name",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
@@ -117,9 +117,116 @@ const columns = [
       </div>
     ),
   },
+  {
+    accessorKey: "action",
+    header: "Action",
+    cell: ({ row }) => (
+      <div className="  font-medium  text-card-foreground/80">
+        <div className="flex space-x-3  rtl:space-x-reverse items-center">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                className=" h-7 w-7"
+                color="primary"
+              >
+                <Icon icon="heroicons:pencil" className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium leading-none">
+                    Edit Salary Adjustment
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    Set the Salary Adjustment for the layer.
+                  </p>
+                </div>
+                <div className="grid gap-2 w-full">
+                  <div className="">
+                    <Label htmlFor="deduction">Deduction</Label>
+                    <Input id="deduction" className="col-span-2 h-8 w-full" />
+                  </div>
+                  <div className="">
+                    <Label htmlFor="raise">Raise</Label>
+                    <Input id="raise" className="col-span-2 h-8" />
+                  </div>
+                  <div className="">
+                    <Label htmlFor="reason">Reason</Label>
+                    <Textarea
+                      placeholder="Type your reason here."
+                      id="reason"
+                      className="col-span-2 h-14"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Button type="submit" className="w-full h-8">
+                      Submit
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          {/* / */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                className=" h-7 w-7 "
+                color="primary"
+              >
+                <Icon icon="heroicons:plus" className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium leading-none">
+                    Add Salary Adjustment
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    Set the Salary Adjustment for the layer.
+                  </p>
+                </div>
+                <div className="grid gap-2 w-full">
+                  <div className="">
+                    <Label htmlFor="deduction">Deduction</Label>
+                    <Input id="deduction" className="col-span-2 h-8 w-full" />
+                  </div>
+                  <div className="">
+                    <Label htmlFor="raise">Raise</Label>
+                    <Input id="raise" className="col-span-2 h-8" />
+                  </div>
+                  <div className="">
+                    <Label htmlFor="reason">Reason</Label>
+                    <Textarea
+                      placeholder="Type your reason here."
+                      id="reason"
+                      className="col-span-2 h-14"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Button type="submit" className="w-full h-8">
+                      Submit
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+    ),
+  },
 ];
 
-export function IncomeRolesDataTable() {
+export function PayrollsTeacherDataTable() {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
@@ -254,4 +361,4 @@ export function IncomeRolesDataTable() {
   );
 }
 
-export default IncomeRolesDataTable;
+export default PayrollsTeacherDataTable;
