@@ -3,7 +3,8 @@ import { getCategories, getEvents } from "@/config/calendar.config";
 
 // ✅ dynamic import of client component
 const CalendarView = dynamic(() => import("./CalendarViewWrapper"), {
-  ssr: false,
+  ssr: false, // Disable SSR for client-only components
+  loading: () => <div>Loading...</div>, // Optional: add loading spinner/fallback
 });
 
 const CalenderPage = async () => {
