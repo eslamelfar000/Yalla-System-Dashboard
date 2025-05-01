@@ -161,7 +161,7 @@ const EventSheet = ({ open, onClose, categories, event, selectedDate }) => {
           </SheetHeader>
           <div className="mt-6 h-full">
             <form className=" h-full" onSubmit={handleSubmit(onSubmit)}>
-              <div className="h-[calc(100vh-130px)]">
+              <div className="h-[calc(100vh-150px)]">
                 <ScrollArea className="h-full">
                   <div className="space-y-4 pb-5 px-6">
                     <div className=" space-y-1.5">
@@ -270,7 +270,7 @@ const EventSheet = ({ open, onClose, categories, event, selectedDate }) => {
                             <SelectTrigger>
                               <SelectValue placeholder="Label" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[9999]">
                               {categories.map((category) => (
                                 <SelectItem
                                   value={category.value}
