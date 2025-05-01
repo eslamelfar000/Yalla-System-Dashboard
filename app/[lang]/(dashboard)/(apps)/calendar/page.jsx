@@ -1,10 +1,12 @@
-import { getCategories, getEvents } from "@/config/calendar.config";
 import dynamic from "next/dynamic";
+import { getCategories, getEvents } from "@/config/calendar.config";
 
-// 👇 dynamic import with SSR disabled
-const CalendarView = dynamic(() => import("./calender-view"), {
+// Dynamic import with SSR disabled
+const CalendarView = dynamic(() => import("./CalendarViewWrapper"), {
   ssr: false,
 });
+
+
 
 const CalenderPage = async () => {
   const events = await getEvents();
