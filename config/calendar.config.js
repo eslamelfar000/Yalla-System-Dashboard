@@ -1,9 +1,8 @@
 import { api } from "@/config/axios.config";
-import axios from "axios";
 
 export const getEvents = async (selectedCategory) => {
   try {
-    const response = await axios.get(`http://localhost:3000/api/calendars`);
+    const response = await api.get(`/api/calendars`);
     return response.data;
   }catch (error) {
     console.error("Error deleting message:", error);
@@ -12,7 +11,7 @@ export const getEvents = async (selectedCategory) => {
 };
 export const getCategories = async () => {
   try {
-    const response = await axios.get("http://localhost:3000/api/calendars/categories");
+    const response = await api.get("/api/calendars/categories");
     return response.data;
   } catch (error) {
     console.error("Error deleting message:", error);
@@ -21,7 +20,7 @@ export const getCategories = async () => {
 };
 export const createEvent = async (data) => {
   try {
-    const response = await axios.post("http://localhost:3000/api/calendars", data);
+    const response = await api.post("/api/calendars", data);
     return response.data;
   }catch (error) {
     console.error("Error deleting message:", error);
@@ -32,7 +31,7 @@ export const createEvent = async (data) => {
 // delete
 export const deleteEvent = async (id) => {
   try {
-    const response = await axios.delete(`http://localhost:3000/api/calendars/${id}`);
+    const response = await api.delete(`/api/calendars/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting message:", error);
@@ -43,7 +42,7 @@ export const deleteEvent = async (id) => {
 // update
 export const updateEvent = async (id, data) => {
   try {
-    const response = await axios.put(`http://localhost:3000/api/calendars/${id}`, data);
+    const response = await api.put(`/api/calendars/${id}`, data);
     return response.data;
   }catch (error) {
     console.error("Error deleting message:", error);
