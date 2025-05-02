@@ -7,9 +7,11 @@ export const getContacts = async () => {
 
 export const getMessages = async (id) => {
   try {
-    const response = await api.get(`/chat/messages/${id}`);
+    if(id){
+      const response = await api.get(`/chat/messages/${id}`);
     console.log("Response from getMessages:", response.data);
     return response.data;
+    }
   } catch (error) {
     console.error("Error fetching messages:", error);
     throw error;

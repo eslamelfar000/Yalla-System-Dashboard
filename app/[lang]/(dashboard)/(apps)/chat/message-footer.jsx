@@ -78,7 +78,7 @@ const MessageFooter = ({ handleSendMessage, replay, setReply, replayData }) => {
       >
         <div className="flex-none flex gap-1 absolute md:static top-0 left-1.5 z-10 ">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            {/* <DropdownMenuTrigger asChild>
               <div>
                 <TooltipProvider>
                   <Tooltip>
@@ -103,13 +103,13 @@ const MessageFooter = ({ handleSendMessage, replay, setReply, replayData }) => {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-            </DropdownMenuTrigger>
+            </DropdownMenuTrigger> */}
             <DropdownMenuContent
               className="w-[196px] p-2.5 rounded-xl"
               align="start"
               side="top"
             >
-              <DropdownMenuItem className="py-2 px-2 rounded-xl">
+              {/* <DropdownMenuItem className="py-2 px-2 rounded-xl">
                 <div className="flex items-center gap-1">
                   <Icon
                     icon="material-symbols:mic"
@@ -119,7 +119,7 @@ const MessageFooter = ({ handleSendMessage, replay, setReply, replayData }) => {
                     Send a voice clip
                   </span>
                 </div>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               {message.length > 0 && (
                 <>
                   <DropdownMenuItem className="py-2 px-2 rounded-xl">
@@ -134,7 +134,7 @@ const MessageFooter = ({ handleSendMessage, replay, setReply, replayData }) => {
                       </span>
                     </Label>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="py-2 px-2 rounded-xl">
+                  {/* <DropdownMenuItem className="py-2 px-2 rounded-xl">
                     <div className="flex items-center gap-1">
                       <Icon
                         icon="fluent:sticker-12-filled"
@@ -144,7 +144,7 @@ const MessageFooter = ({ handleSendMessage, replay, setReply, replayData }) => {
                         Choose a sticker
                       </span>
                     </div>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                 </>
               )}
             </DropdownMenuContent>
@@ -176,7 +176,7 @@ const MessageFooter = ({ handleSendMessage, replay, setReply, replayData }) => {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <div className="hidden lg:block">
+              {/* <div className="hidden lg:block">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -197,7 +197,7 @@ const MessageFooter = ({ handleSendMessage, replay, setReply, replayData }) => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-              </div>
+              </div> */}
             </>
           )}
         </div>

@@ -52,7 +52,7 @@ const MessageHeader = ({
         </div>
       </div>
       <div className="flex-none space-x-2 rtl:space-x-reverse">
-        <TooltipProvider>
+        {/* <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -90,7 +90,7 @@ const MessageHeader = ({
               <TooltipArrow className="fill-primary" />
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
+        </TooltipProvider> */}
 
         <TooltipProvider>
           <Tooltip>

@@ -31,7 +31,7 @@ const ContactInfo = ({ handleSetIsOpenSearch, handleShowInfo, contact }) => {
       )}
 
       <Card className="h-full overflow-hidden ">
-        <CardHeader>
+        <CardHeader className="mb-0">
           <div className="absolute xl:hidden">
             <Button
               size="icon"
@@ -53,7 +53,7 @@ const ContactInfo = ({ handleSetIsOpenSearch, handleShowInfo, contact }) => {
               {contact?.about}
             </span>
           </div>
-          <div className="flex justify-center gap-6  pt-3">
+          {/* <div className="flex justify-center gap-6  pt-3">
             <div className="flex flex-col items-center gap-1">
               <Link
                 href="/chat"
@@ -66,39 +66,12 @@ const ContactInfo = ({ handleSetIsOpenSearch, handleShowInfo, contact }) => {
               </Link>
               <span className="text-xs text-default-900">Profile</span>
             </div>
-            <MuteNotification />
-            <div
-              className="flex flex-col items-center gap-1"
-              onClick={handleSetIsOpenSearch}
-            >
-              <Button
-                type="button"
-                color="secondary"
-                size="icon"
-                className="rounded-full"
-              >
-                <Icon icon="zondicons:search" />
-              </Button>
-              <span className="text-xs text-default-900">Search</span>
-            </div>
-          </div>
+          </div> */}
         </CardHeader>
 
         <CardContent className="px-0 border-0 h-[calc(100%-260px)] overflow-hidden ">
           <ScrollArea className="h-full md:pb-10">
             <Accordion type="single" collapsible className="w-full  space-y-0 ">
-              {/* option */}
-              <AccordionItem
-                value="item-1"
-                className="shadow-none dark:shadow-none dark:bg-card/90 px-4"
-              >
-                <AccordionTrigger>Option</AccordionTrigger>
-                <AccordionContent>
-                  <EditNickname />
-                  <ChangeTheme />
-                </AccordionContent>
-              </AccordionItem>
-              {/* Shared Files */}
               <AccordionItem
                 value="item-2"
                 className="shadow-none dark:shadow-none dark:bg-card/90 px-4"
@@ -138,32 +111,6 @@ const ContactInfo = ({ handleSetIsOpenSearch, handleShowInfo, contact }) => {
                         />
                       </span>
                       <span className="text-xs text-default-600">Links</span>
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* Settings */}
-              <AccordionItem
-                value="item-3"
-                className="shadow-none dark:shadow-none dark:bg-card/90 px-4"
-              >
-                <AccordionTrigger className="rounded-none">
-                  Settings
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div>
-                    <BlockUser />
-                    <Button
-                      type="button"
-                      className="w-full justify-start gap-3  bg-transparent hover:bg-default-50 px-1.5 group"
-                    >
-                      <span className="w-5 h-5 rounded-full bg-default-200 group-hover:bg-default-300 flex justify-center items-center">
-                        <AlertTriangle className="w-3 h-3 text-default-500" />
-                      </span>
-                      <span className="text-xs text-default-600">
-                        Something wrong
-                      </span>
                     </Button>
                   </div>
                 </AccordionContent>
