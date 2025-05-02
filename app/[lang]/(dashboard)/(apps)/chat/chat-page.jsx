@@ -154,6 +154,9 @@ export const ChatPage = () => {
     setPinnedMessages([...pinnedMessages, note]);
     console.log(pinnedMessages);
   };
+
+  console.log("chats", chats);
+
   return (
     <div className="flex gap-5 app-height  relative rtl:space-x-reverse">
       <div className="transition-all duration-150 flex-none  lg:w-[260px]">

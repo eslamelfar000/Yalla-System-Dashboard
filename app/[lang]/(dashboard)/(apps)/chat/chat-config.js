@@ -8,16 +8,22 @@ export const getContacts = async () => {
 
 // Fetch messages for a specific contact
 export const getMessages = async (id) => {
-  if (!id) return [];
+  if (!id) return { chat: [], contact: {} };
 
   try {
-    const response = await api.get(`/api/chat/messages/${id}`);  // Next.js API route
+    const response = await api.get(`/api/chat/messages/${id}`);
     return response.data;
   } catch (error) {
+    // if (error.response?.status === 404) {
+    //   // Return a fallback structure when 404
+    //   return { chat: [], contact: {} };
+    // }
+
     console.error("Error fetching messages:", error);
-    throw error;
+    // return { chat: [], contact: {} }; // Fallback for other errors
   }
 };
+
 
 // Delete message
 export const deleteMessage = async (obj) => {
