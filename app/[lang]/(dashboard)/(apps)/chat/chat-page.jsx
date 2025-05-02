@@ -74,6 +74,7 @@ export const ChatPage = () => {
     queryKey: ["message", selectedChatId],
     queryFn: () => getMessagesCallback(selectedChatId),
     keepPreviousData: true,
+    enabled: !!selectedChatId, // ✅ prevent query from running with null id
   });
   const {
     isLoading: profileLoading,

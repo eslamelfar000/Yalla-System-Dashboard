@@ -6,17 +6,17 @@ export const getContacts = async () => {
 };
 
 export const getMessages = async (id) => {
+  if (!id) return []; // Or return null or throw, depending on your logic
+
   try {
-    if(id){
-      const response = await api.get(`/chat/messages/${id}`);
-    console.log("Response from getMessages:", response.data);
+    const response = await api.get(`/chat/messages/${id}`);
     return response.data;
-    }
   } catch (error) {
     console.error("Error fetching messages:", error);
     throw error;
   }
 };
+
 export const deleteMessage = async (obj) => {
   console.log("Object to be sent:", obj); // Add this log statement
   try {
