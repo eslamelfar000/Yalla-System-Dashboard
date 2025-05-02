@@ -1,15 +1,17 @@
 import { api } from "@/config/axios.config";
 
+// Fetch contacts
 export const getContacts = async () => {
-  const response = await api.get("/chat");
+  const response = await api.get("/api/chat");  // Use the Next.js API route
   return response.data;
 };
 
+// Fetch messages for a specific contact
 export const getMessages = async (id) => {
-  if (!id) return []; // Or return null or throw, depending on your logic
+  if (!id) return [];
 
   try {
-    const response = await api.get(`/chat/messages/${id}`);
+    const response = await api.get(`/api/chat/messages/${id}`);  // Next.js API route
     return response.data;
   } catch (error) {
     console.error("Error fetching messages:", error);
@@ -17,23 +19,25 @@ export const getMessages = async (id) => {
   }
 };
 
+// Delete message
 export const deleteMessage = async (obj) => {
-  console.log("Object to be sent:", obj); // Add this log statement
+  console.log("Object to be sent:", obj); // Log the object for debugging
   try {
-    await api.delete(`/chat/messages/${obj.selectedChatId}`, { data: obj });
+    await api.delete(`/api/chat/messages/${obj.selectedChatId}`, { data: obj });
   } catch (error) {
     console.error("Error deleting message:", error);
-    // Handle error gracefully (e.g., display an error message to the user)
+    // Handle error gracefully
   }
 };
 
+// Fetch user profile
 export const getProfile = async () => {
-  const response = await api.get("/chat/profile-data");
-
+  const response = await api.get("/api/chat/profile-data");  // Next.js API route
   return response.data;
 };
 
+// Send a new message
 export const sendMessage = async (msg) => {
-  const response = await api.post("/chat/messages", msg);
+  const response = await api.post("/api/chat/messages", msg);  // Next.js API route
   return response.data;
 };
