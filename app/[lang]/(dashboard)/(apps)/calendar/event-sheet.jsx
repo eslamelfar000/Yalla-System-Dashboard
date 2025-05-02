@@ -43,7 +43,7 @@ const EventSheet = ({ open, onClose, categories, event, selectedDate }) => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [isPending, startTransition] = React.useTransition();
-  const [calendarProps, setCalendarProps] = React.useState(categories[0].value);
+  const [calendarProps, setCalendarProps] = React.useState(categories?.[0].value);
   // delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [eventIdToDelete, setEventIdToDelete] = useState(null);
@@ -271,7 +271,7 @@ const EventSheet = ({ open, onClose, categories, event, selectedDate }) => {
                               <SelectValue placeholder="Label" />
                             </SelectTrigger>
                             <SelectContent className="z-[9999]">
-                              {categories.map((category) => (
+                              {categories?.map((category) => (
                                 <SelectItem
                                   value={category.value}
                                   key={category.value}
