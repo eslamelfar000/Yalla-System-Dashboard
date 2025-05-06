@@ -18,6 +18,7 @@ import AddQualityComponent from "@/components/Apis/Quality/add-quality";
 import EditTeacherComponent from "@/components/Apis/Teacher/edit-teacher";
 import EditQualityComponent from "@/components/Apis/Quality/edit-quality";
 import FilterStudentsComponent from "@/components/Apis/Student/filter-students";
+import FilterArchiveComponent from "@/components/Apis/Student/filter-archive";
 import { Icon } from "@iconify/react";
 
 export function SharedSheet({ type, user }) {
@@ -54,12 +55,16 @@ export function SharedSheet({ type, user }) {
             Filter Results
           </Button>
         ) : (
-          <Button variant="outline" color="primary" title="filter">
+          <Button variant="outline" title="filter">
             Filter Results
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className={`w-3/4 max-w-lg md:max-w-2xl ${type === "filter-students" ? "md:max-w-sm" : ""}`}>
+      <SheetContent
+        className={`w-3/4 max-w-lg md:max-w-2xl ${
+          ["filter-students","filter-archive"].includes(type) ? "md:max-w-sm" : ""
+        }`}
+      >
         <div className="cover">
           <SheetHeader>
             <SheetTitle>
@@ -95,6 +100,8 @@ export function SharedSheet({ type, user }) {
               <EditQualityComponent user={user} info={true} />
             ) : type === "filter-students" ? (
               <FilterStudentsComponent />
+            ) : type === "filter-archive" ? (
+              <FilterArchiveComponent />
             ) : (
               <div className="flex flex-col gap-4">
                 <h3 className="text-lg font-medium text-default-700 mb-2 opacity-60">

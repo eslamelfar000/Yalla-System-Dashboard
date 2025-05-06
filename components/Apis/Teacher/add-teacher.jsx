@@ -52,7 +52,7 @@ function AddTeacherComponent() {
         message:
           "Password must include an uppercase letter, a number, and a special character.",
       }),
-    target: z.coerce.number().min(1).max(100, {
+    target: z.coerce.number().min(0).max(100, {
       message: "Target must be between 1 and 100.",
     }),
     debt: z.coerce.number().min(0, {
@@ -61,9 +61,19 @@ function AddTeacherComponent() {
     trail_lesson_price: z.coerce.number().min(1, {
       message: "Trail lesson price must be a positive number.",
     }),
-    subscriber_lesson_price: z.coerce.number().min(1, {
+    payAfter_lesson_price: z.coerce.number().min(1, {
       message: "Subscriber lesson price must be a positive number.",
     }),
+    payBefore_lesson_price: z.coerce.number().min(1, {
+      message: "Subscriber lesson price must be a positive number.",
+    }),
+    package_after_price: z.coerce.number().min(1, {
+      message: "Package lesson price must be a positive number.",
+    }),
+    package_before_price: z.coerce.number().min(1, {
+      message: "Package lesson price must be a positive number.",
+    }),
+
   });
 
   const form = useForm({
@@ -76,8 +86,11 @@ function AddTeacherComponent() {
       password: "",
       target: 0,
       debt: 0,
-      trail_lesson_price: "",
-      subscriber_lesson_price: "",
+      trail_lesson_price: 0,
+      payAfter_lesson_price: 0,
+      payBefore_lesson_price: 0,
+      package_after_price: 0,
+      package_before_price: 0,
     },
   });
 
@@ -210,6 +223,19 @@ function AddTeacherComponent() {
             />
             <FormField
               control={form.control}
+              name="debt"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Debt</FormLabel>
+                  <FormControl>
+                    <Input placeholder="debt" {...field} type="number" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="trail_lesson_price"
               render={({ field }) => (
                 <FormItem>
@@ -227,14 +253,14 @@ function AddTeacherComponent() {
             />
             <FormField
               control={form.control}
-              name="subscriber_lesson_price"
+              name="payAfter_lesson_price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Subscriber Lesson Price</FormLabel>
+                  <FormLabel>Pay After Lesson Price</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="subscriber lesson price"
+                      placeholder="pay after lesson price"
                       {...field}
                     />
                   </FormControl>
@@ -244,12 +270,50 @@ function AddTeacherComponent() {
             />
             <FormField
               control={form.control}
-              name="debt"
+              name="payBefore_lesson_price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Debt</FormLabel>
+                  <FormLabel>Pay Before Lesson Price</FormLabel>
                   <FormControl>
-                    <Input placeholder="debt" {...field} type="number" />
+                    <Input
+                      type="number"
+                      placeholder="pay before lesson price"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="package_after_price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Package / After Price</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="package after price"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="package_before_price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Package / Before Price</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="package before price"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

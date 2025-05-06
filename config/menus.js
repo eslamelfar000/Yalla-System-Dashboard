@@ -43,7 +43,7 @@ import {
   Mail,
   UserSign,
 } from "@/components/svg";
-import { Archive, ArchiveIcon, ArchiveRestore, Box, CalendarSearch, CheckCheckIcon, CheckSquare, CircleDollarSignIcon, CircuitBoard, Contact, Contact2Icon, DollarSignIcon, MailCheckIcon, PhoneCall, PhoneCallIcon, Plus, User, UserCheck, Users, WalletCards, WalletIcon } from "lucide-react";
+import { Archive, ArchiveIcon, ArchiveRestore, Box, CalendarSearch, CheckCheckIcon, CheckSquare, CircleDollarSignIcon, CircuitBoard, Contact, Contact2Icon, DollarSignIcon, Edit, MailCheckIcon, PhoneCall, PhoneCallIcon, Plus, User, UserCheck, Users, WalletCards, WalletIcon } from "lucide-react";
 import { MOTION_KEY } from "rc-tree/lib/NodeList";
 
 export const menusConfig = {
@@ -1123,6 +1123,11 @@ export const menusConfig = {
       {
         isHeader: true,
         title: "Application",
+      },
+      {
+        title: "user website",
+        icon: Edit,
+        href: "/user-website",
       },
       {
         title: "calendar",

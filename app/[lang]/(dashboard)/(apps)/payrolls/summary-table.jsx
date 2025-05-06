@@ -116,7 +116,6 @@ export function SummaryTable() {
             Summary
           </h3>
         </div>
-
       </div>
       <Card title="Simple">
         <Table>
@@ -142,12 +141,12 @@ export function SummaryTable() {
             {table.getRowModel().rows?.length ? (
               table
                 .getRowModel()
-                .rows.slice(0, 2)
+                .rows.slice(0, 3)
                 .map((row) => (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-gray-100"
+                    className="hover:bg-default-100 "
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
@@ -159,7 +158,6 @@ export function SummaryTable() {
                     ))}
                   </TableRow>
                 ))
-                .slice(0, 4)
             ) : (
               <TableRow>
                 <TableCell

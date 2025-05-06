@@ -3,17 +3,33 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Icon } from "@iconify/react";
 
-function FilterStudentsComponent() {
+function FilterArchiveComponent() {
   const types = [
     { id: 1, name: "Trail Lesson" },
     { id: 2, name: "Pay After Lesson" },
     { id: 3, name: "Pay Before Lesson" },
   ];
 
+  const month = [
+    { id: 1, name: "January" },
+    { id: 2, name: "February" },
+    { id: 3, name: "March" },
+    { id: 4, name: "April" },
+    { id: 5, name: "May" },
+    { id: 6, name: "June" },
+    { id: 7, name: "July" },
+    { id: 8, name: "August" },
+    { id: 9, name: "September" },
+    { id: 10, name: "October" },
+    { id: 11, name: "November" },
+    { id: 12, name: "December" },
+  ];
+
   const sessionCount = 8;
 
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [selectedSessions, setSelectedSessions] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState([]);
 
   const toggleType = (id) => {
     setSelectedTypes((prev) =>
@@ -27,9 +43,16 @@ function FilterStudentsComponent() {
     );
   };
 
+  const toggleMonth = (num) => {
+    setSelectedMonth((prev) =>
+      prev.includes(num) ? prev.filter((v) => v !== num) : [...prev, num]
+    );
+  };
+
   const handleReset = () => {
     setSelectedTypes([]);
     setSelectedSessions([]);
+    setSelectedMonth([]);
   };
 
   return (
@@ -105,8 +128,36 @@ function FilterStudentsComponent() {
         </div>
       </div>
 
+      <div className="month-filter">
+        <div className="head">
+          <h2 className="text-sm flex items-center gap-2 font-medium p-2 bg-primary text-white rounded-xl">
+            <Icon icon="heroicons:adjustments-vertical" className="w-7 h-7" />
+            Filter By Month
+          </h2>
+        </div>
+        <div className="content">
+          <ul className="grid grid-cols-2 mx-5 my-4">
+            {month.map((item) => (
+              <li key={item?.id} className="flex items-center space-x-2 mb-2">
+                <Checkbox
+                  id={`month-${item.id}`}
+                  className="size-10"
+                  checked={selectedMonth.includes(item.id)}
+                  onCheckedChange={() => toggleMonth(item.id)}
+                />
+                <label
+                  htmlFor={`month-${item.id}`}
+                  className="text-sm font-medium text-card-foreground/80 select-none"
+                >
+                  {item.name}
+                </label>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }
 
-export default FilterStudentsComponent;
+export default FilterArchiveComponent;

@@ -38,7 +38,7 @@ const NotesTable = () => {
       </TableHeader>
       <TableBody>
         {data.map((item) => (
-          <TableRow key={item.id}>
+          <TableRow key={item.id} className="hover:bg-default-100 ">
             <TableCell>{item.count}</TableCell>
             <TableCell>{item.page}</TableCell>
             <TableCell className="">

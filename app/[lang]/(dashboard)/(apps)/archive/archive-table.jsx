@@ -91,6 +91,19 @@ const columns = [
       </Badge>
     ),
   },
+  {
+    accessorKey: "date",
+    header: "Date",
+    cell: ({ row }) => (
+      <div className="text-gary-500">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className=" text-sm  text-gray-600 whitespace-nowrap">
+            {row?.original?.id}
+          </span>
+        </div>
+      </div>
+    ),
+  },
 ];
 
 export function ArchiveDataTable() {
@@ -129,23 +142,9 @@ export function ArchiveDataTable() {
           }
           className="max-w-sm min-w-[200px] h-10"
         />
-        <Select className="w-[280px]">
-          <SelectTrigger className="w-[200px]">
-            <SelectValue
-              placeholder="Select Teacher"
-              className="whitespace-nowrap"
-            />
-          </SelectTrigger>
-          <SelectContent className="h-[300px] overflow-y-auto ">
-            {data?.map((item) => (
-              <SelectItem key={item?.user?.name} value={item?.user?.name}>
-                {item?.user?.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Button>Download</Button>
 
-        <SharedSheet />
+        <SharedSheet type={"filter-archive"}/>
       </div>
       <div>
         <Card>
@@ -174,7 +173,7 @@ export function ArchiveDataTable() {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-gray-100"
+                    className="hover:bg-default-100"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>

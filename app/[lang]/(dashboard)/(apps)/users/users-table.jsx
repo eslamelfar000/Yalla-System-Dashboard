@@ -7,13 +7,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Switch } from "@/components/ui/switch";
 import { users } from "../../(tables)/tailwindui-table/data";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SharedSheet } from "@/components/Shared/Drawer/shared-sheet";
 import { SharedAlertDialog } from "@/components/Shared/Drawer/shared-dialog";
 
-const UsersTableStatus = ({type}) => {
+const UsersTableStatus = ({ type }) => {
   const columns = [
     {
       key: "Name",
@@ -31,6 +32,14 @@ const UsersTableStatus = ({type}) => {
       key: "Email",
       label: "Email",
     },
+    ...(type === "teacher"
+      ? [
+          {
+            key: "is-new",
+            label: "IS-New",
+          },
+        ]
+      : []),
     {
       key: "action",
       label: "action",
@@ -61,8 +70,13 @@ const UsersTableStatus = ({type}) => {
               <TableCell>{item.id}</TableCell>
               <TableCell>{item.name}</TableCell>
               <TableCell>{item.email}</TableCell>
+              {type === "teacher" && (
+                <TableCell>
+                  <Switch id="airplane-mode" />
+                </TableCell>
+              )}
 
-              <TableCell className="flex gap-3  justify-end">
+              <TableCell className="flex gap-3">
                 <SharedSheet type={`edit-${type}`} user={item} />
                 <SharedSheet type={`show-${type}`} user={item} />
                 <SharedAlertDialog type={`delete-${type}`} info={item} />

@@ -9,29 +9,33 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { users } from "../../../../(tables)/tailwindui-table/data";
+import { Icon } from "@iconify/react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import {
+  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { users, data } from "./data";
-import { Icon } from "@iconify/react";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import LessonsStepsLineSpace from "./lessons-steps";
-import { Card } from "@/components/ui/card";
 
-const LessonBoardTable = () => {
-  const [sorting, setSorting] = useState([]);
-  const [columnFilters, setColumnFilters] = useState([]);
-  const [columnVisibility, setColumnVisibility] = useState({});
-  const [rowSelection, setRowSelection] = useState({});
-
+const AdminArchiveTable = () => {
+  const [collapsedRows, setCollapsedRows] = useState([]);
+  const toggleRow = (id) => {
+    if (collapsedRows.includes(id)) {
+      setCollapsedRows(collapsedRows.filter((rowId) => rowId !== id));
+    } else {
+      setCollapsedRows([...collapsedRows, id]);
+    }
+  };
   const columns = [
     {
-      key: "student-name",
+      key: "stud-name",
       label: "Student Name",
     },
     {
@@ -47,16 +51,22 @@ const LessonBoardTable = () => {
       label: "Booked",
     },
     {
+      key: "teacher",
+      label: "Teacher",
+    },
+    {
       key: "action",
       label: "action",
     },
   ];
 
+  const [columnFilters, setColumnFilters] = useState([]);
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
-    data,
+    data: users,
     columns,
-    onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -65,25 +75,16 @@ const LessonBoardTable = () => {
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     state: {
-      sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
     },
   });
 
-  const [collapsedRows, setCollapsedRows] = useState([]);
-  const toggleRow = (id) => {
-    if (collapsedRows.includes(id)) {
-      setCollapsedRows(collapsedRows.filter((rowId) => rowId !== id));
-    } else {
-      setCollapsedRows([...collapsedRows, id]);
-    }
-  };
   return (
     <>
-      <Card title="Simple">
-        <Table className="min-w-[150%] md:min-w-full">
+      <Card>
+        <Table>
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
@@ -96,7 +97,7 @@ const LessonBoardTable = () => {
               <Fragment key={item.id}>
                 <TableRow
                   onClick={() => toggleRow(item.id)}
-                  className={`cursor-pointer hover:bg-default-100 transition-all duration-300 ${
+                  className={`cursor-pointer select-none hover:bg-default-100 ${
                     collapsedRows.includes(item.id) ? "bg-default-100" : ""
                   }`}
                 >
@@ -111,23 +112,47 @@ const LessonBoardTable = () => {
                           <span className=" text-sm  block  text-card-foreground">
                             {item.name}
                           </span>
+                          <span className=" text-xs mt-1  block   font-normal">
+                            {item.email}
+                          </span>
                         </div>
                       </div>
                     </div>
                   </TableCell>
 
-                  <TableCell>{item.id}8687</TableCell>
-                  <TableCell>{item.role}</TableCell>
-                  <TableCell>8 Sessions</TableCell>
+                  <TableCell>{item.title}</TableCell>
                   <TableCell>
-                    <span className="text-sm bg-gray-100 dark:bg-gray-900 text-primary border border-primary rounded-full px-4 py-1 font-medium select-none">
-                      1 o 8 is done
-                    </span>
+                    <Badge
+                      variant="soft"
+                      color="success"
+                      className="capitalize rounded-md"
+                    >
+                      Active
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{item.title}</TableCell>
+                  <TableCell>
+                    {" "}
+                    <div className="flex items-center gap-4">
+                      <div className="flex gap-3 items-center">
+                        <Avatar className=" rounded-full">
+                          <AvatarImage src={item.avatar} />
+                          <AvatarFallback>AB</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <span className=" text-sm  block  text-card-foreground">
+                            {item.name}
+                          </span>
+                          <span className=" text-xs mt-1  block   font-normal">
+                            {item.email}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="">
                     <Button
-                      onClick={() => toggleRow(item.id)}
                       size="icon"
                       variant="outline"
                       color="secondary"
@@ -144,13 +169,43 @@ const LessonBoardTable = () => {
                 </TableRow>
                 {collapsedRows.includes(item.id) && (
                   <TableRow>
-                    <TableCell colSpan={6} className="">
-                      {/* <div className="ltr:pl-12 rtl:pr-12 flex flex-col items-start">
-                    <p>City: {item.details.city}</p>
-                    <p>Experience:{item.details.experience}</p>
-                    <p>Post: {item.details.post}</p>
-                  </div> */}
-                      <LessonsStepsLineSpace />
+                    <TableCell colSpan={7}>
+                      <div className="pl-12 space-y-2">
+                        <p className="flex items-center gap-1 text-sm">
+                          <Icon
+                            icon="heroicons:arrow-right-circle"
+                            className="h-7 w-7 text-primary"
+                          />
+                          <span className="font-bold text-md">Date :</span>{" "}
+                          {item.details.city}
+                        </p>
+                        <p className="flex items-center gap-1 text-sm">
+                          <Icon
+                            icon="heroicons:arrow-right-circle"
+                            className="h-7 w-7 text-primary"
+                          />
+                          <span className="font-bold text-md">Pay :</span>
+                          {item.details.experience}
+                        </p>
+                        <p className="flex items-center gap-1 text-sm">
+                          <Icon
+                            icon="heroicons:arrow-right-circle"
+                            className="h-7 w-7 text-primary"
+                          />
+                          <span className="font-bold text-md">
+                            Payment Method :
+                          </span>
+                          {item.details.post}
+                        </p>
+                        <p className="flex items-center gap-1 text-sm">
+                          <Icon
+                            icon="heroicons:arrow-right-circle"
+                            className="h-7 w-7 text-primary"
+                          />
+                          <span className="font-bold text-md">Mobile :</span>
+                          {item.details.post}
+                        </p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
@@ -213,4 +268,4 @@ const LessonBoardTable = () => {
   );
 };
 
-export default LessonBoardTable;
+export default AdminArchiveTable;
