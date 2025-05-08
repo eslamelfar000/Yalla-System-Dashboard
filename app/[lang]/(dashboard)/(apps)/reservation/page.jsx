@@ -6,7 +6,14 @@ function page() {
   return (
     <div>
       {/* <Card title="Simple"> */}
-      <ReservationDataTable />
+      <div className="">
+        <div className="flex-1">
+          <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
+            Trail and Pay Before Students
+          </h3>
+        </div>
+        <ReservationDataTable />
+      </div>
       <div className="mt-20">
         <div className="flex-1">
           <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">

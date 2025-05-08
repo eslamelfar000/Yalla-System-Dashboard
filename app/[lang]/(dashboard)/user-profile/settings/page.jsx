@@ -17,17 +17,15 @@ const Settings = () => {
       label: "Change Password",
       value: "password"
     },
-    {
-      label: "Others",
-      value: "others"
-    }
+    // {
+    //   label: "Others",
+    //   value: "others"
+    // }
   ]
   return (
     <div className='grid grid-cols-12 gap-6 mt-6'>
       <div className="col-span-12 lg:col-span-4 space-y-6">
         <UserMeta />
-        <Socials />
-        <Skills />
       </div>
       <div className="col-span-12 lg:col-span-8">
         <Tabs defaultValue="personal" className="p-0 px-1" >
@@ -52,9 +50,9 @@ const Settings = () => {
           <TabsContent value="password" className="mt-0">
             <ChangePassword />
           </TabsContent>
-          <TabsContent value="others" className="mt-0">
+          {/* <TabsContent value="others" className="mt-0">
             <CommingSoon/>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
 
       </div>

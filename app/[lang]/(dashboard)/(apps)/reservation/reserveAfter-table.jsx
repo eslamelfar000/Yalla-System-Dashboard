@@ -35,6 +35,7 @@ import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Toggle } from "@/components/ui/toggle";
+import { SharedAlertDialog } from "@/components/Shared/Drawer/shared-dialog";
 
 const columns = [
   {
@@ -125,13 +126,18 @@ const columns = [
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="rtl:space-x-reverse items-center">
-          <Toggle
+          {/* <Toggle
             aria-label="Toggle italic"
             size="icon"
             className="w-6 h-6 p-1 rounded-full bg-transparent text-primary border border-solid border-primary"
           >
             <Check className="w-6 h-6" />
-          </Toggle>
+          </Toggle> */}
+
+                    <SharedAlertDialog
+                      type={`accept-patAfter-reservation`}
+                      info={row?.original?.user}
+                    />
         </div>
       </div>
     ),

@@ -8,7 +8,7 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 const UserMeta = () => {
   return (
-    <Card>
+    <Card className="h-full">
       <CardContent className="p-6 flex flex-col items-center">
         <div className="w-[124px] h-[124px] relative rounded-full">
           <Image src={avatar} alt="avatar" className="w-full h-full object-cover rounded-full" />

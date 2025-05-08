@@ -16,11 +16,11 @@ function page() {
   return (
     <div>
       <div className=" space-y-10">
-        <BoardStepsLineSpacs/>
-        <div className="cover space-y-6">
-          <div className="flex flex-wrap items-center gap-4 mb-1">
+        {/* <BoardStepsLineSpacs/> */}
+        <div className="cover space-y-5">
+          <div className="flex flex-wrap items-center gap-4">
             <div className="flex-1">
-              <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
+              <h3 className="text-xl font-medium text-default-700 opacity-60">
                 Borad
               </h3>
             </div>
@@ -43,7 +43,7 @@ function page() {
             <BoradTableStatus />
         </div>
 
-        <div className="">
+        <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-4 mb-1">
             <div className="flex-1">
               <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
@@ -51,9 +51,7 @@ function page() {
               </h3>
             </div>
           </div>
-          <Card title="Simple">
             <ReportsTableStatus />
-          </Card>
         </div>
       </div>
     </div>

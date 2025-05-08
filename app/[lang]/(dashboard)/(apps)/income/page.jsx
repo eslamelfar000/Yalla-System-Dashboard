@@ -5,6 +5,7 @@ import IncomeArea from "./income-area";
 import SalariesDataTable from "./income-table";
 import RolePageView from "./role-page-view";
 import { Button } from "@/components/ui/button";
+import IncomeChart from "./IncomeChart/income-chart";
 
 function page() {
   const [role, setRole] = useState("admin");
@@ -44,7 +45,8 @@ function page() {
         <>
           <div className="grid grid-cols-12 gap-6 ">
             <div className="col-span-12 2xl:col-span-8">
-              <SalaryIncomeStat />
+              {/* <SalaryIncomeStat /> */}
+              <IncomeChart/>
             </div>
             <div className="grid col-span-12 2xl:col-span-4 grid-cols-1 sm:grid-cols-2 gap-4">
               <IncomeArea />

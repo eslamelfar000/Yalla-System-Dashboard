@@ -152,58 +152,6 @@ const ChangePassword = () => {
           </div>
         </CardContent>
       </Card>
-      {/* recent device table */}
-      <Card className="mt-6">
-        <CardHeader className="flex-row items-center border-none mb-0">
-          <CardTitle className="flex-1 text-lg font-medium text-default-800">Recent Device</CardTitle>
-          <Button className="flex-none" size="sm" variant="outline"> Logout All </Button>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {
-                  ["Browser", "DEVICE", "LOCATION", "RECEN ACTIVITIES", "ACTION"]
-                    .map((column, index) => (
-                      <TableHead
-                        key={`column-${index}`}
-                        className="last:text-right border-t border-default-200 first:pl-5 last:pr-5 whitespace-nowrap"
-                      >
-                        {column}
-                      </TableHead>
-                    ))
-                }
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {
-                data.map((item, index) => (
-                  <TableRow
-                   key={`device-row-${index}`}
-                   className="border-default-200"
-                   >
-                    <TableCell
-                      className="py-2">
-                      <div className="flex items-center gap-2 text-sm font-medium text-default-600 whitespace-nowrap">
-                        <div className="h-5 w-5 grid place-content-center rounded bg-default-100 dark:bg-default-50">
-                          <Image className="w-3.5 h-3.5" src={item.image} alt={item.browser} />
-                        </div>
-                        {item.browser}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm  text-default-600 py-2 whitespace-nowrap">{item.device}</TableCell>
-                    <TableCell className="text-sm  text-default-600 capitalize py-2 whitespace-nowrap">{item.location}</TableCell>
-                    <TableCell className="text-sm  text-default-600 capitalize py-2 whitespace-nowrap">{item.recent_activites}</TableCell>
-                    <TableCell className="text-right py-2">
-                      <Button size="sm" variant="ghost">Logout</Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              }
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
     </>
   );
 };

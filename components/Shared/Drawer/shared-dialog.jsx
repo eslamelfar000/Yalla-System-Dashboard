@@ -22,6 +22,7 @@ export function SharedAlertDialog({ type, info }) {
           "delete-quality",
           "delete-paybox-request",
           "delete-after-pay-request",
+          "",
         ].includes(type) ? (
           <Button
             size="icon"
@@ -32,9 +33,11 @@ export function SharedAlertDialog({ type, info }) {
           >
             <Icon icon="heroicons:trash" className="h-4 w-4" />
           </Button>
-        ) : ["accept-paybox-request", "accept-after-pay-request"].includes(
-            type
-          ) ? (
+        ) : [
+            "accept-paybox-request",
+            "accept-after-pay-request",
+            "accept-patAfter-reservation",
+          ].includes(type) ? (
           <Button
             size="icon"
             variant="outline"
@@ -56,9 +59,11 @@ export function SharedAlertDialog({ type, info }) {
           </DialogTitle>
           <DialogTitle>Are you absolutely sure?</DialogTitle>
           <DialogDescription>
-            {["accept-paybox-request", "accept-after-pay-request"].includes(
-              type
-            ) ? (
+            {[
+              "accept-paybox-request",
+              "accept-after-pay-request",
+              "accept-patAfter-reservation",
+            ].includes(type) ? (
               <span className="text-sm text-default-600">
                 This action cannot be undone. This will permanently accept this
                 request?
@@ -79,9 +84,11 @@ export function SharedAlertDialog({ type, info }) {
             </Button>
           </DialogClose>
 
-          {["accept-paybox-request", "accept-after-pay-request"].includes(
-            type
-          ) ? (
+          {[
+            "accept-paybox-request",
+            "accept-after-pay-request",
+            "accept-patAfter-reservation",
+          ].includes(type) ? (
             <Button type="submit" color="success">
               Accept
             </Button>

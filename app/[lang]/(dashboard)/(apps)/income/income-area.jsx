@@ -35,7 +35,7 @@ const IncomeArea = () => {
     },
     {
       id: 4,
-      name: "Expensise",
+      name: "Total Outcome",
       count: "46s",
       rate: "30",
       isUp: false,

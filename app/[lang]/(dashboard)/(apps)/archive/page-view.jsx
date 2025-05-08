@@ -23,7 +23,7 @@ function RoleArchive({ role }) {
             placeholder="Filter results..."
             className="max-w-sm min-w-[200px] h-10"
           />
-          {(role === "quality" || role === "admin") && (
+          {(role === "quality") && (
             <Select>
               <SelectTrigger className="w-[180px] h-10">
                 <SelectValue placeholder="Select Teacher" />

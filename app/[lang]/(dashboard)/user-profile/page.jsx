@@ -12,17 +12,18 @@ const Overview = () => {
   return (
     <div className="pt-6 grid grid-cols-12 gap-6">
       <div className="col-span-12 lg:col-span-4 space-y-6">
-        <ProfileProgress />
+        {/* <ProfileProgress /> */}
         <UserInfo />
-        <Portfolio />
-        <Skills />
-        <Connections />
-        <Teams />
+        {/* <Portfolio /> */}
+        {/* <Skills /> */}
+        {/* <Connections /> */}
+        {/* <Teams /> */}
       </div>
       <div className="col-span-12 lg:col-span-8 space-y-6">
         <About />
-        <RecentActivity />
-        <Projects />
+        <About course={true}/>
+        {/* <RecentActivity /> */}
+        {/* <Projects /> */}
       </div>
     </div>
   );

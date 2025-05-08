@@ -1,46 +1,46 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Phone, Location, Calender, CalenderCheck } from "@/components/svg";
-import FigmaImage from "@/public/images/all-img/figma.png"
-import ReactImage from "@/public/images/all-img/react.png"
-import Image from "next/image";
+import { User, Phone,Location, CalenderCheck, ClipBoard, Envelope } from "@/components/svg";
+
 const UserInfo = () => {
   const userInfo = [
     {
       icon: User,
       label: "Full Name",
-      value: "Jennyfer Frankin"
+      value: "Jennyfer Frankin",
     },
     {
       icon: Phone,
       label: "Mobile",
-      value: "+(1) 987 6543"
+      value: "+(1) 987 6543",
+    },
+    {
+      icon: Envelope,
+      label: "Email Address",
+      value: "example@gmail.com",
     },
     {
       icon: Location,
-      label: "Location",
-      value: "101, California"
+      label: "Country / Region",
+      value: "Egypt / Cairo",
     },
     {
       icon: CalenderCheck,
-      label: "Joining Date",
-      value: "24 Nov 2021"
+      label: "Target",
+      value: "85%",
     },
     {
-      icon: Calender,
-      label: "Last Task Complete ",
-      value: "09 Mar 2024"
+      icon: ClipBoard,
+      label: "Language",
+      value: "English",
     },
-  ]
+  ];
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="border-none mb-0">
         <CardTitle className="text-lg font-medium text-default-800">Information</CardTitle>
       </CardHeader>
       <CardContent className="px-4">
-        <p className="text-sm text-default-600">
-          Tart I love sugar plum I love oat cake. Sweet roll caramels I love jujubes. Topping cake wafer..
-        </p>
-        <ul className="mt-6 space-y-4">
+        <ul className="mt-4 space-y-6">
           {
             userInfo.map((item, index) => (
               <li
@@ -56,7 +56,7 @@ const UserInfo = () => {
             ))
           }
         </ul>
-        <div className="mt-6 text-lg font-medium text-default-800 mb-4">Active Teams</div>
+        {/* <div className="mt-6 text-lg font-medium text-default-800 mb-4">Active Teams</div>
         <div className="space-y-3">
           {
             [
@@ -85,7 +85,7 @@ const UserInfo = () => {
               </div>
             ))
           }
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );
