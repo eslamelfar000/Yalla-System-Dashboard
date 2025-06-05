@@ -6,6 +6,8 @@ import SalariesDataTable from "./income-table";
 import RolePageView from "./role-page-view";
 import { Button } from "@/components/ui/button";
 import IncomeChart from "./IncomeChart/income-chart";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import UserStats from "../../(home)/dashboard/components/user-stats-chart";
 
 function page() {
   const [role, setRole] = useState("admin");
@@ -43,13 +45,25 @@ function page() {
 
       {role === "admin" ? (
         <>
-          <div className="grid grid-cols-12 gap-6 ">
-            <div className="col-span-12 2xl:col-span-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-4">
+            <IncomeArea />
+          </div>
+          <div className="grid grid-cols-3 gap-4 ">
+            <div className="col-span-2">
               {/* <SalaryIncomeStat /> */}
-              <IncomeChart/>
+              <IncomeChart />
             </div>
-            <div className="grid col-span-12 2xl:col-span-4 grid-cols-1 sm:grid-cols-2 gap-4">
-              <IncomeArea />
+            <div className="">
+              <Card className="h-full">
+                <CardHeader className="border-none p-6 pt-5">
+                  <CardTitle className="text-lg font-semibold text-default-900 p-0">
+                    Outcomes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <UserStats />
+                </CardContent>
+              </Card>
             </div>
           </div>
 

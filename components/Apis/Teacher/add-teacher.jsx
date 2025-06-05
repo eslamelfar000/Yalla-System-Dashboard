@@ -208,117 +208,37 @@ function AddTeacherComponent() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="target"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Target</FormLabel>
-                  <FormControl>
-                    <Input placeholder="target" {...field} type="number" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="debt"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Debt</FormLabel>
-                  <FormControl>
-                    <Input placeholder="debt" {...field} type="number" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="trail_lesson_price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Trail Lesson Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="trail lesson price"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="payAfter_lesson_price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Pay After Lesson Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="pay after lesson price"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="payBefore_lesson_price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Pay Before Lesson Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="pay before lesson price"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="package_after_price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Package / After Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="package after price"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="package_before_price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Package / Before Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="package before price"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/** Numeric fields */}
+            {[
+              { name: "target", label: "Target" },
+              { name: "debt", label: "Debt" },
+              { name: "trail_lesson_price", label: "Trial Lesson Price" },
+              {
+                name: "payAfter_lesson_price",
+                label: "Pay After Lesson Price",
+              },
+              {
+                name: "payBefore_lesson_price",
+                label: "Pay Before Lesson Price",
+              },
+              { name: "package_after_price", label: "Package After Price" },
+              { name: "package_before_price", label: "Package Before Price" },
+            ].map((item) => (
+              <FormField
+                key={item.name}
+                control={form.control}
+                name={item.name}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{item.label}</FormLabel>
+                    <FormControl>
+                      <Input type="number" min={0} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ))}
           </div>
           <div className="cover flex justify-center">
             <Button type="submit" className="w-full md:w-[50%]">

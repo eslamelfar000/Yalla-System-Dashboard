@@ -21,8 +21,10 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
+import { Toggle } from "@/components/ui/toggle";
+import { Check } from "lucide-react";
 
-const CoachingTableStatus = () => {
+const CoachingTableStatus = ({ action }) => {
   const columns = [
     {
       key: "session",
@@ -36,6 +38,12 @@ const CoachingTableStatus = () => {
       key: "purpose",
       label: "Purpose",
     },
+    ...[
+      action && {
+        key: "action",
+        label: "Action",
+      },
+    ],
   ];
 
   const [columnFilters, setColumnFilters] = useState([]);
@@ -79,6 +87,26 @@ const CoachingTableStatus = () => {
                 <TableCell>{item.id}</TableCell>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{item.name}</TableCell>
+                {action === "board" ? (
+                  <TableCell>
+                    <Button
+                      className="px-5 text-xs h-8 rounded-full"
+                      color="primary"
+                    >
+                      Done
+                    </Button>
+                  </TableCell>
+                ) : (
+                  <TableCell>
+                    <Toggle
+                      aria-label="Toggle italic"
+                      size="icon"
+                      className="w-6 h-6 p-1 rounded-full bg-transparent text-primary border border-solid border-primary"
+                    >
+                      <Check className="w-6 h-6" />
+                    </Toggle>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

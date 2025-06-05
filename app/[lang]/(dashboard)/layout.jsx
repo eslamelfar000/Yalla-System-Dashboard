@@ -1,13 +1,15 @@
 import DashBoardLayoutProvider from "@/provider/dashboard.layout.provider";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { getDictionary } from "@/app/dictionaries";
-const layout = async ({ children, params: { lang } }) => {
-  const session = await getServerSession(authOptions);
+import { cookies } from "next/headers";
 
-  if (!session?.user?.email) {
-    redirect("/");
+const layout = async ({ children, params: { lang } }) => {
+  // Check for custom authentication token
+  const cookieStore = cookies();
+  const authToken = cookieStore.get("auth_token");
+
+  if (!authToken?.value) {
+    redirect(`/${lang}/auth/login`);
   }
 
   const trans = await getDictionary(lang);

@@ -8,7 +8,7 @@ import TanstackProvider from "@/provider/providers.client";
 import AuthProvider from "@/provider/auth.provider";
 import "flatpickr/dist/themes/light.css";
 import DirectionProvider from "@/provider/direction.provider";
-import logo from "@/public/yallalogo.png";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -18,21 +18,23 @@ export const metadata = {
   },
   description: siteConfig.description,
   icons: {
-    icon: "/yallalogo.png", // or use a PNG like '/favicon-32x32.png'
+    icon: "/yallalogo.png",
     shortcut: "/favicon.ico",
   },
 };
 
 export default function RootLayout({ children, params: { lang } }) {
   return (
-    <html lang={lang}>
-      <AuthProvider>
-        <TanstackProvider>
-          <Providers>
-            <DirectionProvider lang={lang}>{children}</DirectionProvider>
-          </Providers>
-        </TanstackProvider>
-      </AuthProvider>
+    <html lang={lang} suppressHydrationWarning>
+      <body className={inter.className} suppressHydrationWarning>
+        <AuthProvider>
+          <TanstackProvider>
+            <Providers>
+              <DirectionProvider lang={lang}>{children}</DirectionProvider>
+            </Providers>
+          </TanstackProvider>
+        </AuthProvider>
+      </body>
     </html>
   );
 }

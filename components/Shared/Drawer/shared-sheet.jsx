@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Edit } from "lucide-react";
+import { Edit, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -19,16 +19,25 @@ import EditTeacherComponent from "@/components/Apis/Teacher/edit-teacher";
 import EditQualityComponent from "@/components/Apis/Quality/edit-quality";
 import FilterStudentsComponent from "@/components/Apis/Student/filter-students";
 import FilterArchiveComponent from "@/components/Apis/Student/filter-archive";
+import AddExpenseComponent from "@/app/[lang]/(dashboard)/(home)/dashboard/components/add-expense";
 import { Icon } from "@iconify/react";
 
-export function SharedSheet({ type, user }) {
+export function SharedSheet({ type, user, onSuccess }) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        {["add-teacher", "add-quality"].includes(type) ? (
+        {["add-teacher", "add-quality", "add-expense"].includes(type) ? (
           <Button variant="outline" size="md" className="text-[12px]">
-            <Edit className="mr-2 h-4 w-4" />
-            {type === "add-teacher" ? "Add Teacher" : "Add Quality Assurance"}
+            {type === "add-expense" ? (
+              <Icon icon="heroicons:plus" className="mr-2 h-4 w-4" />
+            ) : (
+              <Edit className="mr-2 h-4 w-4" />
+            )}
+            {type === "add-teacher"
+              ? "Add Teacher"
+              : type === "add-quality"
+              ? "Add Quality Assurance"
+              : "Add Expense"}
           </Button>
         ) : ["edit-teacher", "edit-quality"].includes(type) ? (
           <Button
@@ -62,8 +71,10 @@ export function SharedSheet({ type, user }) {
       </SheetTrigger>
       <SheetContent
         className={`w-3/4 max-w-lg md:max-w-2xl ${
-          ["filter-students","filter-archive"].includes(type) ? "md:max-w-sm" : ""
-        }`}
+          ["filter-students", "filter-archive"].includes(type)
+            ? "md:max-w-sm"
+            : ""
+        } ${type === "add-expense" ? "md:max-w-md" : ""}`}
       >
         <div className="cover">
           <SheetHeader>
@@ -73,6 +84,8 @@ export function SharedSheet({ type, user }) {
                 ? "Add Teacher"
                 : type === "add-quality"
                 ? "Add Quality Assurance"
+                : type === "add-expense"
+                ? "Add New Expense"
                 : type === "edit-teacher"
                 ? "Edit Teacher"
                 : type === "edit-quality"
@@ -90,6 +103,8 @@ export function SharedSheet({ type, user }) {
               <AddTeacherComponent />
             ) : type === "add-quality" ? (
               <AddQualityComponent />
+            ) : type === "add-expense" ? (
+              <AddExpenseComponent onSuccess={onSuccess} />
             ) : type === "edit-teacher" ? (
               <EditTeacherComponent user={user} />
             ) : type === "edit-quality" ? (

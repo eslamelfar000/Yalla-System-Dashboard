@@ -1,26 +1,19 @@
 import React from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
-import { InputGroup, InputGroupText } from "@/components/ui/input-group";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getUserData } from "@/lib/auth-utils";
 
 const MyProfileHeader = ({ profile }) => {
+  const { user } = getUserData();
+
   return (
     <>
       <div className="flex  justify-between mb-4">
         <div className="flex   gap-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={profile?.avatar.src} alt="" />
-            <AvatarFallback>{profile?.fullName.slice(0, 2)}</AvatarFallback>
+            <AvatarImage src={user?.image} alt="" />
+            <AvatarFallback>{user?.name}</AvatarFallback>
           </Avatar>
           <div className="block">
             <div className="text-sm font-medium text-default-900 ">

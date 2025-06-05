@@ -114,11 +114,14 @@ const CalendarView = ({ events, categories }) => {
   const filteredEvents = events?.filter((event) =>
     selectedCategory?.includes(event.extendedProps.calendar)
   );
+  
+  // console.log("filteredEvents", filteredEvents);
+  
 
   return (
     <>
       <div className=" grid grid-cols-12 gap-6 divide-x  divide-border">
-        <Card className="col-span-12 lg:col-span-4 2xl:col-span-3  pb-5">
+        {/* <Card className="col-span-12 lg:col-span-4 2xl:col-span-3  pb-5">
           <CardContent className="p-0 ">
             <CardHeader className="border-none mb-2 pt-5">
               <Button onClick={handleDateClick}>
@@ -175,9 +178,9 @@ const CalendarView = ({ events, categories }) => {
               ))}
             </ul>
           </CardContent>
-        </Card>
+        </Card> */}
 
-        <Card className="col-span-12 lg:col-span-8 2xl:col-span-9  pt-5">
+        <Card className="col-span-12  pt-5">
           <CardContent className="dash-tail-calendar">
             <FullCalendar
               plugins={[
@@ -186,15 +189,26 @@ const CalendarView = ({ events, categories }) => {
                 interactionPlugin,
                 listPlugin,
               ]}
+              viewDidMount={() => {
+                const slots = document.querySelectorAll(
+                  ".fc .fc-timegrid-slot"
+                );
+                slots.forEach((slot) => {
+                  slot.style.height = "3.5em";
+                });
+              }}
               headerToolbar={{
                 left: "prev,next today",
                 center: "title",
                 right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
               }}
+              allDaySlot={false}
               events={filteredEvents}
+              slotDuration="01:00:00"
+              slotLabelFormat={{ hour: "2-digit", minute: "2-digit" }}
               editable={true}
               rerenderDelay={10}
-              eventDurationEditable={false}
+              eventDurationEditable={true}
               selectable={true}
               selectMirror={true}
               droppable={true}
@@ -203,7 +217,14 @@ const CalendarView = ({ events, categories }) => {
               eventClassNames={handleClassName}
               dateClick={handleDateClick}
               eventClick={handleEventClick}
-              initialView="dayGridMonth"
+              initialView="timeGridWeek"
+              views={{
+                timeGridWeek: {
+                  type: "timeGrid",
+                  duration: { days: 7 },
+                  buttonText: "Week",
+                },
+              }}
             />
           </CardContent>
         </Card>

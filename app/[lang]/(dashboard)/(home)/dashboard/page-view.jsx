@@ -101,14 +101,20 @@ const DashboardPageView = ({ trans }) => {
               <TopContributer />
             </div>
             <div className="col-span-6">
-              <Card title="Simple" className="h-full rounded-lg overflow-hidden">
-                <div className="flex flex-wrap items-center gap-4 p-5 bg-default-200">
+              <Card
+                title="Simple"
+                className="h-full rounded-lg overflow-hidden"
+              >
+                <div className="flex justify-between items-center gap-4 p-5">
                   <div className="">
                     <h3 className="text-xl font-medium text-default-700">
                       Expenses
                     </h3>
                   </div>
-                  <div className="flex-none">{/* <SharedSheet /> */}</div>
+                  <SharedSheet
+                    type="add-expense"
+                    onSuccess={() => window.location.reload()}
+                  />
                 </div>
                 <CardContent className="h-[510px] overflow-y-auto">
                   <NotesTable />

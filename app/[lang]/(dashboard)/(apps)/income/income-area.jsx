@@ -42,6 +42,24 @@ const IncomeArea = () => {
       icon: <Cup className="h-4 w-4" />,
       color: "destructive",
     },
+    {
+      id: 3,
+      name: "Raise",
+      count: "46s",
+      rate: "22",
+      isUp: true,
+      icon: <Increase className="h-4 w-4" />,
+      color: "warning",
+    },
+    {
+      id: 4,
+      name: "Total Outcome",
+      count: "46s",
+      rate: "30",
+      isUp: false,
+      icon: <Cup className="h-4 w-4" />,
+      color: "destructive",
+    },
   ];
   return (
     <>

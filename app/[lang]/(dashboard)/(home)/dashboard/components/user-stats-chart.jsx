@@ -6,8 +6,8 @@ import { useThemeStore } from "@/store";
 import { useTheme } from "next-themes";
 import { themes } from "@/config/thems";
 
-const UserStats = ({ height = 350 }) => {
-  const { theme: config, setTheme: setConfig,isRtl } = useThemeStore();
+const UserStats = ({ height = 350, income }) => {
+  const { theme: config, setTheme: setConfig, isRtl } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
   const series = [1200, 1400, 600];
@@ -31,7 +31,7 @@ const UserStats = ({ height = 350 }) => {
       theme: mode === "dark" ? "dark" : "light",
     },
     stroke: {
-      width: 0
+      width: 0,
     },
     plotOptions: {
       pie: {
@@ -42,30 +42,33 @@ const UserStats = ({ height = 350 }) => {
               show: true,
               fontSize: "14px",
               fontWeight: 600,
-              colors: `hsl(${theme?.cssVars[
+              colors: `hsl(${
+                theme?.cssVars[
                   mode === "dark" || mode === "system" ? "dark" : "light"
                 ].chartLabel
-                })`,
+              })`,
             },
             value: {
               show: true,
               label: "Total",
               fontSize: "14px",
               fontWeight: 600,
-              color: `hsl(${theme?.cssVars[
+              color: `hsl(${
+                theme?.cssVars[
                   mode === "dark" || mode === "system" ? "dark" : "light"
                 ].chartLabel
-                })`,
+              })`,
             },
             total: {
               show: true,
               label: "Total",
               fontSize: "16px",
               fontWeight: 600,
-              color: `hsl(${theme?.cssVars[
+              color: `hsl(${
+                theme?.cssVars[
                   mode === "dark" || mode === "system" ? "dark" : "light"
                 ].chartLabel
-                })`,
+              })`,
             },
           },
         },
@@ -74,10 +77,11 @@ const UserStats = ({ height = 350 }) => {
     legend: {
       position: "bottom",
       labels: {
-        colors: `hsl(${theme?.cssVars[
+        colors: `hsl(${
+          theme?.cssVars[
             mode === "dark" || mode === "system" ? "dark" : "light"
           ].chartLabel
-          })`,
+        })`,
       },
       itemMargin: {
         horizontal: 10,
@@ -87,7 +91,7 @@ const UserStats = ({ height = 350 }) => {
         width: 10,
         height: 10,
         radius: 10,
-        offsetX: isRtl ? 5 : -5
+        offsetX: isRtl ? 5 : -5,
       },
     },
     padding: {
@@ -103,7 +107,7 @@ const UserStats = ({ height = 350 }) => {
       series={series}
       type="donut"
       height={height}
-      width={"100%"}
+      width={ "100%"}
     />
   );
 };

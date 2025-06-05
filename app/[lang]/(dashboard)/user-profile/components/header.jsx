@@ -11,8 +11,40 @@ import User from "@/public/images/avatar/user.png";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
+import { useUserData } from "../profile-layout";
+
 const Header = () => {
   const location = usePathname();
+  const { userData } = useUserData();
+
+  // Function to check if image URL is valid
+  const isValidImageUrl = (url) => {
+    if (!url || typeof url !== "string") return false;
+
+    // Check if it's a valid URL and has an image file extension
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname.toLowerCase();
+
+      // Check if it has a proper image extension or is not just the hostname
+      return (
+        pathname !== "/" &&
+        (pathname.includes(".jpg") ||
+          pathname.includes(".jpeg") ||
+          pathname.includes(".png") ||
+          pathname.includes(".gif") ||
+          pathname.includes(".webp") ||
+          pathname.includes("/storage/") ||
+          pathname.includes("/uploads/") ||
+          pathname.includes("/images/"))
+      );
+    } catch {
+      return false;
+    }
+  };
+
+  const hasValidImage = isValidImageUrl(userData?.image);
+
   return (
     <Fragment>
       <Breadcrumbs>
@@ -29,18 +61,29 @@ const Header = () => {
           >
             <div className="flex items-center gap-4 absolute ltr:left-10 rtl:right-10 -bottom-2 lg:-bottom-8">
               <div>
-                <Image
-                  src={User}
-                  alt="user"
-                  className="h-20 w-20 lg:w-32 lg:h-32 rounded-full"
-                />
+                {hasValidImage ? (
+                  <Image
+                    src={userData.image}
+                    alt={userData?.name ?? "User"}
+                    width={128}
+                    height={128}
+                    className="h-20 w-20 lg:w-32 lg:h-32 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="h-20 w-20 lg:w-32 lg:h-32 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Icon
+                      icon="heroicons:user"
+                      className="w-10 h-10 lg:w-16 lg:h-16 text-primary"
+                    />
+                  </div>
+                )}
               </div>
               <div>
                 <div className="text-xl lg:text-2xl font-semibold text-primary-foreground mb-1">
-                  Jennyfer Franking
+                  {userData?.name || "User Name"}
                 </div>
                 <div className="text-xs lg:text-sm font-medium text-default-100 dark:text-default-900 pb-1.5">
-                  Data Analytics
+                  {userData?.role || "Student"}
                 </div>
               </div>
             </div>
@@ -76,26 +119,22 @@ const Header = () => {
                 title: "Settings",
                 link: "/user-profile/settings",
               },
-            ].map(
-              (item, index) => (
-                // console.log("item", item.link),
-                (
-                  <Link
-                    key={`user-profile-link-${index}`}
-                    href={item.link}
-                    className={cn(
-                      "text-sm font-semibold text-default-500 hover:text-primary relative lg:before:absolute before:-bottom-4 before:left-0 before:w-full lg:before:h-[1px] before:bg-transparent",
-                      {
-                        "text-primary lg:before:bg-primary":
-                          location.slice(3) === item.link,
-                      }
-                    )}
-                  >
-                    {item.title}
-                  </Link>
-                )
-              )
-            )}
+            ].map((item, index) => (
+              // console.log("item", item.link),
+              <Link
+                key={`user-profile-link-${index}`}
+                href={item.link}
+                className={cn(
+                  "text-sm font-semibold text-default-500 hover:text-primary relative lg:before:absolute before:-bottom-4 before:left-0 before:w-full lg:before:h-[1px] before:bg-transparent",
+                  {
+                    "text-primary lg:before:bg-primary":
+                      location.slice(3) === item.link,
+                  }
+                )}
+              >
+                {item.title}
+              </Link>
+            ))}
           </div>
         </CardContent>
       </Card>

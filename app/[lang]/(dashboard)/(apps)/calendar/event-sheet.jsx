@@ -48,6 +48,7 @@ const EventSheet = ({ open, onClose, categories, event, selectedDate }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [eventIdToDelete, setEventIdToDelete] = useState(null);
 
+  
   const {
     register,
     control,
