@@ -8,10 +8,12 @@ const layout = async ({ children, params: { lang } }) => {
   const cookieStore = cookies();
   const authToken = cookieStore.get("auth_token");
 
+  // If no token, redirect to login
   if (!authToken?.value) {
     redirect(`/${lang}/auth/login`);
   }
 
+  // Get dictionary for translations
   const trans = await getDictionary(lang);
 
   return (

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { cn, isLocationMatch, getDynamicPath } from "@/lib/utils";
 import { useSidebar, useThemeStore } from "@/store";
 import SidebarLogo from "../common/logo";
-import { menusConfig } from "@/config/menus";
+import { menusConfig, getRoleBasedMenu } from "@/config/menus";
 import MenuLabel from "../common/menu-label";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,11 +12,17 @@ import SingleMenuItem from "./single-menu-item";
 import SubMenuHandler from "./sub-menu-handler";
 import NestedSubMenu from "../common/nested-menus";
 import AddBlock from "../common/add-block";
+import { useAuth } from "@/hooks/use-auth";
+
 const ClassicSidebar = ({ trans }) => {
   const { sidebarBg } = useSidebar();
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const [activeMultiMenu, setMultiMenu] = useState(null);
-  const menus = menusConfig?.sidebarNav?.classic || [];
+  const { user } = useAuth();
+
+  // Get role-based menu items
+  const menus = getRoleBasedMenu(user?.role, "classic");
+
   const { collapsed, setCollapsed } = useSidebar();
   const { isRtl } = useThemeStore();
   const [hovered, setHovered] = useState(false);

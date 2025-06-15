@@ -14,15 +14,48 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { Slider } from "@/components/ui/slider";
+import { useUpdateUser } from "@/hooks/useUsers";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import LoadingButton from "@/components/Shared/loading-button";
+import { useAxios } from "@/config/axios.config";
 
-function EditQualityComponent({user, info}) {
-  const [show, setShow] = useState(false);
-  const strongPattern =
-    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/;
+function EditQualityComponent({ user, info }) {
+  // API hook for updating quality user
+  const { mutate: updateQuality, isPending: isUpdating } = useUpdateUser(
+    user?.id,
+    "quality"
+  );
+
+  const queryClient = useQueryClient();
+  const axiosInstance = useAxios();
+  const [isNew, setIsNew] = useState(user?.is_new || false);
+
+  // Handle is_new request
+  const handleIsNewRequest = async () => {
+    try {
+      await axiosInstance.post(
+        `dashboard/users/${user?.user_id}/change-is-new`
+      );
+      setIsNew(!isNew); // Only update state after successful request
+      queryClient.invalidateQueries(["users", "quality"]);
+      toast.success("Status updated successfully");
+    } catch (error) {
+      console.error("Is new request error:", error);
+      toast.error(error?.response?.data?.msg || "Failed to update status");
+    }
+  };
+
   const formSchema = z.object({
     name: z.string().min(5, {
       message: "Name must be at least 2 characters.",
@@ -38,31 +71,17 @@ function EditQualityComponent({user, info}) {
       .regex(/^\d+$/, {
         message: "Phone number must contain only digits.",
       }),
-    username: z
-      .string()
-      .min(3, { message: "Username must be at least 3 characters." })
-      .regex(strongPattern, {
-        message:
-          "Username must include an uppercase letter, a number, and a special character.",
-      }),
-    password: z
-      .string()
-      .min(6, { message: "Password must be at least 6 characters." })
-      .regex(strongPattern, {
-        message:
-          "Password must include an uppercase letter, a number, and a special character.",
-      }),
-    target: z.coerce.number().min(1).max(100, {
-      message: "Target must be between 1 and 100.",
-    }),
     debt: z.coerce.number().min(0, {
       message: "Debt must be a positive number.",
     }),
     review_lesson_price: z.coerce.number().min(1, {
-      message: "Trail lesson price must be a positive number.",
+      message: "Review lesson price must be a positive number.",
     }),
-    subscriber_lesson_price: z.coerce.number().min(1, {
-      message: "Subscriber lesson price must be a positive number.",
+    coaching_lesson_price: z.coerce.number().min(1, {
+      message: "Coaching lesson price must be a positive number.",
+    }),
+    status: z.enum(["active", "no_active"], {
+      message: "Please select a status.",
     }),
   });
 
@@ -72,42 +91,35 @@ function EditQualityComponent({user, info}) {
       name: "",
       email: "",
       phone: "",
-      username: "",
-      password: "",
-      target: 0,
       debt: 0,
       review_lesson_price: "",
       coaching_lesson_price: "",
+      status: "active",
     },
   });
 
   React.useEffect(() => {
     const dummyData = {
-      name: user?.name,
-      email: user?.email,
-      phone: "01234567890",
-      username: "John123!",
-      password: "Secure1@",
-      target: 75,
-      debt: 250,
-      review_lesson_price: 50,
-      coaching_lesson_price: 75,
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      debt: user?.debt || 0,
+      review_lesson_price: user?.review_lesson_price || 0,
+      coaching_lesson_price: user?.coaching_lesson_price || 0,
+      status: user?.status || "active",
     };
 
     form.reset(dummyData);
-  }, []);
+  }, [user]);
 
   const onSubmit = async (data) => {
-    console.log(data);
-    // Perform the action based on the type
-    form.reset();
-    toast("Event has been created", {
-      description: `${JSON.stringify(data)}`,
-      action: {
-        label: "Undo",
-        onClick: () => console.log("Undo"),
-      },
-    });
+    // Add role to the data
+    const qualityData = {
+      ...data,
+      role: "quality",
+    };
+
+    updateQuality(qualityData);
   };
 
   return (
@@ -173,63 +185,31 @@ function EditQualityComponent({user, info}) {
             />
             <FormField
               control={form.control}
-              name="username"
+              name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="username"
-                      {...field}
-                      readOnly={info}
-                      className={info ? "cursor-pointer select-none" : ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem className="relative">
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="password"
-                      type={`${show ? "text " : "password"}`}
-                      {...field}
-                      readOnly={info}
-                      className={info ? "cursor-pointer select-none" : ""}
-                    />
-                  </FormControl>
-                  {show ? (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className=" h-7 w-7 absolute right-1 top-6"
-                      color="primary"
-                      title="Show"
-                      type="button"
-                      onClick={() => setShow(!show)}
-                    >
-                      <Icon icon="heroicons:eye-slash" className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className=" h-7 w-7 absolute right-1 top-6"
-                      color="primary"
-                      title="Show"
-                      type="button"
-                      onClick={() => setShow(!show)}
-                    >
-                      <Icon icon="heroicons:eye" className="h-4 w-4" />
-                    </Button>
-                  )}
-
+                  <FormLabel>Status</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    disabled={info}
+                  >
+                    <FormControl>
+                      <SelectTrigger
+                        className={
+                          field.value === "no_active"
+                            ? "text-red-700"
+                            : "text-green-700"
+                        }
+                      >
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="z-[999]">
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="no_active">Not Active</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -293,9 +273,17 @@ function EditQualityComponent({user, info}) {
             />
           </div>
           {!info && (
-            <div className="cover flex justify-center">
-              <Button type="submit" className="w-full md:w-[50%]">
-                Save Changes
+            <div className="flex justify-center gap-4">
+              <Button
+                type="submit"
+                className="w-full md:w-[50%]"
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  <LoadingButton loading={isUpdating}>Saving...</LoadingButton>
+                ) : (
+                  "Submit"
+                )}
               </Button>
             </div>
           )}

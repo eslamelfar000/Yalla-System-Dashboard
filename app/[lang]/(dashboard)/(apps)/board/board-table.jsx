@@ -15,27 +15,26 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { users } from "../../(tables)/tailwindui-table/data";
-import {data} from "../../(tables)/data-table/data";
+import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
-import { cn } from "@/lib/utils"
-import { Slider } from "@/components/ui/slider"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils";
+import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 
 const BoradTableStatus = () => {
   const [percent, setPercent] = useState(50);
   console.log(percent);
-  
 
   const columns = [
     {
@@ -79,9 +78,6 @@ const BoradTableStatus = () => {
       rowSelection,
     },
   });
-
-
-
 
   return (
     <>

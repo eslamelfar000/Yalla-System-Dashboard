@@ -18,11 +18,40 @@ import { useRouter } from "next/navigation";
 
 const ProfileInfo = () => {
   const [userData, setUserData] = React.useState(null);
+
   const router = useRouter();
-  React.useEffect(() => {
-    // Get user data from localStorage
+
+  // Function to update user data from localStorage
+  const updateUserDataFromStorage = () => {
     const user = getUserData();
     setUserData(user);
+  };
+
+  React.useEffect(() => {
+    // Get initial user data from localStorage
+    updateUserDataFromStorage();
+
+    // Listen for storage changes (when updated from other tabs/windows)
+    const handleStorageChange = (e) => {
+      if (e.key === "user_data") {
+        updateUserDataFromStorage();
+      }
+    };
+
+    // Listen for custom profile update events
+    const handleProfileUpdate = () => {
+      updateUserDataFromStorage();
+    };
+
+    // Add event listeners
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+
+    // Cleanup function
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
   }, []);
 
   // Logout mutation
@@ -64,6 +93,7 @@ const ProfileInfo = () => {
           pathname.includes(".png") ||
           pathname.includes(".gif") ||
           pathname.includes(".webp") ||
+          pathname.includes(".bmp") ||
           pathname.includes("/storage/") ||
           pathname.includes("/uploads/") ||
           pathname.includes("/images/"))
@@ -87,10 +117,10 @@ const ProfileInfo = () => {
           {hasValidImage ? (
             <Image
               src={userData.image}
-              alt={userData?.name ?? ""}
+              alt={userData?.image || ""}
               width={36}
               height={36}
-              className="rounded-full"
+              className="w-[40px] h-[40px] rounded-full border-2 border-primary"
             />
           ) : (
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
@@ -103,11 +133,11 @@ const ProfileInfo = () => {
         <DropdownMenuLabel className="flex gap-2 items-center mb-1 p-3">
           {hasValidImage ? (
             <Image
-              src={userData}
-              alt={userData?.name ?? ""}
+              src={userData.image}
+              alt={userData.image || ""}
               width={36}
               height={36}
-              className="rounded-full"
+              className="w-[40px] h-[40px] rounded-full border-2 border-primary"
             />
           ) : (
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
@@ -116,10 +146,10 @@ const ProfileInfo = () => {
           )}
           <div>
             <div className="text-sm font-medium text-default-800 capitalize ">
-              {userData?.name ?? "User"}
+              {userData?.name || "User"}
             </div>
-            <div className="text-xs text-default-600">
-              {userData?.email ?? ""}
+            <div className="text-[10px] text-default-600">
+              {userData?.email || ""}
             </div>
           </div>
         </DropdownMenuLabel>
@@ -133,7 +163,7 @@ const ProfileInfo = () => {
             {
               name: "Settings",
               icon: "heroicons:cog-6-tooth",
-              href: "/dashboard",
+              href: "/user-profile/settings",
             },
           ].map((item, index) => (
             <Link

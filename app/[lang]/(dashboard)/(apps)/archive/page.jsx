@@ -3,38 +3,42 @@ import React, { useState } from "react";
 import ArchiveDataTable from "./archive-table";
 import RoleArchive from "./page-view";
 import { Button } from "@/components/ui/button";
+import { getUserRoleFromCookies } from "@/lib/auth-utils";
 
 function page() {
-  const [role, setRole] = useState("admin");
+  const userRole = getUserRoleFromCookies();
+  const [role, setRole] = useState(userRole);
+
   return (
     <div>
-
-
-    <div className="cover">
-      <ul className="flex items-center gap-2 mb-5">
-        <li>
-          <Button
-          disabled={role === "admin"}
-            onClick={() => setRole("admin")}>
-            Admin
+      {/* <div className="cover">
+        <ul className="flex items-center gap-2 mb-5">
+          <li>
+            <Button
+              disabled={role === "admin"}
+              onClick={() => setRole("admin")}
+            >
+              Admin
             </Button>
-        </li>
-        <li>
-          <Button
-          disabled={role === "teacher"}
-            onClick={() => setRole("teacher")}>
-            Teacher
+          </li>
+          <li>
+            <Button
+              disabled={role === "teacher"}
+              onClick={() => setRole("teacher")}
+            >
+              Teacher
             </Button>
-        </li>
-        <li>
-          <Button
-          disabled={role === "quality"}
-            onClick={() => setRole("quality")}>
-            Quality
+          </li>
+          <li>
+            <Button
+              disabled={role === "quality"}
+              onClick={() => setRole("quality")}
+            >
+              Quality
             </Button>
-        </li>
-      </ul>
-    </div>
+          </li>
+        </ul>
+      </div> */}
 
       {role === "teacher" ? (
         <div className="cover">

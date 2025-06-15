@@ -20,9 +20,7 @@ function page() {
               <SharedSheet type="add-teacher" />
             </div>
           </div>
-          <Card title="Simple">
-            <UserTableStatus type="teacher" />
-          </Card>
+          <UserTableStatus type="teacher" />
         </div>
 
         {/* Quality Assurance */}
@@ -37,9 +35,7 @@ function page() {
               <SharedSheet type="add-quality" />
             </div>
           </div>
-          <Card title="Simple">
-            <UserTableStatus type="quality" />
-          </Card>
+          <UserTableStatus type="quality" />
         </div>
       </div>
     </>

@@ -52,11 +52,11 @@ const ThemeCustomize = ({
         </SheetHeader>
         <ScrollArea className="h-[calc(100%-50px)] -mx-6 px-6">
           <div className=" space-y-8 mt-3">
-            <SelectLayout />
+            {/* <SelectLayout /> */}
             <SelectTheme />
             {/* <RtlSwitcher /> */}
             <ThemeChange />
-            <SidebarChange />
+            {/* <SidebarChange /> */}
             <SidebarImage />
             {/* <RadiusInit /> */}
             {/* <HeaderStyle /> */}

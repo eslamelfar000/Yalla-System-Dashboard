@@ -1,23 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Icon } from "@iconify/react";
 
-function FilterStudentsComponent() {
+function FilterStudentsComponent({
+  onApply,
+  onReset: parentReset,
+  initialFilters,
+}) {
   const types = [
-    { id: 1, name: "Trail Lesson" },
-    { id: 2, name: "Pay After Lesson" },
-    { id: 3, name: "Pay Before Lesson" },
+    { id: "Trail Lesson", name: "Trail Lesson" },
+    { id: "Pay After Lesson", name: "Pay After Lesson" },
+    { id: "Pay Before Lesson", name: "Pay Before Lesson" },
   ];
 
   const sessionCount = 8;
 
-  const [selectedTypes, setSelectedTypes] = useState([]);
-  const [selectedSessions, setSelectedSessions] = useState([]);
+  const [selectedTypes, setSelectedTypes] = useState(
+    initialFilters?.types || []
+  );
+  const [selectedSessions, setSelectedSessions] = useState(
+    initialFilters?.sessions || []
+  );
 
-  const toggleType = (id) => {
+  // Update local state when initialFilters change
+  useEffect(() => {
+    if (initialFilters) {
+      setSelectedTypes(initialFilters.types || []);
+      setSelectedSessions(initialFilters.sessions || []);
+    }
+  }, [initialFilters]);
+
+  const toggleType = (typeName) => {
     setSelectedTypes((prev) =>
-      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]
+      prev.includes(typeName)
+        ? prev.filter((v) => v !== typeName)
+        : [...prev, typeName]
     );
   };
 
@@ -30,6 +48,18 @@ function FilterStudentsComponent() {
   const handleReset = () => {
     setSelectedTypes([]);
     setSelectedSessions([]);
+    if (parentReset) {
+      parentReset();
+    }
+  };
+
+  const handleApply = () => {
+    if (onApply) {
+      onApply({
+        types: selectedTypes,
+        sessions: selectedSessions,
+      });
+    }
   };
 
   return (
@@ -42,7 +72,9 @@ function FilterStudentsComponent() {
             </Button>
           </li>
           <li>
-            <Button variant="soft">Apply</Button>
+            <Button variant="soft" onClick={handleApply}>
+              Apply
+            </Button>
           </li>
         </ul>
       </div>
@@ -104,7 +136,6 @@ function FilterStudentsComponent() {
           </ul>
         </div>
       </div>
-
     </div>
   );
 }

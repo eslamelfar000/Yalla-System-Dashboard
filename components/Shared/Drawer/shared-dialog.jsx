@@ -10,10 +10,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Icon } from "@iconify/react";
+import LoadingButton from "../loading-button";
 
-export function SharedAlertDialog({ type, info }) {
-  console.log("info", info);
-
+export function SharedAlertDialog({ type, info, onConfirm, isDeleting }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -89,13 +88,18 @@ export function SharedAlertDialog({ type, info }) {
             "accept-after-pay-request",
             "accept-patAfter-reservation",
           ].includes(type) ? (
-            <Button type="submit" color="success">
+            <Button type="submit" color="success" onClick={onConfirm}>
               Accept
             </Button>
           ) : (
-            <Button type="submit" color="destructive">
-              Delete
-            </Button>
+            <LoadingButton
+              loading={isDeleting}
+              onClick={onConfirm}
+              variant="default"
+              color="destructive"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </LoadingButton>
           )}
         </DialogFooter>
       </DialogContent>

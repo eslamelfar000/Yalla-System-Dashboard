@@ -38,12 +38,10 @@ const CoachingTableStatus = ({ action }) => {
       key: "purpose",
       label: "Purpose",
     },
-    ...[
-      action && {
-        key: "action",
-        label: "Action",
-      },
-    ],
+    {
+      key: "action",
+      label: "Action",
+    },
   ];
 
   const [columnFilters, setColumnFilters] = useState([]);
@@ -76,7 +74,7 @@ const CoachingTableStatus = ({ action }) => {
               {columns.map((column) => (
                 <TableHead key={column.key} className="text-right!">
                   {" "}
-                  {column.label}
+                  {column?.label}
                 </TableHead>
               ))}
             </TableRow>

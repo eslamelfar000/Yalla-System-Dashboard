@@ -10,12 +10,24 @@ import { Icon } from "@iconify/react";
 import User from "@/public/images/avatar/user.png";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import { useUserData } from "../profile-layout";
 
 const Header = () => {
   const location = usePathname();
-  const { userData } = useUserData();
+  const { userData, loadUserData } = useUserData();
+
+  // Listen for profile updates
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      loadUserData(); // Refresh user data when profile is updated
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+    return () => {
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
+  }, [loadUserData]);
 
   // Function to check if image URL is valid
   const isValidImageUrl = (url) => {
@@ -67,13 +79,13 @@ const Header = () => {
                     alt={userData?.name ?? "User"}
                     width={128}
                     height={128}
-                    className="h-20 w-20 lg:w-32 lg:h-32 rounded-full object-cover"
+                    className="h-[120px] w-[120px] lg:w-32 lg:h-32 rounded-full object-cover border-4 border-primary"
                   />
                 ) : (
-                  <div className="h-20 w-20 lg:w-32 lg:h-32 rounded-full bg-primary/10 flex items-center justify-center">
+                  <div className="h-20 w-20 lg:w-32 lg:h-32 rounded-full bg-primary text-white flex items-center justify-center border-4 border-white">
                     <Icon
                       icon="heroicons:user"
-                      className="w-10 h-10 lg:w-16 lg:h-16 text-primary"
+                      className="w-10 h-10 lg:w-16 lg:h-16"
                     />
                   </div>
                 )}

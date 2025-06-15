@@ -8,6 +8,7 @@ import TanstackProvider from "@/provider/providers.client";
 import AuthProvider from "@/provider/auth.provider";
 import "flatpickr/dist/themes/light.css";
 import DirectionProvider from "@/provider/direction.provider";
+import { AuthProvider as CustomAuth } from "@/hooks/use-auth";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,11 +29,13 @@ export default function RootLayout({ children, params: { lang } }) {
     <html lang={lang} suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
         <AuthProvider>
-          <TanstackProvider>
-            <Providers>
-              <DirectionProvider lang={lang}>{children}</DirectionProvider>
-            </Providers>
-          </TanstackProvider>
+          <CustomAuth>
+            <TanstackProvider>
+              <Providers>
+                <DirectionProvider lang={lang}>{children}</DirectionProvider>
+              </Providers>
+            </TanstackProvider>
+          </CustomAuth>
         </AuthProvider>
       </body>
     </html>

@@ -36,6 +36,15 @@ const UserDataProvider = ({ children }) => {
 
   const updateUserData = (newUserData) => {
     setUserDataState(newUserData);
+
+    // Dispatch custom event to notify other components (like header) about profile update
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("profileUpdated", {
+          detail: newUserData,
+        })
+      );
+    }
   };
 
   const value = {

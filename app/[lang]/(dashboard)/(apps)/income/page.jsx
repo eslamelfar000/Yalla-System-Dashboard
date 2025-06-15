@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import IncomeChart from "./IncomeChart/income-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import UserStats from "../../(home)/dashboard/components/user-stats-chart";
+import { getUserRoleFromCookies } from "@/lib/auth-utils";
 
 function page() {
-  const [role, setRole] = useState("admin");
+  const userRole = getUserRoleFromCookies();
+  const [role, setRole] = useState(userRole);
   return (
     <div className="space-y-6">
-      <ul className="flex items-center space-x-4 mb-4">
+      {/* <ul className="flex items-center space-x-4 mb-4">
         <li>
           <Button
             onClick={() => {
@@ -41,7 +43,7 @@ function page() {
             Quality
           </Button>
         </li>
-      </ul>
+      </ul> */}
 
       {role === "admin" ? (
         <>

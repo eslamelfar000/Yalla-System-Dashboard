@@ -17,14 +17,16 @@ import { useState } from "react";
 import NotesTable from "./components/notes-table";
 import { SharedSheet } from "../../../../../components/Shared/Drawer/shared-sheet";
 import { Button } from "@/components/ui/button";
+import { getUserRoleFromCookies } from "@/lib/auth-utils";
 
 const DashboardPageView = ({ trans }) => {
-  const [role, setRole] = useState("admin");
+  const userRole = getUserRoleFromCookies();
+  const [role, setRole] = useState(userRole);
 
   return (
     <>
       {/* Role Switch Buttons */}
-      <ul className="flex items-center justify-center gap-4 my-6">
+      {/* <ul className="flex items-center justify-center gap-4 my-6">
         <li>
           <Button onClick={() => setRole("admin")}>Admin</Button>
         </li>
@@ -34,7 +36,7 @@ const DashboardPageView = ({ trans }) => {
         <li>
           <Button onClick={() => setRole("quality")}>Quality</Button>
         </li>
-      </ul>
+      </ul> */}
 
       {/* Admin Dashboard */}
       {role === "admin" && (

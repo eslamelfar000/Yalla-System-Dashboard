@@ -32,7 +32,7 @@ function page() {
         </div>
       </div>
 
-        <LessonBoardTable />
+      <LessonBoardTable />
     </div>
   );
 }

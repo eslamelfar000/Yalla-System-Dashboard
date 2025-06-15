@@ -1,4 +1,9 @@
 "use client";
+import { useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { useAuth } from "@/hooks/use-auth";
+import { getDefaultRouteForRole } from "@/lib/auth-utils";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { Icon } from "@iconify/react";
 import background from "@/public/images/auth/line.png";
@@ -8,8 +13,46 @@ import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import LogInForm from "@/components/auth/login-form";
 
-const LoginPage = () => {
+const HomePage = () => {
+  const { isAuthenticated, loading, user } = useAuth();
+  const router = useRouter();
+  const params = useParams();
+  const lang = params?.lang || "en";
   const [openVideo, setOpenVideo] = useState(false);
+
+  useEffect(() => {
+    if (!loading) {
+      if (isAuthenticated && user) {
+        // Redirect authenticated users to their appropriate dashboard
+        const defaultRoute = getDefaultRouteForRole(user.role);
+        router.push(`/${lang}${defaultRoute}`);
+      }
+    }
+  }, [isAuthenticated, loading, user, router, lang]);
+
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-default-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If authenticated, show loading while redirecting
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-default-600">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <>
       <div className="min-h-screen bg-background  flex items-center  overflow-hidden w-full">
@@ -84,4 +127,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default HomePage;

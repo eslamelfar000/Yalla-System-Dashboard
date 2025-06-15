@@ -1,12 +1,5 @@
 "use client";
 import * as React from "react";
-
-import {
-  ArrowUpDown,
-  ChevronDown,
-  EyeIcon,
-  MoreHorizontal,
-} from "lucide-react";
 import {
   flexRender,
   getCoreRowModel,
@@ -15,14 +8,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -33,14 +18,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SharedSheet } from "../../../../../components/Shared/Drawer/shared-sheet";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
-import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { useStudents } from "@/hooks/useUsers";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect } from "react";
+import Pagination from "@/components/Shared/Pagination/Pagination";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 const columns = [
   {
@@ -50,11 +36,11 @@ const columns = [
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <Avatar className=" rounded-full">
-            <AvatarImage src={row?.original?.user.avatar} />
-            <AvatarFallback>AB</AvatarFallback>
+            <AvatarImage src={row?.original?.image || ""} />
+            <AvatarFallback>{row?.original?.name?.charAt(0)}</AvatarFallback>
           </Avatar>
           <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+            {row?.original?.name || "N/A"}
           </span>
         </div>
       </div>
@@ -80,7 +66,7 @@ const columns = [
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+            {row?.original?.sessions_count}
           </span>
         </div>
       </div>
@@ -93,7 +79,7 @@ const columns = [
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+            {row?.original?.lesson_type || "N/A"}
           </span>
         </div>
       </div>
@@ -110,9 +96,20 @@ const columns = [
           </Button> */}
           <div className="cover w-full">
             <div className="head text-gray-600">
-              <h2 className="text-sm">2 / 5</h2>
+              <h2 className="text-sm">
+                {row?.original?.sessions_count_done} /{" "}
+                {row?.original?.sessions_count}
+              </h2>
             </div>
-            <Progress value="50" color="primary" isStripe isAnimate />
+            <Progress
+              value={
+                row?.original?.sessions_count -
+                row?.original?.sessions_count_done
+              }
+              color="primary"
+              isStripe
+              isAnimate
+            />
           </div>
         </div>
       </div>
@@ -121,13 +118,70 @@ const columns = [
 ];
 
 export function StudentsDataTable() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Get current page from URL
+  const pageFromUrl = searchParams.get("page");
+  const initialPage = pageFromUrl ? parseInt(pageFromUrl) : 1;
+
+  // State for search and filters
+  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState({
+    types: [],
+    sessions: [],
+  });
+  const [currentPage, setCurrentPage] = useState(initialPage);
+
+  // Update URL when page changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", currentPage.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  }, [currentPage, pathname, router, searchParams]);
+
+  // Fetch students with filters/search
+  const { data, isLoading, isError, error, refetch } = useStudents(
+    {
+      search,
+      ...filters,
+    },
+    currentPage
+  );
+
+  // Handle filter apply
+  const handleFilterApply = (newFilters) => {
+    setFilters(newFilters);
+  };
+
+  // Handle filter reset
+  const handleFilterReset = () => {
+    setFilters({
+      types: [],
+      sessions: [],
+    });
+  };
+
+  // Handle search change
+  const handleSearchChange = (value) => {
+    setSearch(value);
+  };
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  // Table state
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [rowSelection, setRowSelection] = React.useState({});
 
+  // Table instance
   const table = useReactTable({
-    data,
+    data: data?.data?.data || [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -149,51 +203,65 @@ export function StudentsDataTable() {
     <>
       <div className="flex items-center flex-wrap gap-2 mb-5">
         <Input
-          placeholder="Filter emails..."
-          value={table.getColumn("email")?.getFilterValue() || ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
+          placeholder="Search students..."
+          value={search}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="max-w-sm min-w-[200px] h-10"
         />
-        <Select className="w-[280px]">
-          <SelectTrigger className="w-[200px]">
-            <SelectValue
-              placeholder="Select Teacher"
-              className="whitespace-nowrap"
-            />
-          </SelectTrigger>
-          <SelectContent className="">
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="teacher">Teacher</SelectItem>
-            <SelectItem value="quality">Quality Assurance</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <SharedSheet type={`filter-students`} />
+        <SharedSheet
+          type="filter-students"
+          onSuccess={handleFilterApply}
+          onReset={handleFilterReset}
+          initialFilters={filters}
+        />
       </div>
       <Card title="Simple">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell className="h-8 text-center">
+                  <Skeleton className="w-full h-8" />
+                </TableCell>
+                <TableCell className="h-8 text-center">
+                  <Skeleton className="w-full h-8" />
+                </TableCell>
+                <TableCell className="h-8 text-center">
+                  <Skeleton className="w-full h-8" />
+                </TableCell>
+                <TableCell className="h-8 text-center">
+                  <Skeleton className="w-full h-8" />
+                </TableCell>
+                <TableCell className="h-8 text-center">
+                  <Skeleton className="w-full h-8" />
+                </TableCell>
+              </TableRow>
+            ) : isError ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center text-red-500"
+                >
+                  {error?.message || "Error loading students"}
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -216,7 +284,7 @@ export function StudentsDataTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No results found
                 </TableCell>
               </TableRow>
             )}
@@ -224,55 +292,13 @@ export function StudentsDataTable() {
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4 px-4 py-4">
-        <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-
-        <div className="flex gap-2  items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-left"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-
-          {table.getPageOptions().map((page, pageIdx) => (
-            <Button
-              key={`basic-data-table-${pageIdx}`}
-              onClick={() => table.setPageIndex(pageIdx)}
-              variant={`${
-                pageIdx === table.getState().pagination.pageIndex
-                  ? ""
-                  : "outline"
-              }`}
-              className={cn("w-8 h-8")}
-            >
-              {page + 1}
-            </Button>
-          ))}
-
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-right"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-        </div>
-      </div>
+      {/* Pagination */}
+      <Pagination
+        last_page={data?.data?.last_page}
+        setCurrentPage={handlePageChange}
+        current_page={currentPage}
+        studentsPagination={true}
+      />
     </>
   );
 }

@@ -39,6 +39,10 @@ const UserInfo = () => {
     );
   }
 
+  // Check if user is a teacher
+  const isTeacher =
+    userData?.role === "teacher" || userData?.role === "Teacher";
+
   const userInfo = [
     {
       icon: User,
@@ -57,7 +61,7 @@ const UserInfo = () => {
     },
     {
       icon: Location,
-      label: "Country / Region",
+      label: "Location",
       value: userData?.location || userData?.country || "N/A",
     },
     {
@@ -65,11 +69,16 @@ const UserInfo = () => {
       label: "Target",
       value: userData?.target || "85%",
     },
-    {
-      icon: ClipBoard,
-      label: "Language",
-      value: userData?.language || "English",
-    },
+    // Only show language for teachers
+    ...(isTeacher
+      ? [
+          {
+            icon: ClipBoard,
+            label: "Language",
+            value: userData?.language || "English",
+          },
+        ]
+      : []),
   ];
   return (
     <Card className="h-full">

@@ -14,15 +14,26 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useState } from "react";
 import { Icon } from "@iconify/react";
-import { Slider } from "@/components/ui/slider";
+import { useCreateUser } from "@/hooks/useUsers";
+import { useQueryClient } from "@tanstack/react-query";
 
 function AddQualityComponent() {
   const [show, setShow] = useState(false);
   const strongPattern =
     /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/;
+
+  // API hook for creating quality user
+  const { mutate: createQuality, isPending } = useCreateUser("quality");
+
   const formSchema = z.object({
     name: z.string().min(5, {
       message: "Name must be at least 2 characters.",
@@ -38,13 +49,6 @@ function AddQualityComponent() {
       .regex(/^\d+$/, {
         message: "Phone number must contain only digits.",
       }),
-    username: z
-      .string()
-      .min(3, { message: "Username must be at least 3 characters." })
-      .regex(strongPattern, {
-        message:
-          "Username must include an uppercase letter, a number, and a special character.",
-      }),
     password: z
       .string()
       .min(6, { message: "Password must be at least 6 characters." })
@@ -52,17 +56,17 @@ function AddQualityComponent() {
         message:
           "Password must include an uppercase letter, a number, and a special character.",
       }),
-    target: z.coerce.number().min(1).max(100, {
-      message: "Target must be between 1 and 100.",
-    }),
     debt: z.coerce.number().min(0, {
       message: "Debt must be a positive number.",
     }),
     review_lesson_price: z.coerce.number().min(1, {
       message: "Trail lesson price must be a positive number.",
     }),
-    subscriber_lesson_price: z.coerce.number().min(1, {
-      message: "Subscriber lesson price must be a positive number.",
+    coaching_lesson_price: z.coerce.number().min(1, {
+      message: "Coaching lesson price must be a positive number.",
+    }),
+    status: z.enum(["active", "no_active"], {
+      message: "Please select a status.",
     }),
   });
 
@@ -72,26 +76,22 @@ function AddQualityComponent() {
       name: "",
       email: "",
       phone: "",
-      username: "",
       password: "",
-      target: 0,
       debt: 0,
-      review_lesson_price: "",
-      coaching_lesson_price: "",
+      review_lesson_price: 0,
+      coaching_lesson_price: 0,
+      status: "active",
     },
   });
 
   const onSubmit = async (data) => {
-    console.log(data);
-    // Perform the action based on the type
-    form.reset();
-    toast("Event has been created", {
-      description: `${JSON.stringify(data)}`,
-      action: {
-        label: "Undo",
-        onClick: () => console.log("Undo"),
-      },
-    });
+    // Add role to the data
+    const qualityData = {
+      ...data,
+      role: "quality",
+    };
+
+    createQuality(qualityData);
   };
 
   return (
@@ -141,19 +141,6 @@ function AddQualityComponent() {
             />
             <FormField
               control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Username</FormLabel>
-                  <FormControl>
-                    <Input placeholder="username" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="password"
               render={({ field }) => (
                 <FormItem className="relative">
@@ -191,6 +178,36 @@ function AddQualityComponent() {
                     </Button>
                   )}
 
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger
+                        className={
+                          field.value === "no_active"
+                            ? "text-red-700"
+                            : "text-green-700"
+                        }
+                      >
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="z-[999]">
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="no_active">No Active</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -245,8 +262,22 @@ function AddQualityComponent() {
             />
           </div>
           <div className="flex justify-center">
-            <Button type="submit" className="w-full md:w-[50%]">
-              Submit
+            <Button
+              type="submit"
+              className="w-full md:w-[50%]"
+              disabled={isPending}
+            >
+              {isPending ? (
+                <>
+                  <Icon
+                    icon="svg-spinners:180-ring"
+                    className="h-4 w-4 animate-spin mr-2"
+                  />
+                  <span>Submitting...</span>
+                </>
+              ) : (
+                "Submit"
+              )}
             </Button>
           </div>
         </form>

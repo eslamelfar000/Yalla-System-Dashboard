@@ -4,9 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Icon } from "@iconify/react";
 import { useUserData } from "../profile-layout";
+import { MapPin } from "lucide-react";
 
 const About = ({ course }) => {
   const { userData } = useUserData();
+
+  // Check if user is a teacher
+  const isTeacher =
+    userData?.role === "teacher" || userData?.role === "Teacher";
+
+  // Don't show course section for non-teachers
+  if (course && !isTeacher) {
+    return null;
+  }
 
   // Default content if no user data or specific content
   const getAboutContent = () => {
@@ -56,11 +66,10 @@ const About = ({ course }) => {
               },
               {
                 title: "Location",
-                position: userData.country
-                  ? `${userData.city || ""} ${userData.country}`.trim() ||
-                    userData.country
+                position: userData.location
+                  ? `${userData.location || ""}`.trim() || userData.location
                   : "N/A",
-                icon: Web,
+                icon: MapPin,
               },
               {
                 title: "Email",

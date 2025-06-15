@@ -21,10 +21,50 @@ import FilterStudentsComponent from "@/components/Apis/Student/filter-students";
 import FilterArchiveComponent from "@/components/Apis/Student/filter-archive";
 import AddExpenseComponent from "@/app/[lang]/(dashboard)/(home)/dashboard/components/add-expense";
 import { Icon } from "@iconify/react";
+import { useUser } from "@/hooks/useUsers";
 
-export function SharedSheet({ type, user, onSuccess }) {
+export function SharedSheet({
+  type,
+  user,
+  open,
+  onOpenChange,
+  onSuccess,
+  onReset,
+  initialFilters,
+}) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  // const { data: userData, isLoading } = useUser(user?.id);
+
+  React.useEffect(() => {
+    if (open !== undefined) {
+      setIsOpen(open);
+    }
+  }, [open]);
+
+  const handleOpenChange = (newOpen) => {
+    setIsOpen(newOpen);
+    if (onOpenChange) {
+      onOpenChange(newOpen);
+    }
+  };
+
+  const handleSuccess = async (data) => {
+    if (onSuccess) {
+      await onSuccess(data);
+    }
+    handleOpenChange(false);
+  };
+
+  const handleReset = () => {
+    if (onReset) {
+      onReset();
+    }
+    handleOpenChange(false);
+  };
+
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         {["add-teacher", "add-quality", "add-expense"].includes(type) ? (
           <Button variant="outline" size="md" className="text-[12px]">
@@ -79,7 +119,6 @@ export function SharedSheet({ type, user, onSuccess }) {
         <div className="cover">
           <SheetHeader>
             <SheetTitle>
-              {" "}
               {type === "add-teacher"
                 ? "Add Teacher"
                 : type === "add-quality"
@@ -98,23 +137,35 @@ export function SharedSheet({ type, user, onSuccess }) {
             </SheetTitle>
           </SheetHeader>
 
-          <div className="overflow-y-auto h-[calc(100vh-100px)] px-4 py-3 space-y-6">
+          <div className="mt-4 px-4">
             {type === "add-teacher" ? (
-              <AddTeacherComponent />
+              <AddTeacherComponent onSuccess={handleSuccess} />
             ) : type === "add-quality" ? (
-              <AddQualityComponent />
+              <AddQualityComponent onSuccess={handleSuccess} />
             ) : type === "add-expense" ? (
-              <AddExpenseComponent onSuccess={onSuccess} />
+              <AddExpenseComponent onSuccess={handleSuccess} />
             ) : type === "edit-teacher" ? (
-              <EditTeacherComponent user={user} />
+              <EditTeacherComponent
+                user={user}
+                onSuccess={handleSuccess}
+                onReset={handleReset}
+              />
             ) : type === "edit-quality" ? (
-              <EditQualityComponent user={user} />
+              <EditQualityComponent
+                user={user}
+                onSuccess={handleSuccess}
+                onReset={handleReset}
+              />
             ) : type === "show-teacher" ? (
               <EditTeacherComponent user={user} info={true} />
             ) : type === "show-quality" ? (
               <EditQualityComponent user={user} info={true} />
             ) : type === "filter-students" ? (
-              <FilterStudentsComponent />
+              <FilterStudentsComponent
+                onApply={handleSuccess}
+                onReset={handleReset}
+                initialFilters={initialFilters}
+              />
             ) : type === "filter-archive" ? (
               <FilterArchiveComponent />
             ) : (
@@ -130,14 +181,6 @@ export function SharedSheet({ type, user, onSuccess }) {
             )}
           </div>
         </div>
-        {/* 
-        <SheetFooter>
-          <SheetClose asChild>
-            <Button type="submit" className="w-full" variant="outline">
-              Close
-            </Button>
-          </SheetClose>
-        </SheetFooter> */}
       </SheetContent>
     </Sheet>
   );

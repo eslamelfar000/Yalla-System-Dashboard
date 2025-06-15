@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { cn, isLocationMatch, getDynamicPath, translate } from "@/lib/utils";
-import { menusConfig } from "@/config/menus";
+import { menusConfig, getRoleBasedMenu } from "@/config/menus";
 import SingleIconMenu from "./single-icon-menu";
 import { useRouter, usePathname } from "next/navigation";
 import { useSidebar, useThemeStore } from "@/store";
@@ -16,9 +16,14 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import MenuOverlayPortal from "./MenuOverlayPortal";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 const ModuleSidebar = ({ trans }) => {
-  const menus = menusConfig?.sidebarNav?.modern || [];
+  const { user } = useAuth();
+
+  // Get role-based menu items - using 'modern' for module sidebar
+  const menus = getRoleBasedMenu(user?.role, "classic") || [];
+
   const { subMenu, setSubmenu, collapsed, setCollapsed, sidebarBg } =
     useSidebar();
   const { isRtl } = useThemeStore();
