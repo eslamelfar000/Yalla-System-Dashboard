@@ -12,7 +12,7 @@ const SwiperItemCard = ({ slider, onEdit, onDelete, deleteLoading }) => {
       <img
         src={slider?.image?.src || slider?.image}
         alt={slider?.title}
-        className="w-full h-70 object-cover"
+        className="w-full object-cover h-170"
       />
       <CardContent className="p-4">
         <div className="flex justify-between items-end mb-4">

@@ -41,9 +41,27 @@ const SliderFormModal = ({
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
+    console.log("File selected:", file); // Debug logging
+
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        alert("Please select a valid image file");
+        return;
+      }
+
+      // Validate file size (e.g., max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image file size should be less than 5MB");
+        return;
+      }
+
       setImageFile(file);
       setPreview(URL.createObjectURL(file));
+      console.log("Image file set:", file.name); // Debug logging
+    } else {
+      setImageFile(null);
+      setPreview(null);
     }
   };
 
@@ -55,7 +73,8 @@ const SliderFormModal = ({
       id: initialData?.id,
       title,
       description,
-      image: imageFile || preview,
+      imageFile: imageFile,
+      image: preview,
     };
 
     onSave(data);
@@ -63,7 +82,7 @@ const SliderFormModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {initialData ? "Edit Review" : "Add New Review"}
@@ -84,18 +103,27 @@ const SliderFormModal = ({
             onChange={(e) => setDescription(e.target.value)}
             required
           />
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            required={!initialData} // Only required for new reviews
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Image</label>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              required={!initialData} // Only required for new reviews
+              key={open ? "open" : "closed"} // Force re-render when modal opens/closes
+            />
+            {!initialData && (
+              <p className="text-xs text-gray-500">
+                Image is required for new reviews. Max size: 5MB
+              </p>
+            )}
+          </div>
           {preview && (
-            <div className="cover h-[250px] w-full mt-4 overflow-y-auto rounded">
+            <div className="cover h-[350px] w-full mt-4 overflow-y-auto rounded border border-primary">
               <img
                 src={preview?.src || preview}
                 alt="Preview"
-                className="w-full h-full rounded object-cover object-center"
+                className="w-full h-full rounded object-contain object-center"
               />
             </div>
           )}

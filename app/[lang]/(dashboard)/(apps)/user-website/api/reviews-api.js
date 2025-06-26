@@ -32,6 +32,12 @@ export const useReviewsAPI = () => {
   // Create review
   const createReview = useMutation({
     mutationFn: async (formData) => {
+      // Debug: Log FormData contents before sending
+      console.log("API - FormData contents:");
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+      
       const response = await axiosInstance.post("dashboard/reviews", formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -40,6 +46,7 @@ export const useReviewsAPI = () => {
       return response.data;
     },
     onSuccess: (data) => {
+      console.log("API - Review created successfully:", data);
       // Refetch only reviews data
       refetchReviewsData();
       
@@ -57,6 +64,8 @@ export const useReviewsAPI = () => {
       toast.success("Review added successfully");
     },
     onError: (error) => {
+      console.error("API - Create review error:", error);
+      console.error("API - Error response:", error?.response?.data);
       const errorMessage = error?.response?.data?.msg || "Failed to add review";
       toast.error(errorMessage);
       

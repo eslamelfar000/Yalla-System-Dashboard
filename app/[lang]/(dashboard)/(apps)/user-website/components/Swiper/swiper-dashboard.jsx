@@ -36,8 +36,20 @@ function SwiperDashboard() {
     formData.append("title", reviewData.title);
     formData.append("description", reviewData.description);
 
+    // Debug logging
+    console.log("Review data received:", reviewData);
+    console.log("Image file:", reviewData.imageFile);
+
     if (reviewData.imageFile) {
       formData.append("image", reviewData.imageFile);
+      console.log("Image appended to FormData");
+    } else {
+      console.log("No image file found");
+    }
+
+    // Debug: Log FormData contents
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
     }
 
     if (reviewData.id) {
