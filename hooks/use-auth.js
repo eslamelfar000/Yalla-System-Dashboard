@@ -64,9 +64,8 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     setIsAuthenticated(true);
     
-    // Redirect to appropriate route based on role
-    const defaultRoute = getDefaultRouteForRole(userData.role);
-    router.push(defaultRoute);
+    // Always redirect to dashboard home
+    router.push('/dashboard');
   };
 
   const logout = async () => {
@@ -136,7 +135,7 @@ export const useRoleAccess = () => {
 
 // Route protection hook
 export const useRouteProtection = () => {
-  const { isAuthenticated, loading, checkRouteAccess } = useAuth();
+  const { isAuthenticated, loading, user, checkRouteAccess } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -146,19 +145,27 @@ export const useRouteProtection = () => {
       const pathSegments = pathname.split('/');
       const pathWithoutLocale = '/' + pathSegments.slice(2).join('/');
       
+      // Check if user is trying to access login page while authenticated
+      if (isAuthenticated && pathWithoutLocale === '/auth/login') {
+        // Redirect to dashboard home if user has token
+        router.push('/dashboard');
+        return;
+      }
+      
       if (!isAuthenticated) {
         // Redirect to login if not authenticated
         router.push('/auth/login');
         return;
       }
 
-      if (!checkRouteAccess(pathWithoutLocale)) {
-        // Redirect to dashboard if no access
+      // Check if user has access to the current route
+      if (user && !checkRouteAccess(pathWithoutLocale)) {
+        // Redirect to dashboard home if no access (not login)
         router.push('/dashboard');
         return;
       }
     }
-  }, [isAuthenticated, loading, pathname, router, checkRouteAccess]);
+  }, [isAuthenticated, loading, pathname, router, checkRouteAccess, user]);
 
   return { isAuthenticated, loading };
 }; 

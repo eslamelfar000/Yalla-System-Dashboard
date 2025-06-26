@@ -63,6 +63,8 @@ export function SharedSheet({
     handleOpenChange(false);
   };
 
+  // console.log(initialFilters);
+
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>

@@ -1,7 +1,7 @@
 // components/PartnerBannerEditor.jsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,25 +11,40 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import LoadingButton from "@/components/Shared/loading-button";
 
-const PartnerBannerEditor = ({ open, onClose, onSave, initialData }) => {
-  const [title, setTitle] = useState(initialData?.title || "");
-  const [description, setDescription] = useState(
-    initialData?.description || ""
-  );
-  const [ourLogo, setOurLogo] = useState(null);
+const PartnerBannerEditor = ({
+  open,
+  onClose,
+  onSave,
+  initialData,
+  loading = false,
+}) => {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [logo, setLogo] = useState(null);
   const [partnerLogo, setPartnerLogo] = useState(null);
   const [bannerImage, setBannerImage] = useState(null);
 
-  const [ourLogoPreview, setOurLogoPreview] = useState(
-    initialData?.ourLogo || ""
-  );
-  const [partnerLogoPreview, setPartnerLogoPreview] = useState(
-    initialData?.partnerLogo || ""
-  );
-  const [bannerPreview, setBannerPreview] = useState(
-    initialData?.bannerImage || ""
-  );
+  const [logoPreview, setLogoPreview] = useState("");
+  const [partnerLogoPreview, setPartnerLogoPreview] = useState("");
+  const [bannerPreview, setBannerPreview] = useState("");
+
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title || "");
+      setDescription(initialData.description || "");
+      setLogoPreview(initialData.logo || "");
+      setPartnerLogoPreview(initialData.partner_logo || "");
+      setBannerPreview(initialData.banner || "");
+    } else {
+      setTitle("");
+      setDescription("");
+      setLogoPreview("");
+      setPartnerLogoPreview("");
+      setBannerPreview("");
+    }
+  }, [initialData, open]);
 
   const handleFileChange = (e, setFile, setPreview) => {
     const file = e.target.files[0];
@@ -39,27 +54,19 @@ const PartnerBannerEditor = ({ open, onClose, onSave, initialData }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (
-      !title ||
-      !description ||
-      !ourLogoPreview ||
-      !partnerLogoPreview ||
-      !bannerPreview
-    )
-      return;
+    if (!title || !description) return;
 
     const data = {
       title,
       description,
-      ourLogo: ourLogoPreview,
-      partnerLogo: partnerLogoPreview,
-      bannerImage: bannerPreview,
+      logo: logo || logoPreview,
+      partner_logo: partnerLogo || partnerLogoPreview,
+      banner: bannerImage || bannerPreview,
     };
 
-    onSave(data);
-    onClose();
+    await onSave(data);
   };
 
   return (
@@ -69,18 +76,20 @@ const PartnerBannerEditor = ({ open, onClose, onSave, initialData }) => {
           <DialogTitle>Edit Partner Banner</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 grid">
           <Input
             type="text"
             placeholder="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            required
           />
           <Textarea
             placeholder="Description"
             className="resize-none"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            required
           />
 
           <div className="grid grid-cols-2 gap-4">
@@ -89,14 +98,12 @@ const PartnerBannerEditor = ({ open, onClose, onSave, initialData }) => {
               <Input
                 type="file"
                 accept="image/*"
-                onChange={(e) =>
-                  handleFileChange(e, setOurLogo, setOurLogoPreview)
-                }
+                onChange={(e) => handleFileChange(e, setLogo, setLogoPreview)}
               />
-              {ourLogoPreview && (
+              {logoPreview && (
                 <img
-                  src={ourLogoPreview?.src || ourLogoPreview}
-                  className="h-16 mt-2 rounded"
+                  src={logoPreview?.src || logoPreview}
+                  className="h-16 mt-2 rounded object-contain"
                   alt="Our Logo Preview"
                 />
               )}
@@ -114,7 +121,7 @@ const PartnerBannerEditor = ({ open, onClose, onSave, initialData }) => {
               {partnerLogoPreview && (
                 <img
                   src={partnerLogoPreview?.src || partnerLogoPreview}
-                  className="h-16 mt-2 rounded"
+                  className="h-16 mt-2 rounded object-contain"
                   alt="Partner Logo Preview"
                 />
               )}
@@ -133,17 +140,24 @@ const PartnerBannerEditor = ({ open, onClose, onSave, initialData }) => {
             {bannerPreview && (
               <img
                 src={bannerPreview?.src || bannerPreview}
-                className="h-32 mt-2 rounded object-cover"
+                className="h-[300px] mt-2 rounded object-contain w-full"
                 alt="Banner Preview"
               />
             )}
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
+            >
               Cancel
             </Button>
-            <Button type="submit">Save</Button>
+            <LoadingButton type="submit" loading={loading}>
+              Save
+            </LoadingButton>
           </div>
         </form>
       </DialogContent>

@@ -14,6 +14,8 @@ import HeaderSearch from "@/components/header-search";
 import { useMounted } from "@/hooks/use-mounted";
 import LayoutLoader from "@/components/layout-loader";
 import Head from "next/head";
+import { useRouteProtection } from "@/hooks/use-auth";
+
 const DashBoardLayoutProvider = ({ children, trans }) => {
   const { collapsed, sidebarType, setCollapsed, subMenu } = useSidebar();
   const [open, setOpen] = React.useState(false);
@@ -21,9 +23,24 @@ const DashBoardLayoutProvider = ({ children, trans }) => {
   const location = usePathname();
   const isMobile = useMediaQuery("(min-width: 768px)");
   const mounted = useMounted();
+
+  // Add route protection
+  const { isAuthenticated, loading } = useRouteProtection();
+
   if (!mounted) {
     return <LayoutLoader />;
   }
+
+  // Show loading while checking authentication and route access
+  if (loading) {
+    return <LayoutLoader />;
+  }
+
+  // Don't render the layout if not authenticated (will redirect in useRouteProtection)
+  if (!isAuthenticated) {
+    return null;
+  }
+
   if (layout === "semibox") {
     return (
       <>

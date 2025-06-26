@@ -3,6 +3,7 @@ import { useGetData } from "./useGetData";
 import { useMutate } from "./useMutate";
 import { createUser, updateUser, deleteUser } from "@/config/users.config";
 import { useEffect, useMemo, useState } from "react";
+import { type } from "os";
 
 // Debounce utility
 function useDebounce(value, delay = 500) {
@@ -50,25 +51,31 @@ export const useStudents = (params = {}, page = 1) => {
   // Debounce search/filter params
   const debouncedParams = useDebounce(params, 500);
 
+  console.log(debouncedParams);
+
   // Build query string
   const queryString = useMemo(() => {
     const searchParams = new URLSearchParams();
-    searchParams.append("roles[0]", "teacher");
+    // searchParams.append("roles[0]", "student");
     if (debouncedParams.search) {
-      searchParams.append("search", debouncedParams.search);
+      searchParams.append("name", debouncedParams.search);
     }
     if(debouncedParams.types){
-      searchParams.append("types", debouncedParams.types);
+      debouncedParams.types.map((type, index) => {
+        searchParams.append(`type[${index}]`, type);
+      });
     }
     if(debouncedParams.sessions){
-      searchParams.append("sessions", debouncedParams.sessions);
+      debouncedParams.sessions.map((session, index) => {
+        searchParams.append(`sessions[${index}]`, session);
+      });
     }
     // ...add more as needed
     return searchParams.toString();
   }, [debouncedParams, page]);
 
 
-  const endpoint = `dashboard/users?${queryString}&page=${page}`;
+  const endpoint = `dashboard/users?roles[0]=student&${queryString}&page=${page}`;
   const queryKey = ["users", "student", debouncedParams, page];
 
   return useGetData({

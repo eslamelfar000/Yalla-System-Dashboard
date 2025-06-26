@@ -4,29 +4,29 @@
 const PartnerBannerPreview = ({ data }) => {
   if (!data) return null;
 
-  const { title, description, ourLogo, partnerLogo, bannerImage } = data;
+  const { title, description, logo, partner_logo, banner } = data;
 
   return (
-    <div className="" >
+    <div className="">
       <div className="w-full grid grid-cols-2 items-center py-10 px-20 bg-default-100  relative overflow-hidden">
         {/* Background Banner Image */}
 
         {/* Overlay Content */}
         <div className="">
           <div className="flex items-center gap-4 mb-4">
-            {ourLogo && (
+            {logo && (
               <img
-                src={ourLogo?.src || ourLogo}
+                src={logo?.src || logo}
                 alt="Our Logo"
-                className="h-12 rounded"
+                className="h-12 rounded object-contain"
               />
             )}
             <span className="text-xl font-bold">×</span>
-            {partnerLogo && (
+            {partner_logo && (
               <img
-                src={partnerLogo?.src || partnerLogo}
+                src={partner_logo?.src || partner_logo}
                 alt="Partner Logo"
-                className="h-12 rounded"
+                className="h-12 rounded object-contain"
               />
             )}
           </div>
@@ -36,9 +36,9 @@ const PartnerBannerPreview = ({ data }) => {
         </div>
 
         <div className="overflow-hidden relative rounded-lg flex items-center justify-center">
-          {bannerImage && (
+          {banner && (
             <img
-              src={bannerImage?.src || bannerImage}
+              src={banner?.src || banner}
               alt="Banner"
               className="w-full object-cover"
             />

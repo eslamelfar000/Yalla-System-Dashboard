@@ -2,105 +2,148 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import LoadingButton from "@/components/Shared/loading-button";
 import SliderFormModal from "./SliderFormModal";
 import SwiperItemCard from "./SwiperItemCard";
-import image1 from "@/public/images/avatar/avatar-1.jpg";
-import image2 from "@/public/images/avatar/avatar-2.jpg";
-import image3 from "@/public/images/avatar/avatar-3.jpg";
+import ConfirmationDialog from "../Shared/ConfirmationDialog";
+import DataErrorBoundary from "../Shared/DataErrorBoundary";
+import { useReviewsAPI } from "../../api/reviews-api";
+import { Trash2 } from "lucide-react";
 
 function SwiperDashboard() {
-  // Swiper Slider Component
-  const [sliders, setSliders] = useState([
-    {
-      id: 1,
-      title: "Slider 1",
-      image: image1,
-      description:
-        "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.",
-    },
-    {
-      id: 2,
-      title: "Slider 2",
-      image: image2,
-      description:
-        "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.",
-    },
-    {
-      id: 3,
-      title: "Slider 3",
-      image: image3,
-      description:
-        "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.",
-    },
-    {
-      id: 4,
-      title: "Slider 2",
-      image: image2,
-      description:
-        "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.",
-    },
-  ]);
-
   const [editing, setEditing] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState({
+    open: false,
+    reviewId: null,
+    reviewTitle: "",
+  });
 
-  const addOrUpdateSlider = (slider) => {
-    if (slider.id) {
-      setSliders((prev) =>
-        prev.map((item) => (item.id === slider.id ? slider : item))
-      );
-    } else {
-      setSliders((prev) => [...prev, { ...slider, id: Date.now() }]);
+  const {
+    getAllReviews,
+    createReview,
+    updateReview,
+    deleteReview,
+    refetchReviewsData,
+  } = useReviewsAPI();
+
+  // Get reviews data using the hook
+  const { data: reviewsData, isLoading, error, refetch } = getAllReviews;
+  const reviews = reviewsData?.data || [];
+
+  const addOrUpdateReview = async (reviewData) => {
+    const formData = new FormData();
+    formData.append("title", reviewData.title);
+    formData.append("description", reviewData.description);
+
+    if (reviewData.imageFile) {
+      formData.append("image", reviewData.imageFile);
     }
+
+    if (reviewData.id) {
+      // Update existing review
+      await updateReview.mutateAsync({ id: reviewData.id, formData });
+    } else {
+      // Create new review
+      await createReview.mutateAsync(formData);
+    }
+
     setOpenModal(false);
   };
 
-  const deleteSlider = (id) => {
-    setSliders((prev) => prev.filter((item) => item.id !== id));
+  const handleDeleteClick = (review) => {
+    setDeleteConfirm({
+      open: true,
+      reviewId: review.id,
+      reviewTitle: review.title,
+    });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deleteConfirm.reviewId) {
+      await deleteReview.mutateAsync(deleteConfirm.reviewId);
+      setDeleteConfirm({ open: false, reviewId: null, reviewTitle: "" });
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirm({ open: false, reviewId: null, reviewTitle: "" });
+  };
+
+  const handleRetry = async () => {
+    await refetch();
   };
 
   return (
-    <div>
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-xl font-bold">Swiper Dashboard</h1>
-          <div className="space-x-2">
-            <Button
-              onClick={() => {
-                setEditing(null);
-                setOpenModal(true);
-              }}
-            >
-              Add New Slider
-            </Button>
-            <Button disabled={sliders.length === 4}>
-              Save Changes
-            </Button>
+    <DataErrorBoundary
+      error={error}
+      isLoading={isLoading}
+      onRetry={handleRetry}
+      dataType="reviews"
+    >
+      <div>
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-xl font-bold">Testimonials Slider</h1>
+            <div className="space-x-2">
+              <Button
+                onClick={() => {
+                  setEditing(null);
+                  setOpenModal(true);
+                }}
+              >
+                Add New Review
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {sliders.map((slider) => (
-            <SwiperItemCard
-              key={slider.id}
-              slider={slider}
-              onEdit={() => {
-                setEditing(slider);
-                setOpenModal(true);
-              }}
-              onDelete={() => deleteSlider(slider.id)}
-            />
-          ))}
-        </div>
+          {reviews.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No reviews found. Add your first review to get started.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {reviews.map((review) => (
+                <SwiperItemCard
+                  key={review.id}
+                  slider={review}
+                  onEdit={() => {
+                    setEditing(review);
+                    setOpenModal(true);
+                  }}
+                  onDelete={() => handleDeleteClick(review)}
+                  deleteLoading={
+                    deleteReview.isPending &&
+                    deleteConfirm.reviewId === review.id
+                  }
+                />
+              ))}
+            </div>
+          )}
 
-        <SliderFormModal
-          open={openModal}
-          onClose={() => setOpenModal(false)}
-          onSave={addOrUpdateSlider}
-          initialData={editing}
-        />
+          <SliderFormModal
+            open={openModal}
+            onClose={() => setOpenModal(false)}
+            onSave={addOrUpdateReview}
+            initialData={editing}
+            loading={createReview.isPending || updateReview.isPending}
+          />
+
+          <ConfirmationDialog
+            open={deleteConfirm.open}
+            onClose={handleDeleteCancel}
+            onConfirm={handleDeleteConfirm}
+            title="Delete Review"
+            description={`Are you sure you want to delete "${deleteConfirm.reviewTitle}"? This action cannot be undone.`}
+            confirmText="Delete"
+            cancelText="Cancel"
+            loading={deleteReview.isPending}
+            variant="destructive"
+            icon={Trash2}
+          />
+        </div>
       </div>
-    </div>
+    </DataErrorBoundary>
   );
 }
 

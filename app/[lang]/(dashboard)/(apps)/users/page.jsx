@@ -3,10 +3,11 @@ import { Card } from "@/components/ui/card";
 import React from "react";
 import UserTableStatus from "./users-table";
 import { SharedSheet } from "../../../../../components/Shared/Drawer/shared-sheet";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 function page() {
   return (
-    <>
+    <ProtectedRoute requiredRoles={["admin"]}>
       <div className="space-y-20">
         {/* Teachers */}
         <div className=" space-y-6">
@@ -38,7 +39,7 @@ function page() {
           <UserTableStatus type="quality" />
         </div>
       </div>
-    </>
+    </ProtectedRoute>
   );
 }
 

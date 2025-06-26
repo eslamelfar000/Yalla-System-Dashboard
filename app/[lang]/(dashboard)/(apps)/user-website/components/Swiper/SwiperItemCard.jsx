@@ -3,9 +3,10 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import LoadingButton from "@/components/Shared/loading-button";
 import { Icon } from "@iconify/react";
 
-const SwiperItemCard = ({ slider, onEdit, onDelete }) => {
+const SwiperItemCard = ({ slider, onEdit, onDelete, deleteLoading }) => {
   return (
     <Card className="overflow-hidden relative shadow-lg">
       <img
@@ -27,16 +28,17 @@ const SwiperItemCard = ({ slider, onEdit, onDelete }) => {
             >
               <Icon icon="heroicons:pencil-square" className="h-4 w-4" />
             </Button>
-            <Button
+            <LoadingButton
               size="icon"
               variant="outline"
               className=" h-7 w-7"
               color="destructive"
               title="Delete"
               onClick={onDelete}
+              loading={deleteLoading}
             >
               <Icon icon="heroicons:trash" className="h-4 w-4" />
-            </Button>
+            </LoadingButton>
           </div>
         </div>
         <p className="text-xs text-default-600">{slider.description}</p>

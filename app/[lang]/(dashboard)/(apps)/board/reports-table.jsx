@@ -14,48 +14,108 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { users } from "../../(tables)/tailwindui-table/data";
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Link from "next/link";
-import { ArrowBigRightDash } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useGetData } from "@/hooks/useGetData";
+import { useMutate } from "@/hooks/useMutate";
+import LoadingButton from "@/components/Shared/loading-button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 
-const ReportsTableStatus = () => {
+const ReportsTable = () => {
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [sendConfirmOpen, setSendConfirmOpen] = useState(false);
+
+  // Get reports data using custom hook
+  const {
+    data: reportsData,
+    isLoading,
+    error,
+    refetch,
+  } = useGetData({
+    endpoint: "dashboard/reports",
+    queryKey: ["reports"],
+  });
+
+  const reports = reportsData?.data || [];
+
+  // Send report mutation using custom hook
+  const sendReportMutation = useMutate({
+    method: "POST",
+    endpoint: `dashboard/send-report/${selectedReport?.id}`,
+    queryKeysToInvalidate: [["reports"]],
+    text: "Report sent successfully",
+    onSuccess: (data) => {
+      setSendConfirmOpen(false);
+      setSelectedReport(null);
+    },
+  });
+
+  const handleSendReport = (report) => {
+    setSelectedReport(report);
+    setSendConfirmOpen(true);
+  };
+
+  const confirmSendReport = () => {
+    if (selectedReport) {
+      sendReportMutation.mutate();
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status?.toLowerCase()) {
+      case "sent":
+        return <Badge className="bg-green-100 text-green-800">Sent</Badge>;
+      case "pending":
+        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
+      case "draft":
+        return <Badge className="bg-gray-100 text-gray-800">Draft</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800">Unknown</Badge>;
+    }
+  };
+
   const columns = [
     {
-      key: "Student",
-      label: "Student",
+      key: "id",
+      label: "Report ID",
     },
     {
-      key: "ID",
-      label: "ID",
+      key: "teacher",
+      label: "Teacher",
     },
     {
-      key: "Date",
-      label: "Date",
+      key: "lesson",
+      label: "Lesson",
     },
     {
-      key: "Target",
+      key: "target",
       label: "Target",
     },
     {
-      key: "Admin Report",
-      label: "Admin Report",
+      key: "status",
+      label: "Status",
     },
     {
-      key: "Teacher Reaport",
-      label: "Teacher Reaport",
+      key: "created_at",
+      label: "Created",
     },
     {
       key: "action",
-      label: "action",
+      label: "Action",
     },
   ];
-
 
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
@@ -63,7 +123,7 @@ const ReportsTableStatus = () => {
   const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
-    data : users,
+    data: reports,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -81,6 +141,24 @@ const ReportsTableStatus = () => {
     },
   });
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">Error loading reports</p>
+          <Button onClick={() => refetch()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -89,59 +167,79 @@ const ReportsTableStatus = () => {
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={column.key} className="text-right!">
-                  {" "}
-                  {column.label}
-                </TableHead>
+                <TableHead key={column.key}>{column.label}</TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users
-              .map((item) => (
-                <TableRow key={item.email} className="hover:bg-default-100">
-                  <TableCell className=" font-medium  text-card-foreground/80">
+            {reports?.length > 0 ? (
+              reports?.map((report) => (
+                <TableRow key={report.id} className="hover:bg-default-100">
+                  <TableCell className="font-medium text-card-foreground/80">
+                    #{report.id}
+                  </TableCell>
+                  <TableCell className="font-medium text-card-foreground/80">
                     <div className="flex gap-3 items-center">
                       <Avatar className="rounded-lg">
-                        <AvatarImage src={item.avatar} />
-                        <AvatarFallback>AB</AvatarFallback>
+                        <AvatarImage
+                          src={report.teacher?.avatar || report.teacher?.image}
+                        />
+                        <AvatarFallback>
+                          {report.teacher?.name?.charAt(0) || "T"}
+                        </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm  text-default-600">
-                        {item.name}
+                      <span className="text-sm text-default-600">
+                        {report.teacher?.name ||
+                          report.teacher_id ||
+                          "Unknown Teacher"}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>{item.id}</TableCell>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.email}</TableCell>
                   <TableCell>
-                    <Link href={""} className="">
-                      <button className="text-primary text-[12px] border px-4 py-1 border-solid border-primary rounded-full">
-                        Check
-                        <ArrowBigRightDash className="inline-block ml-1 w-6 h-6" />
-                      </button>
-                    </Link>
+                    <span className="text-sm text-default-600">
+                      Lesson #{report.lesson_id}
+                    </span>
                   </TableCell>
                   <TableCell>
-                    <Link href={""} className="">
-                      <button className="text-primary text-[12px] border px-4 py-1 border-solid border-primary rounded-full">
-                        Check
-                        <ArrowBigRightDash className="inline-block ml-1 w-6 h-6" />
-                      </button>
-                    </Link>
+                    <span className="text-sm text-default-600">
+                      {report.target}%
+                    </span>
                   </TableCell>
-
-                  <TableCell className="flex gap-3 ">
-                    <Button
-                      className="px-5 text-xs h-8 rounded-full"
-                      color="primary"
-                    >
-                      Send
-                    </Button>
+                  <TableCell>{getStatusBadge(report.status)}</TableCell>
+                  <TableCell>
+                    <span className="text-sm text-default-600">
+                      {new Date(report.created_at).toLocaleDateString()}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSendReport(report)}
+                        disabled={report.status?.toLowerCase() === "sent"}
+                        className="h-7"
+                      >
+                        <Icon
+                          icon="heroicons:paper-airplane"
+                          className="h-4 w-4 mr-1"
+                        />
+                        Send
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-7">
+                        <Icon icon="heroicons:eye" className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
-              .slice(0, 4)}
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  No reports found
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </Card>
@@ -152,7 +250,7 @@ const ReportsTableStatus = () => {
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
 
-        <div className="flex gap-2  items-center">
+        <div className="flex gap-2 items-center">
           <Button
             variant="outline"
             size="icon"
@@ -168,7 +266,7 @@ const ReportsTableStatus = () => {
 
           {table.getPageOptions().map((page, pageIdx) => (
             <Button
-              key={`basic-data-table-${pageIdx}`}
+              key={`reports-table-${pageIdx}`}
               onClick={() => table.setPageIndex(pageIdx)}
               variant={`${
                 pageIdx === table.getState().pagination.pageIndex
@@ -195,8 +293,37 @@ const ReportsTableStatus = () => {
           </Button>
         </div>
       </div>
+
+      {/* Send Report Confirmation Dialog */}
+      <Dialog open={sendConfirmOpen} onOpenChange={setSendConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send Report</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to send report #{selectedReport?.id}? This
+              action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setSendConfirmOpen(false)}
+              disabled={sendReportMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <LoadingButton
+              onClick={confirmSendReport}
+              loading={sendReportMutation.isPending}
+              variant="default"
+            >
+              {sendReportMutation.isPending ? "Sending..." : "Send Report"}
+            </LoadingButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
 
-export default ReportsTableStatus;
+export default ReportsTable;

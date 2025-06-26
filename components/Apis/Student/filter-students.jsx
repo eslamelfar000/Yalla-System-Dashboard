@@ -9,9 +9,17 @@ function FilterStudentsComponent({
   initialFilters,
 }) {
   const types = [
-    { id: "Trail Lesson", name: "Trail Lesson" },
-    { id: "Pay After Lesson", name: "Pay After Lesson" },
-    { id: "Pay Before Lesson", name: "Pay Before Lesson" },
+    { id: "Trail Lesson", name: "trail_lesson", label: "Trail Lesson" },
+    {
+      id: "Pay After Lesson",
+      name: "pay_after_lesson",
+      label: "Pay After Lesson",
+    },
+    {
+      id: "Pay Before Lesson",
+      name: "pay_before_lesson",
+      label: "Pay Before Lesson",
+    },
   ];
 
   const sessionCount = 8;
@@ -93,14 +101,14 @@ function FilterStudentsComponent({
                 <Checkbox
                   id={`type-${type.id}`}
                   className="size-10"
-                  checked={selectedTypes.includes(type.id)}
-                  onCheckedChange={() => toggleType(type.id)}
+                  checked={selectedTypes.includes(type.name)}
+                  onCheckedChange={() => toggleType(type.name)}
                 />
                 <label
                   htmlFor={`type-${type.id}`}
                   className="text-sm font-medium text-card-foreground/80 select-none"
                 >
-                  {type.name}
+                  {type.label}
                 </label>
               </li>
             ))}

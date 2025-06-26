@@ -11,8 +11,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
+import LoadingButton from "@/components/Shared/loading-button";
 
-const SliderFormModal = ({ open, onClose, onSave, initialData }) => {
+const SliderFormModal = ({
+  open,
+  onClose,
+  onSave,
+  initialData,
+  loading = false,
+}) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -20,8 +27,8 @@ const SliderFormModal = ({ open, onClose, onSave, initialData }) => {
 
   useEffect(() => {
     if (initialData) {
-      setTitle(initialData.title);
-      setDescription(initialData.description);
+      setTitle(initialData.title || "");
+      setDescription(initialData.description || "");
       setImageFile(null);
       setPreview(initialData.image);
     } else {
@@ -42,13 +49,13 @@ const SliderFormModal = ({ open, onClose, onSave, initialData }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title || (!preview && !imageFile)) return;
+    if (!title || !description) return;
 
     const data = {
       id: initialData?.id,
       title,
       description,
-      image: imageFile ? URL.createObjectURL(imageFile) : preview, // generate URL from file
+      image: imageFile || preview,
     };
 
     onSave(data);
@@ -56,51 +63,70 @@ const SliderFormModal = ({ open, onClose, onSave, initialData }) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Slider" : "Add New Slider"}
+            {initialData ? "Edit Review" : "Add New Review"}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <Input
             type="text"
-            placeholder="Slider Title"
+            placeholder="Review Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            required
           />
           <Textarea
             placeholder="Description"
             className="resize-none"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            required
           />
-          <Input type="file" accept="image/*" onChange={handleImageChange} />
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            required={!initialData} // Only required for new reviews
+          />
           {preview && (
-            <div className="cover h-[300px] w-full mt-4 overflow-y-auto rounded">
+            <div className="cover h-[250px] w-full mt-4 overflow-y-auto rounded">
               <img
                 src={preview?.src || preview}
                 alt="Preview"
-                className="w-full rounded object-cover"
+                className="w-full h-full rounded object-cover object-center"
               />
             </div>
           )}
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" type="button" onClick={onClose}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+            >
               Cancel
             </Button>
-            <Button
+            <LoadingButton
               disabled={
-                title === "" ||
-                description === "" ||
-                (!initialData ? imageFile === null : '') ||
-                preview === null
+                !title ||
+                !description ||
+                (!initialData && !imageFile) ||
+                loading
               }
               type="submit"
               className="select-none"
+              loading={loading}
             >
-              {initialData ? "Update" : "Add"}
-            </Button>
+              {initialData
+                ? loading
+                  ? "Updating..."
+                  : "Update"
+                : loading
+                ? "Adding..."
+                : "Add"}
+            </LoadingButton>
           </div>
         </form>
       </DialogContent>

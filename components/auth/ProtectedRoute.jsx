@@ -143,14 +143,14 @@ export const AdminOnly = ({ children, fallback = null }) => (
 
 // Teacher-only wrapper (includes admin access)
 export const TeacherOnly = ({ children, fallback = null }) => (
-  <RoleGuard roles={["teacher", "admin"]} fallback={fallback}>
+  <RoleGuard roles={["teacher"]} fallback={fallback}>
     {children}
   </RoleGuard>
 );
 
 // Quality-only wrapper (includes admin access)
 export const QualityOnly = ({ children, fallback = null }) => (
-  <RoleGuard roles={["quality", "admin"]} fallback={fallback}>
+  <RoleGuard roles={["quality"]} fallback={fallback}>
     {children}
   </RoleGuard>
 );

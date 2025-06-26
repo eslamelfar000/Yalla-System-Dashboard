@@ -4,12 +4,44 @@ import { Icon } from "@iconify/react";
 import background from "@/public/images/auth/line.png";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import LogInForm from "@/components/auth/login-form";
+import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
   const [openVideo, setOpenVideo] = useState(false);
+  const { isAuthenticated, loading } = useAuth();
+  const router = useRouter();
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, loading, router]);
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Icon
+            icon="eos-icons:loading"
+            className="w-8 h-8 animate-spin mx-auto mb-2"
+          />
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render login form if already authenticated (will redirect)
+  if (isAuthenticated) {
+    return null;
+  }
+
   return (
     <>
       <div className="min-h-screen bg-background  flex items-center  overflow-hidden w-full">

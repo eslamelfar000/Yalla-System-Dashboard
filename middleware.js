@@ -15,32 +15,32 @@ const USER_ROLES = {
 const ROUTE_PERMISSIONS = {
   // Common routes (accessible by all authenticated users)
   '/dashboard': 'all',
-  '/user-website': 'all',
+  '/user-website': 'admin',
   '/calendar': 'all',
-  '/board': 'all',
-  '/chat': 'all',
-  '/reservation': 'all',
-  '/requests': 'all',
-  '/contact': 'all',
+  '/board': 'quality',
+  '/chat': 'teacher',
+  '/reservation': 'admin',
+  '/requests': 'admin',
+  '/contact': 'admin',
   
   // Admin-only routes
-  '/users': 'all',
-  '/payrolls': 'all',
-  '/target': 'all',
+  '/users': ['admin'],
+  '/payrolls': ['admin'],
+  '/target': ['admin'],
   
   // Quality routes
-  '/qa-reports': 'all',
+  '/qa-reports': ['admin'],
   
   // Teacher routes
-  '/lessons-board': 'all',
+  '/lessons-board': ['teacher'],
   
   // Multi-role routes
-  '/compelete-sessions': 'all',
-  '/students': 'all',
-  '/income': 'all',
-  '/archive': 'all',
-  '/user-profile' : 'all',
-  '/user-profile/settings':'all'
+  '/compelete-sessions': ['admin'],
+  '/students': ['admin'],
+  '/income': ['admin', 'teacher', 'quality'],
+  '/archive': ['admin', 'teacher', 'quality'],
+  '/user-profile': 'all',
+  '/user-profile/settings': 'all'
 };
 
 // Auth routes that should redirect to dashboard if user is logged in
@@ -62,7 +62,7 @@ function getLocale(request) {
 function canAccessRoute(route, userRole) {
   const routePermissions = ROUTE_PERMISSIONS[route];
   
-  // If route permissions not defined, deny access
+  // If route permissions not defined, deny access (redirect to dashboard)
   if (!routePermissions) return false;
   
   // If route is accessible by all authenticated users
@@ -72,18 +72,9 @@ function canAccessRoute(route, userRole) {
   return routePermissions.includes(userRole);
 }
 
-// Get default route for user role
+// Get default route for user role (always dashboard home)
 function getDefaultRouteForRole(role) {
-  switch (role) {
-    case USER_ROLES.ADMIN:
-      return '/dashboard';
-    case USER_ROLES.TEACHER:
-      return '/dashboard';
-    case USER_ROLES.QUALITY:
-      return '/dashboard';
-    default:
-      return '/dashboard';
-  }
+  return '/dashboard';
 }
 
 // Extract user data from cookies (simplified - in production you'd validate JWT)
@@ -157,7 +148,7 @@ export function middleware(request) {
 
   // Check role-based permissions for protected routes
   if (!canAccessRoute(pathWithoutLocale, user.role)) {
-    // Redirect to user's default route if no permission
+    // Redirect to dashboard home if no permission (not login)
     const defaultRoute = getDefaultRouteForRole(user.role);
     return NextResponse.redirect(new URL(`/${currentLocale}${defaultRoute}`, request.url));
   }

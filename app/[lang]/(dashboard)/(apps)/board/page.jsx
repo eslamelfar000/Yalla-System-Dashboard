@@ -63,7 +63,7 @@ function page() {
               </h3>
             </div>
           </div>
-          <CoachingTableStatus action={'board'}/>
+          <CoachingTableStatus action={"board"} />
         </div>
       </div>
     </div>

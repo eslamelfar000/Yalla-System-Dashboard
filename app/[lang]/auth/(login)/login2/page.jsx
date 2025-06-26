@@ -1,9 +1,9 @@
-"use client"
+"use client";
 import Image from "next/image";
-import bg from "@/public/images/auth/bg-2.jpg"
-import slider1 from "@/public/images/auth/slide-1.png"
-import slider2 from "@/public/images/auth/slide-2.png"
-import slider3 from "@/public/images/auth/slide-3.png"
+import bg from "@/public/images/auth/bg-2.jpg";
+import slider1 from "@/public/images/auth/slide-1.png";
+import slider2 from "@/public/images/auth/slide-2.png";
+import slider3 from "@/public/images/auth/slide-3.png";
 import LogInForm from "./login-form";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -11,9 +11,42 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import { useThemeStore } from "@/store";
+import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { Icon } from "@iconify/react";
 
 const LoginPage = () => {
   const { isRtl } = useThemeStore();
+  const { isAuthenticated, loading } = useAuth();
+  const router = useRouter();
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, loading, router]);
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Icon
+            icon="eos-icons:loading"
+            className="w-8 h-8 animate-spin mx-auto mb-2"
+          />
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render login form if already authenticated (will redirect)
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="loginwrapper bg-background flex items-center min-h-screen overflow-hidden  w-full">
@@ -61,7 +94,6 @@ const LoginPage = () => {
               </div>
             </SwiperSlide>
           </Swiper>
-
         </div>
         <div className=" px-4  py-5 flex justify-center items-center">
           <div className="lg:w-[480px]">

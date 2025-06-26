@@ -10,29 +10,33 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import LoadingButton from "@/components/Shared/loading-button";
 
 export default function ContactDetailsEditor({
   open,
   onClose,
   onSave,
   initialData,
+  loading = false,
 }) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
 
   useEffect(() => {
     if (initialData) {
-      setEmail(initialData.email);
-      setPhone(initialData.phone);
+      setEmail(initialData.email || "");
+      setPhone(initialData.phone || "");
+    } else {
+      setEmail("");
+      setPhone("");
     }
   }, [initialData, open]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !phone) return;
 
-    onSave({ email, phone });
-    onClose();
+    await onSave({ email, phone });
   };
 
   return (
@@ -47,18 +51,27 @@ export default function ContactDetailsEditor({
             placeholder="Enter email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
           <Input
             type="tel"
             placeholder="Enter phone number"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
+            required
           />
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose} type="button">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              type="button"
+              disabled={loading}
+            >
               Cancel
             </Button>
-            <Button type="submit">Save</Button>
+            <LoadingButton type="submit" loading={loading}>
+              Save
+            </LoadingButton>
           </div>
         </form>
       </DialogContent>

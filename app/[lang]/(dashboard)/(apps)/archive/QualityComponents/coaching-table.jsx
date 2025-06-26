@@ -7,7 +7,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { users } from "../../../(tables)/tailwindui-table/data";
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -23,15 +22,57 @@ import {
 import { cn } from "@/lib/utils";
 import { Toggle } from "@/components/ui/toggle";
 import { Check } from "lucide-react";
+import { useGetData } from "@/hooks/useGetData";
+import { useMutate } from "@/hooks/useMutate";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import LoadingButton from "@/components/Shared/loading-button";
 
 const CoachingTableStatus = ({ action }) => {
+  const [selectedCoaching, setSelectedCoaching] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  // Fetch coaching data from API
+  const {
+    data: coachingData,
+    isLoading,
+    error,
+    refetch,
+  } = useGetData({
+    endpoint: "dashboard/coaching",
+    queryKey: ["coaching"],
+  });
+
+  const coachingList = coachingData?.data || [];
+
+  // Mutation for completing coaching
+  const completeCoachingMutation = useMutate({
+    method: "POST",
+    endpoint: `dashboard/coaching/${selectedCoaching?.id}/complete`,
+    queryKeysToInvalidate: [["coaching"]],
+    text: "Coaching completed successfully!",
+    onSuccess: () => {
+      setShowConfirmDialog(false);
+      setSelectedCoaching(null);
+      refetch();
+    },
+  });
+
   const columns = [
     {
       key: "session",
       label: "Session",
     },
     {
-      key: "Date",
+      key: "date",
       label: "Date",
     },
     {
@@ -49,7 +90,7 @@ const CoachingTableStatus = ({ action }) => {
   const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
-    data: users,
+    data: coachingList,
     columns,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -64,6 +105,52 @@ const CoachingTableStatus = ({ action }) => {
       rowSelection,
     },
   });
+
+  const handleCompleteCoaching = (coaching) => {
+    setSelectedCoaching(coaching);
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmComplete = async () => {
+    if (selectedCoaching) {
+      await completeCoachingMutation.mutateAsync();
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <Icon
+              icon="eos-icons:loading"
+              className="w-8 h-8 animate-spin mx-auto mb-2"
+            />
+            <p>Loading coaching data...</p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <Icon
+              icon="material-symbols:error-outline"
+              className="w-8 h-8 text-red-500 mx-auto mb-2"
+            />
+            <p className="text-red-500">Error loading coaching data</p>
+            <Button onClick={() => refetch()} className="mt-2">
+              Retry
+            </Button>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <>
@@ -80,33 +167,44 @@ const CoachingTableStatus = ({ action }) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((item) => (
-              <TableRow key={item.email} className="hover:bg-default-100">
-                <TableCell>{item.id}</TableCell>
-                <TableCell>{item.name}</TableCell>
-                <TableCell>{item.name}</TableCell>
-                {action === "board" ? (
-                  <TableCell>
-                    <Button
-                      className="px-5 text-xs h-8 rounded-full"
-                      color="primary"
-                    >
-                      Done
-                    </Button>
-                  </TableCell>
-                ) : (
-                  <TableCell>
-                    <Toggle
-                      aria-label="Toggle italic"
-                      size="icon"
-                      className="w-6 h-6 p-1 rounded-full bg-transparent text-primary border border-solid border-primary"
-                    >
-                      <Check className="w-6 h-6" />
-                    </Toggle>
-                  </TableCell>
-                )}
+            {coachingList.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-8">
+                  No coaching data available
+                </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              coachingList.map((item) => (
+                <TableRow key={item.id} className="hover:bg-default-100">
+                  <TableCell>{item.session || item.id}</TableCell>
+                  <TableCell>{item.date || "N/A"}</TableCell>
+                  <TableCell>{item.purpose || "N/A"}</TableCell>
+                  {action === "board" ? (
+                    <TableCell>
+                      <Button
+                        className="px-5 text-xs h-8 rounded-full"
+                        color="primary"
+                        onClick={() => handleCompleteCoaching(item)}
+                        disabled={item.status === "completed"}
+                      >
+                        {item.status === "completed" ? "Completed" : "Done"}
+                      </Button>
+                    </TableCell>
+                  ) : (
+                    <TableCell>
+                      <Toggle
+                        aria-label="Toggle italic"
+                        size="icon"
+                        className="w-6 h-6 p-1 rounded-full bg-transparent text-primary border border-solid border-primary"
+                        pressed={item.status === "completed"}
+                      >
+                        <Check className="w-6 h-6" />
+                      </Toggle>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </Card>
@@ -160,6 +258,37 @@ const CoachingTableStatus = ({ action }) => {
           </Button>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Coaching Completion</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to mark this coaching session as completed?
+              <br />
+              <strong>Session:</strong>{" "}
+              {selectedCoaching?.session || selectedCoaching?.id}
+              <br />
+              <strong>Date:</strong> {selectedCoaching?.date || "N/A"}
+              <br />
+              <strong>Purpose:</strong> {selectedCoaching?.purpose || "N/A"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={completeCoachingMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <LoadingButton
+              loading={completeCoachingMutation.isPending}
+              onClick={handleConfirmComplete}
+              variant="default"
+            >
+              Complete Coaching
+            </LoadingButton>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

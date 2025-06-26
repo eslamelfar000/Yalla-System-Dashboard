@@ -27,6 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import Pagination from "@/components/Shared/Pagination/Pagination";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 const columns = [
   {
@@ -66,7 +67,9 @@ const columns = [
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.sessions_count}
+            {row?.original?.sessions > 1
+              ? `${row?.original?.sessions} Sessions`
+              : `${row?.original?.sessions} Session`}
           </span>
         </div>
       </div>
@@ -79,7 +82,13 @@ const columns = [
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.lesson_type || "N/A"}
+            {row?.original?.type === "trail_lesson"
+              ? "Trail Lesson"
+              : row?.original?.type === "pay_after_lesson"
+              ? "Pay After Lesson"
+              : row?.original?.type === "pay_before_lesson"
+              ? "Pay Before Lesson"
+              : "N/A"}
           </span>
         </div>
       </div>
@@ -97,15 +106,17 @@ const columns = [
           <div className="cover w-full">
             <div className="head text-gray-600">
               <h2 className="text-sm">
-                {row?.original?.sessions_count_done} /{" "}
-                {row?.original?.sessions_count}
+                {row?.original?.sessions_count_done || 0} /{" "}
+                {row?.original?.sessions || 0}
               </h2>
             </div>
             <Progress
               value={
-                row?.original?.sessions_count -
-                row?.original?.sessions_count_done
+                (row?.original?.sessions_count_current /
+                  row?.original?.sessions) *
+                  100 || 0
               }
+              // showValue={true}
               color="primary"
               isStripe
               isAnimate
@@ -161,6 +172,7 @@ export function StudentsDataTable() {
       types: [],
       sessions: [],
     });
+    setSearch("");
   };
 
   // Handle search change
@@ -201,13 +213,23 @@ export function StudentsDataTable() {
 
   return (
     <>
-      <div className="flex items-center flex-wrap gap-2 mb-5">
-        <Input
-          placeholder="Search students..."
-          value={search}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          className="max-w-sm min-w-[200px] h-10"
-        />
+      <div className="flex justify-between items-center flex-wrap gap-2 mb-5">
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Search students..."
+            value={search}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="max-w-sm min-w-[250px] h-10"
+          />
+          {(filters.types?.length > 0 ||
+            filters.sessions?.length > 0 ||
+            search !== "") && (
+            <Button variant="outline" onClick={handleFilterReset}>
+              <Icon icon="mdi:filter-remove" className="w-4 h-4" />
+              Clear Filters
+            </Button>
+          )}
+        </div>
         <SharedSheet
           type="filter-students"
           onSuccess={handleFilterApply}

@@ -90,14 +90,14 @@ const UserInfo = () => {
       <CardContent className="px-4">
         <ul className="mt-4 space-y-6">
           {userInfo.map((item, index) => (
-            <li key={`user-info-${index}`} className="flex items-center">
+            <li key={`user-info-${index}`} className="flex justify-between items-center">
               <div className="flex-none  2xl:w-56 flex items-center gap-1.5">
-                <span>{<item.icon className="w-4 h-4 text-primary" />}</span>
+                <span>{item.icon && <item.icon className="w-4 h-4 mr-2 text-primary" />}</span>
                 <span className="text-sm font-medium text-default-800">
                   {item.label}:
                 </span>
               </div>
-              <div className="flex-1 text-sm text-default-700">
+              <div className="flex-1 text-sm text-default-700 text-right">
                 {item.value}
               </div>
             </li>
