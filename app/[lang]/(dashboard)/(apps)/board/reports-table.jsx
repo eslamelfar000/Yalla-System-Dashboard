@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { useGetData } from "@/hooks/useGetData";
 import { useMutate } from "@/hooks/useMutate";
 import LoadingButton from "@/components/Shared/loading-button";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import {
   Dialog,
   DialogContent,
@@ -31,32 +32,35 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
-const ReportsTable = () => {
+const ReportsTable = ({ selectedTeacher }) => {
   const [selectedReport, setSelectedReport] = useState(null);
   const [sendConfirmOpen, setSendConfirmOpen] = useState(false);
 
-  // Get reports data using custom hook
+  // Get reports data using custom hook with teacher filter
   const {
     data: reportsData,
     isLoading,
     error,
     refetch,
   } = useGetData({
-    endpoint: "dashboard/reports",
-    queryKey: ["reports"],
+    endpoint: selectedTeacher
+      ? `dashboard/reports?teacher_id=${selectedTeacher}`
+      : "dashboard/reports",
+    queryKey: ["reports", selectedTeacher],
   });
 
   const reports = reportsData?.data || [];
 
   // Send report mutation using custom hook
   const sendReportMutation = useMutate({
-    method: "POST",
+    method: "GET",
     endpoint: `dashboard/send-report/${selectedReport?.id}`,
     queryKeysToInvalidate: [["reports"]],
     text: "Report sent successfully",
-    onSuccess: (data) => {
+    onSuccess: () => {
+      refetch();
       setSendConfirmOpen(false);
       setSelectedReport(null);
     },
@@ -73,43 +77,30 @@ const ReportsTable = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
-    switch (status?.toLowerCase()) {
-      case "sent":
-        return <Badge className="bg-green-100 text-green-800">Sent</Badge>;
-      case "pending":
-        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
-      case "draft":
-        return <Badge className="bg-gray-100 text-gray-800">Draft</Badge>;
-      default:
-        return <Badge className="bg-gray-100 text-gray-800">Unknown</Badge>;
-    }
-  };
-
   const columns = [
     {
+      key: "student",
+      label: "Student",
+    },
+    {
       key: "id",
-      label: "Report ID",
+      label: "ID",
     },
     {
-      key: "teacher",
-      label: "Teacher",
-    },
-    {
-      key: "lesson",
-      label: "Lesson",
+      key: "date",
+      label: "Date",
     },
     {
       key: "target",
       label: "Target",
     },
     {
-      key: "status",
-      label: "Status",
+      key: "admin_report",
+      label: "Admin Report",
     },
     {
-      key: "created_at",
-      label: "Created",
+      key: "teacher_report",
+      label: "Teacher Report",
     },
     {
       key: "action",
@@ -143,20 +134,22 @@ const ReportsTable = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <Card>
+        <TableSkeleton columns={columns} rows={3} />
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-center">
-          <p className="text-red-500 mb-4">Error loading reports</p>
-          <Button onClick={() => refetch()}>Retry</Button>
+      <Card>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">Error loading reports</p>
+            <Button onClick={() => refetch()}>Retry</Button>
+          </div>
         </div>
-      </div>
+      </Card>
     );
   }
 
@@ -172,15 +165,23 @@ const ReportsTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {reports?.length > 0 ? (
-              reports?.map((report) => (
+            {reports.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-8"
+                >
+                  {selectedTeacher
+                    ? "No reports found for the selected teacher"
+                    : "Please select a teacher to view reports"}
+                </TableCell>
+              </TableRow>
+            ) : (
+              reports.map((report) => (
                 <TableRow key={report.id} className="hover:bg-default-100">
-                  <TableCell className="font-medium text-card-foreground/80">
-                    #{report.id}
-                  </TableCell>
-                  <TableCell className="font-medium text-card-foreground/80">
+                  <TableCell>
                     <div className="flex gap-3 items-center">
-                      <Avatar className="rounded-lg">
+                      <Avatar className="w-8 h-8 rounded-full">
                         <AvatarImage
                           src={report.teacher?.avatar || report.teacher?.image}
                         />
@@ -189,56 +190,74 @@ const ReportsTable = () => {
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm text-default-600">
-                        {report.teacher?.name ||
-                          report.teacher_id ||
-                          "Unknown Teacher"}
+                        {report.teacher?.name || "Unknown Teacher"}
                       </span>
                     </div>
                   </TableCell>
+                  <TableCell className="font-medium">{report.id}</TableCell>
                   <TableCell>
-                    <span className="text-sm text-default-600">
-                      Lesson #{report.lesson_id}
-                    </span>
+                    {new Date(report?.lesson?.created_at).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>{report.target}%</TableCell>
+                  <TableCell>
+                    <Link href={report.admin_report} target="_blank">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        <span className="">Admin Report</span>
+                        <Icon
+                          icon="heroicons:arrow-top-right-on-square"
+                          className="w-4 h-4 mr-1"
+                        />
+                      </Button>
+                    </Link>
                   </TableCell>
                   <TableCell>
-                    <span className="text-sm text-default-600">
-                      {report.target}%
-                    </span>
+                    <Link href={report.teacher_report} target="_blank">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        <span className="">Teacher Report</span>
+                        <Icon
+                          icon="heroicons:arrow-top-right-on-square"
+                          className="w-4 h-4 mr-1"
+                        />
+                      </Button>
+                    </Link>
                   </TableCell>
-                  <TableCell>{getStatusBadge(report.status)}</TableCell>
                   <TableCell>
-                    <span className="text-sm text-default-600">
-                      {new Date(report.created_at).toLocaleDateString()}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
+                    {report?.send === "pending" ? (
                       <Button
                         size="sm"
                         variant="outline"
+                        className="flex items-center gap-2"
                         onClick={() => handleSendReport(report)}
-                        disabled={report.status?.toLowerCase() === "sent"}
-                        className="h-7"
+                        disabled={report.status === "sent"}
                       >
+                        <span className="">Send</span>
                         <Icon
                           icon="heroicons:paper-airplane"
-                          className="h-4 w-4 mr-1"
+                          className="w-4 h-4 mr-1"
                         />
-                        Send
                       </Button>
-                      <Button size="sm" variant="outline" className="h-7">
-                        <Icon icon="heroicons:eye" className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    ) : (
+                      <div size="sm" className="flex items-start">
+                        <div className="flex items-center gap-2 bg-green-500 text-white rounded-md p-2 select-none">
+                          <span className="">Done</span>
+                          <Icon
+                            icon="heroicons:check-circle"
+                            className="w-5 h-5"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="text-center">
-                  No reports found
-                </TableCell>
-              </TableRow>
             )}
           </TableBody>
         </Table>
@@ -266,7 +285,7 @@ const ReportsTable = () => {
 
           {table.getPageOptions().map((page, pageIdx) => (
             <Button
-              key={`reports-table-${pageIdx}`}
+              key={`basic-data-table-${pageIdx}`}
               onClick={() => table.setPageIndex(pageIdx)}
               variant={`${
                 pageIdx === table.getState().pagination.pageIndex
@@ -300,24 +319,19 @@ const ReportsTable = () => {
           <DialogHeader>
             <DialogTitle>Send Report</DialogTitle>
             <DialogDescription>
-              Are you sure you want to send report #{selectedReport?.id}? This
-              action cannot be undone.
+              Are you sure you want to send this report? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setSendConfirmOpen(false)}
-              disabled={sendReportMutation.isPending}
-            >
+            <Button variant="outline" onClick={() => setSendConfirmOpen(false)}>
               Cancel
             </Button>
             <LoadingButton
               onClick={confirmSendReport}
               loading={sendReportMutation.isPending}
-              variant="default"
             >
-              {sendReportMutation.isPending ? "Sending..." : "Send Report"}
+              Send Report
             </LoadingButton>
           </DialogFooter>
         </DialogContent>

@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     setIsAuthenticated(false);
-    router.push('/auth/login');
+    router.push('/');
   };
 
   const checkRouteAccess = (route) => {
@@ -146,7 +146,7 @@ export const useRouteProtection = () => {
       const pathWithoutLocale = '/' + pathSegments.slice(2).join('/');
       
       // Check if user is trying to access login page while authenticated
-      if (isAuthenticated && pathWithoutLocale === '/auth/login') {
+      if (isAuthenticated && pathWithoutLocale === '/') {
         // Redirect to dashboard home if user has token
         router.push('/dashboard');
         return;
@@ -154,7 +154,7 @@ export const useRouteProtection = () => {
       
       if (!isAuthenticated) {
         // Redirect to login if not authenticated
-        router.push('/auth/login');
+        router.push('/');
         return;
       }
 

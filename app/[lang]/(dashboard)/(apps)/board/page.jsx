@@ -1,47 +1,48 @@
 "use client";
 import { Card } from "@/components/ui/card";
-import React from "react";
+import React, { useState } from "react";
 import BoradTableStatus from "./board-table";
 import ReportsTableStatus from "./reports-table";
 import BoardStepsLineSpacs from "./board-steps";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import TeacherFilter from "@/components/Shared/TeacherFilter";
 import CoachingTableStatus from "../archive/QualityComponents/coaching-table";
 
 function page() {
+  const [selectedTeacher, setSelectedTeacher] = useState("");
+
+  const handleTeacherChange = (teacherId) => {
+    setSelectedTeacher(teacherId);
+  };
+
+  const handleClearFilter = () => {
+    setSelectedTeacher("");
+  };
+
   return (
     <div>
-      <div className=" space-y-10">
+      <div className="space-y-10">
         {/* <BoardStepsLineSpacs/> */}
+
+        {/* Global Teacher Filter */}
+        <Card>
+          <div className="p-4 border-b">
+            <TeacherFilter
+              selectedTeacher={selectedTeacher}
+              onTeacherChange={handleTeacherChange}
+              onClearFilter={handleClearFilter}
+            />
+          </div>
+        </Card>
+
         <div className="cover space-y-5">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex-1">
               <h3 className="text-xl font-medium text-default-700 opacity-60">
-                Borad
+                Board
               </h3>
             </div>
-            <div className="flex-none">
-              <Select>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue
-                    placeholder="Select Teacher"
-                    className="whitespace-nowrap"
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="jan-12">Jan 12</SelectItem>
-                  <SelectItem value="jan-13">Jan 13</SelectItem>
-                  <SelectItem value="jan-14">Jan 14</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
-          <BoradTableStatus />
+          <BoradTableStatus selectedTeacher={selectedTeacher} />
         </div>
 
         <div className="space-y-5">
@@ -52,7 +53,7 @@ function page() {
               </h3>
             </div>
           </div>
-          <ReportsTableStatus />
+          <ReportsTableStatus selectedTeacher={selectedTeacher} />
         </div>
 
         <div className="space-y-5">
@@ -63,7 +64,10 @@ function page() {
               </h3>
             </div>
           </div>
-          <CoachingTableStatus action={"board"} />
+          <CoachingTableStatus
+            action={"board"}
+            selectedTeacher={selectedTeacher}
+          />
         </div>
       </div>
     </div>

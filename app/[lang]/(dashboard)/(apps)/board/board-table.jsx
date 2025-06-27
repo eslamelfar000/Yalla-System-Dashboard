@@ -27,6 +27,7 @@ import { useGetData } from "@/hooks/useGetData";
 import { useMutate } from "@/hooks/useMutate";
 import LoadingButton from "@/components/Shared/loading-button";
 import toast from "react-hot-toast";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 import {
   Popover,
@@ -34,8 +35,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-const BoardTableStatus = () => {
-  // const [percent, setPercent] = useState(50);
+const BoardTableStatus = ({ selectedTeacher }) => {
   const [selectedSession, setSelectedSession] = useState(null);
   const [reportForm, setReportForm] = useState({
     teacher_id: "",
@@ -45,15 +45,17 @@ const BoardTableStatus = () => {
     admin_report: null,
   });
 
-  // Get sessions data using custom hook
+  // Get sessions data using custom hook with teacher filter
   const {
     data: sessionsData,
     isLoading,
     error,
     refetch,
   } = useGetData({
-    endpoint: "dashboard/sessions",
-    queryKey: ["sessions"],
+    endpoint: selectedTeacher
+      ? `dashboard/sessions?teacher_id=${selectedTeacher}`
+      : "dashboard/sessions",
+    queryKey: ["sessions", selectedTeacher],
   });
 
   const sessions = sessionsData?.data || [];
@@ -164,20 +166,22 @@ const BoardTableStatus = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <Card>
+        <TableSkeleton columns={columns} rows={3} />
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-center">
-          <p className="text-red-500 mb-4">Error loading sessions</p>
-          <Button onClick={() => refetch()}>Retry</Button>
+      <Card>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">Error loading sessions</p>
+            <Button onClick={() => refetch()}>Retry</Button>
+          </div>
         </div>
-      </div>
+      </Card>
     );
   }
 
@@ -193,137 +197,152 @@ const BoardTableStatus = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sessions.map((session) => (
-              <TableRow key={session.id} className="hover:bg-default-100">
-                <TableCell className="font-medium text-card-foreground/80">
-                  <div className="flex gap-3 items-center">
-                    <Avatar className="rounded-lg">
-                      <AvatarImage
-                        src={session.student?.avatar || session.student?.image}
-                      />
-                      <AvatarFallback>
-                        {session.student?.name?.charAt(0) || "S"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm text-default-600">
-                      {session.student || "Unknown Student"}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell>{session.id}</TableCell>
-                <TableCell>{session.day}</TableCell>
-                <TableCell>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-7 w-7"
-                        color="primary"
-                        onClick={() => handleSessionSelect(session)}
-                      >
-                        <Icon icon="heroicons:plus" className="h-4 w-4" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80">
-                      <form
-                        onSubmit={handleCreateReport}
-                        className="grid gap-4"
-                      >
-                        <div className="space-y-2">
-                          <h4 className="font-medium leading-none">
-                            Create Report
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            Create a report for session #{selectedSession?.id}
-                          </p>
-                        </div>
-
-                        <div className="grid gap-2 w-full space-y-5">
-                          <div className="space-y-2">
-                            <Label htmlFor="teacher_id">Teacher ID</Label>
-                            <Input
-                              id="teacher_id"
-                              type="text"
-                              value={reportForm.teacher_id}
-                              onChange={(e) =>
-                                setReportForm((prev) => ({
-                                  ...prev,
-                                  teacher_id: e.target.value,
-                                }))
-                              }
-                              placeholder="Enter teacher ID"
-                              required
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="admin_report">
-                              Admin Report (File)
-                            </Label>
-                            <Input
-                              id="admin_report"
-                              type="file"
-                              onChange={(e) =>
-                                handleFileChange(e, "admin_report")
-                              }
-                              className="col-span-2 h-8 w-full"
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="teacher_report">
-                              Teacher Report (File)
-                            </Label>
-                            <Input
-                              id="teacher_report"
-                              type="file"
-                              onChange={(e) =>
-                                handleFileChange(e, "teacher_report")
-                              }
-                              className="col-span-2 h-8"
-                            />
-                          </div>
-
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <Label htmlFor="target">Target</Label>
-                              <Label htmlFor="target">
-                                {reportForm.target}%
-                              </Label>
-                            </div>
-                            <Slider
-                              value={[reportForm.target]}
-                              max={100}
-                              step={1}
-                              className="w-full"
-                              onValueChange={(value) => {
-                                setReportForm((prev) => ({
-                                  ...prev,
-                                  target: value[0],
-                                }));
-                              }}
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <LoadingButton
-                              type="submit"
-                              className="w-full h-8"
-                              loading={createReportMutation.isPending}
-                            >
-                              {createReportMutation.isPending
-                                ? "Creating..."
-                                : "Create Report"}
-                            </LoadingButton>
-                          </div>
-                        </div>
-                      </form>
-                    </PopoverContent>
-                  </Popover>
+            {sessions.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-8"
+                >
+                  {selectedTeacher
+                    ? "No sessions found for the selected teacher"
+                    : "Please select a teacher to view sessions"}
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              sessions.map((session) => (
+                <TableRow key={session.id} className="hover:bg-default-100">
+                  <TableCell className="font-medium text-card-foreground/80">
+                    <div className="flex gap-3 items-center">
+                      <Avatar className="rounded-lg">
+                        <AvatarImage
+                          src={
+                            session.student?.avatar || session.student?.image
+                          }
+                        />
+                        <AvatarFallback>
+                          {session.student?.name?.charAt(0) || "S"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm text-default-600">
+                        {session.student || "Unknown Student"}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{session.id}</TableCell>
+                  <TableCell>{session.day}</TableCell>
+                  <TableCell>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-7 w-7"
+                          color="primary"
+                          onClick={() => handleSessionSelect(session)}
+                        >
+                          <Icon icon="heroicons:plus" className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80">
+                        <form
+                          onSubmit={handleCreateReport}
+                          className="grid gap-4"
+                        >
+                          <div className="space-y-2">
+                            <h4 className="font-medium leading-none">
+                              Create Report
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              Create a report for session #{selectedSession?.id}
+                            </p>
+                          </div>
+
+                          <div className="grid gap-2 w-full space-y-5">
+                            <div className="space-y-2">
+                              <Label htmlFor="teacher_id">Teacher ID</Label>
+                              <Input
+                                id="teacher_id"
+                                type="text"
+                                value={reportForm.teacher_id}
+                                onChange={(e) =>
+                                  setReportForm((prev) => ({
+                                    ...prev,
+                                    teacher_id: e.target.value,
+                                  }))
+                                }
+                                placeholder="Enter teacher ID"
+                                required
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="admin_report">
+                                Admin Report (File)
+                              </Label>
+                              <Input
+                                id="admin_report"
+                                type="file"
+                                onChange={(e) =>
+                                  handleFileChange(e, "admin_report")
+                                }
+                                className="col-span-2 h-8 w-full"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="teacher_report">
+                                Teacher Report (File)
+                              </Label>
+                              <Input
+                                id="teacher_report"
+                                type="file"
+                                onChange={(e) =>
+                                  handleFileChange(e, "teacher_report")
+                                }
+                                className="col-span-2 h-8"
+                              />
+                            </div>
+
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <Label htmlFor="target">Target</Label>
+                                <Label htmlFor="target">
+                                  {reportForm.target}%
+                                </Label>
+                              </div>
+                              <Slider
+                                value={[reportForm.target]}
+                                max={100}
+                                step={1}
+                                className="w-full"
+                                onValueChange={(value) => {
+                                  setReportForm((prev) => ({
+                                    ...prev,
+                                    target: value[0],
+                                  }));
+                                }}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <LoadingButton
+                                type="submit"
+                                className="w-full h-8"
+                                loading={createReportMutation.isPending}
+                              >
+                                {createReportMutation.isPending
+                                  ? "Creating..."
+                                  : "Create Report"}
+                              </LoadingButton>
+                            </div>
+                          </div>
+                        </form>
+                      </PopoverContent>
+                    </Popover>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </Card>

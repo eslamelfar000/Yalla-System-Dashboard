@@ -72,7 +72,7 @@ const LogInForm = () => {
       type === "admin"
         ? "super@admin.com"
         : type === "teacher"
-        ? "eslamsaber707@gmail.com"
+        ? "eslam5saber707@gmail.com	"
         : "eslamsaber708@gmail.com"
     );
 

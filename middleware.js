@@ -15,32 +15,37 @@ const USER_ROLES = {
 const ROUTE_PERMISSIONS = {
   // Common routes (accessible by all authenticated users)
   '/dashboard': 'all',
-  '/user-website': 'admin',
   '/calendar': 'all',
-  '/board': 'quality',
-  '/chat': 'teacher',
+
+  
+  // Admin-only routes
+  '/users': 'admin',
+  '/payrolls': 'admin',
+  '/target': 'admin',
+  '/compelete-sessions': 'admin',
   '/reservation': 'admin',
   '/requests': 'admin',
   '/contact': 'admin',
-  
-  // Admin-only routes
-  '/users': ['admin'],
-  '/payrolls': ['admin'],
-  '/target': ['admin'],
-  
+  '/user-website': 'admin',
+  '/students': 'admin',
+  '/qa-reports': 'admin',
+
+
+
   // Quality routes
-  '/qa-reports': ['admin'],
+    '/board': 'quality',
+
   
   // Teacher routes
-  '/lessons-board': ['teacher'],
+  '/lessons-board': 'teacher',
+  '/chat': 'teacher',
+
   
   // Multi-role routes
-  '/compelete-sessions': ['admin'],
-  '/students': ['admin'],
   '/income': ['admin', 'teacher', 'quality'],
   '/archive': ['admin', 'teacher', 'quality'],
-  '/user-profile': 'all',
-  '/user-profile/settings': 'all'
+  '/user-profile': ['admin', 'teacher', 'quality'],
+  '/user-profile/settings': ['admin', 'teacher', 'quality']
 };
 
 // Auth routes that should redirect to dashboard if user is logged in

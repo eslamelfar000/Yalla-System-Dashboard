@@ -65,11 +65,6 @@ const ProfileInfo = () => {
       removeUserData();
       router.push("/");
     },
-    // onError: (error) => {
-    // removeAuthToken();
-    // removeUserData();
-    // router.push("/");
-    // },
   });
 
   const handleLogout = () => {
