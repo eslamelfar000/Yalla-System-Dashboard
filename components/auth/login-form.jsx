@@ -195,25 +195,6 @@ const LogInForm = () => {
           )}
         </div>
 
-        <div className="flex justify-between items-center mt-3">
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="remember"
-              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-            />
-            <Label htmlFor="remember" className="text-sm text-default-600">
-              Remember me
-            </Label>
-          </div>
-          <Link
-            href={`/${lang}/auth/forgot`}
-            className="text-sm text-primary hover:text-primary/80"
-          >
-            Forgot password?
-          </Link>
-        </div>
-
         <Button
           className="w-full mt-5"
           disabled={loginMutation.isPending}
@@ -225,18 +206,6 @@ const LogInForm = () => {
           {loginMutation.isPending ? "Signing In..." : "Sign In"}
         </Button>
       </form>
-
-      <div className="mt-6 text-center">
-        <p className="text-sm text-default-600">
-          Don't have an account?{" "}
-          <Link
-            href={`/${lang}/auth/register`}
-            className="text-primary hover:text-primary/80 font-medium"
-          >
-            Sign up here
-          </Link>
-        </p>
-      </div>
     </div>
   );
 };
