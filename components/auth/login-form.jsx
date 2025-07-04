@@ -81,7 +81,7 @@ const LogInForm = () => {
       type === "admin"
         ? "Eslam@000"
         : type === "teacher"
-        ? "Eslam@555"
+        ? "Eslam@000"
         : "Eslam@555"
     );
   }, [type, setValue]);
