@@ -182,21 +182,23 @@ const ReportsTable = ({ selectedTeacher }) => {
                   <TableCell>
                     <div className="flex gap-3 items-center">
                       <Avatar className="w-8 h-8 rounded-full">
-                        <AvatarImage
-                          src={report.teacher?.avatar || report.teacher?.image}
-                        />
+                        <AvatarImage src={report?.lesson?.student?.image} />
                         <AvatarFallback>
-                          {report.teacher?.name?.charAt(0) || "T"}
+                          {report?.lesson?.student?.name?.charAt(0) || "T"}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm text-default-600">
-                        {report.teacher?.name || "Unknown Teacher"}
+                        {report?.lesson?.student?.name || "Unknown Student"}
                       </span>
                     </div>
                   </TableCell>
                   <TableCell className="font-medium">{report.id}</TableCell>
                   <TableCell>
-                    {new Date(report?.lesson?.created_at).toLocaleDateString()}
+                    {
+                      new Date(report?.lesson?.created_at)
+                        .toLocaleString()
+                        .split(",")[0]
+                    }
                   </TableCell>
                   <TableCell>{report.target}%</TableCell>
                   <TableCell>

@@ -38,7 +38,6 @@ import {
 const BoardTableStatus = ({ selectedTeacher }) => {
   const [selectedSession, setSelectedSession] = useState(null);
   const [reportForm, setReportForm] = useState({
-    teacher_id: "",
     lesson_id: "",
     target: 50,
     teacher_report: null,
@@ -53,8 +52,8 @@ const BoardTableStatus = ({ selectedTeacher }) => {
     refetch,
   } = useGetData({
     endpoint: selectedTeacher
-      ? `dashboard/sessions?teacher_id=${selectedTeacher}`
-      : "dashboard/sessions",
+      ? `dashboard/complete-sessions?teacher_id=${selectedTeacher}`
+      : "dashboard/complete-sessions",
     queryKey: ["sessions", selectedTeacher],
   });
 
@@ -94,6 +93,7 @@ const BoardTableStatus = ({ selectedTeacher }) => {
     setReportForm((prev) => ({
       ...prev,
       lesson_id: session.id || session.lesson_id || "",
+      teacher_id: session.teacher?.id || "",
     }));
   };
 
@@ -214,17 +214,13 @@ const BoardTableStatus = ({ selectedTeacher }) => {
                   <TableCell className="font-medium text-card-foreground/80">
                     <div className="flex gap-3 items-center">
                       <Avatar className="rounded-lg">
-                        <AvatarImage
-                          src={
-                            session.student?.avatar || session.student?.image
-                          }
-                        />
+                        <AvatarImage src={session.student?.image} />
                         <AvatarFallback>
                           {session.student?.name?.charAt(0) || "S"}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm text-default-600">
-                        {session.student || "Unknown Student"}
+                        {session.student?.name || "Unknown Student"}
                       </span>
                     </div>
                   </TableCell>
@@ -258,23 +254,6 @@ const BoardTableStatus = ({ selectedTeacher }) => {
                           </div>
 
                           <div className="grid gap-2 w-full space-y-5">
-                            <div className="space-y-2">
-                              <Label htmlFor="teacher_id">Teacher ID</Label>
-                              <Input
-                                id="teacher_id"
-                                type="text"
-                                value={reportForm.teacher_id}
-                                onChange={(e) =>
-                                  setReportForm((prev) => ({
-                                    ...prev,
-                                    teacher_id: e.target.value,
-                                  }))
-                                }
-                                placeholder="Enter teacher ID"
-                                required
-                              />
-                            </div>
-
                             <div className="space-y-2">
                               <Label htmlFor="admin_report">
                                 Admin Report (File)

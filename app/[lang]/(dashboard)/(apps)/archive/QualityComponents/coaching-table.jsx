@@ -56,7 +56,7 @@ const CoachingTableStatus = ({ selectedTeacher }) => {
   // Mutation for completing coaching
   const completeCoachingMutation = useMutate({
     method: "POST",
-    endpoint: `dashboard/coaching/${selectedCoaching?.id}/complete`,
+    endpoint: `dashboard/status-report/${selectedCoaching?.id}`,
     queryKeysToInvalidate: [["coaching"]],
     text: "Coaching completed successfully!",
     onSuccess: () => {
@@ -165,7 +165,7 @@ const CoachingTableStatus = ({ selectedTeacher }) => {
               coachingList.map((coaching) => (
                 <TableRow key={coaching.id} className="hover:bg-default-100">
                   <TableCell className="font-medium">
-                    {coaching.session || coaching.session_id}
+                    {coaching.teacher?.name || coaching.id}
                   </TableCell>
                   <TableCell>
                     {new Date(
