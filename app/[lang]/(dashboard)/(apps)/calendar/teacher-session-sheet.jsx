@@ -19,7 +19,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, CalendarIcon, User, Star, Mail, Phone } from "lucide-react";
+import { Loader2, CalendarIcon, User, Star, Mail, Phone, Info } from "lucide-react";
 import {
   createTeacherSession,
   updateTeacherSession,
@@ -111,8 +111,6 @@ const TeacherSessionSheet = ({
         teacher_id: user.id,
       };
 
-      console.log("Creating/updating session with data:", sessionData);
-      console.log("Teacher ID being used:", user.id);
 
       if (!session) {
         // Create new session
@@ -156,33 +154,14 @@ const TeacherSessionSheet = ({
 
       setValue("date", dateStr);
 
-      // Set default times for new sessions
-      const currentHour = new Date().getHours();
-      const nextHour = currentHour + 1;
-
-      // Ensure times are within reasonable bounds (9 AM to 9 PM)
-      const startHour = Math.max(9, Math.min(21, currentHour));
-      const endHour = Math.max(10, Math.min(22, nextHour));
-
-      const defaultStartTime = `${String(startHour).padStart(2, "0")}:00`;
-      const defaultEndTime = `${String(endHour).padStart(2, "0")}:00`;
-
-      setStartTime(defaultStartTime);
-      setEndTime(defaultEndTime);
-      setValue("start_time", defaultStartTime + ":00");
-      setValue("end_time", defaultEndTime + ":00");
+      // Set empty times for new sessions (user must enter manually)
+      setStartTime("");
+      setEndTime("");
+      setValue("start_time", "");
+      setValue("end_time", "");
 
       console.log("Selected date set:", dateStr);
-      console.log("Default times set:", {
-        start: defaultStartTime,
-        end: defaultEndTime,
-      });
-      console.log(
-        "State updated - startTime:",
-        defaultStartTime,
-        "endTime:",
-        defaultEndTime
-      );
+      console.log("Times set to empty for manual entry");
     }
     if (session) {
       const sessionData = session.extendedProps.sessionData;
@@ -569,6 +548,12 @@ const TeacherSessionSheet = ({
                             </div>
                           )}
                         </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Info className="w-16 h-16 text-yellow-600" />
+                        <span>
+                           You can create some session in one time by select a range of time like from 01:00 to 10:00 this will create 9 sessions.
+                        </span>
                       </div>
                     </div>
                   </div>
