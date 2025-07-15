@@ -250,13 +250,13 @@ const TeacherCalendarView = ({ sessions = [] }) => {
 
     if (is_booked && coaching === 0) {
       // Booked sessions with student - GREEN (regardless of coaching value)
-      return "bg-green-500 text-white border-green-600 hover:bg-green-600 transition-colors";
+      return "bg-primary text-white border-primary hover:bg-primary transition-colors";
     } else if (coaching === 1) {
       // Sessions with coaching quality but NOT booked - RED
       return "bg-red-500 text-white border-red-600 hover:bg-red-600 transition-colors";
     } else {
       // Available sessions - PRIMARY
-      return "bg-primary text-primary-foreground border-primary hover:bg-primary/90 transition-colors";
+      return "bg-green-600 text-white border-green-600 hover:bg-green-600 transition-colors";
     }
   };
 
@@ -279,11 +279,12 @@ const TeacherCalendarView = ({ sessions = [] }) => {
           <div className="mb-4">
             <div className="flex justify-center gap-4 text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-primary border border-primary rounded"></div>
+                <div className="w-4 h-4 bg-green-500 border border-green-600 rounded"></div>
                 <span>Available Sessions</span>
               </div>
+
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-green-500 border border-green-600 rounded"></div>
+                <div className="w-4 h-4 bg-primary border border-primary rounded"></div>
                 <span>Booked with Student</span>
               </div>
               <div className="flex items-center gap-2">

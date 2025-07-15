@@ -346,10 +346,10 @@ const TeacherSessionSheet = ({
                                 className={
                                   sessionData.is_booked &&
                                   sessionData.coaching === 0
-                                    ? "bg-green-500"
+                                    ? "bg-primary"
                                     : sessionData.coaching === 1
                                     ? "bg-red-500"
-                                    : "bg-blue-500"
+                                    : "bg-green-600"
                                 }
                               >
                                 {sessionData.is_booked
