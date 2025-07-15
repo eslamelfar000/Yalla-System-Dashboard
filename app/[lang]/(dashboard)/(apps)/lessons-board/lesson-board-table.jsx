@@ -47,8 +47,8 @@ const LessonBoardTable = () => {
       label: "Booked",
     },
     {
-      key: "action",
-      label: "action",
+      key: "progress",
+      label: "Progress",
     },
   ];
 

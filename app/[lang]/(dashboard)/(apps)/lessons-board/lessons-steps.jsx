@@ -101,7 +101,7 @@ const LessonsStepsLineSpace = () => {
   const handleLessonClick = (lesson) => {
     // Don't allow clicking on already completed lessons
     if (completedLessons.has(lesson.id)) {
-      toast.info("This lesson is already completed!");
+      toast.success("This lesson is already completed!");
       return;
     }
 

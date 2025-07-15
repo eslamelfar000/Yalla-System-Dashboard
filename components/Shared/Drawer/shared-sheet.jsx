@@ -169,7 +169,11 @@ export function SharedSheet({
                 initialFilters={initialFilters}
               />
             ) : type === "filter-archive" ? (
-              <FilterArchiveComponent />
+              <FilterArchiveComponent
+                onApply={handleSuccess}
+                onReset={handleReset}
+                initialFilters={initialFilters}
+              />
             ) : (
               <div className="flex flex-col gap-4">
                 <h3 className="text-lg font-medium text-default-700 mb-2 opacity-60">

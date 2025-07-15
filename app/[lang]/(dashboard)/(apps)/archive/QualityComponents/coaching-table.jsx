@@ -18,10 +18,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { cn } from "@/lib/utils";
 import { useGetData } from "@/hooks/useGetData";
 import { useMutate } from "@/hooks/useMutate";
-import { useAuth } from "@/hooks/use-auth";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import {
   AlertDialog,
@@ -33,31 +31,64 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import LoadingButton from "@/components/Shared/loading-button";
+import Pagination from "@/components/Shared/Pagination/Pagination";
+import { useMemo } from "react";
+import { usePathname } from "next/navigation";
 
-const CoachingTableStatus = ({ selectedTeacher }) => {
+const CoachingTableStatus = ({ selectedTeacher, action, selectedMonth }) => {
   const [selectedCoaching, setSelectedCoaching] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const { pathname } = usePathname();
 
-  // Fetch coaching data from API with teacher filter
+  // Build API endpoint with filters
+  const buildEndpoint = useMemo(() => {
+    if (action === "archive") {
+      // Use reports endpoint for archive action
+      let endpoint = `dashboard/coaching?page=${currentPage}&status=done`;
+      const params = [];
+
+      if (selectedTeacher) {
+        params.push(`teacher_id=${selectedTeacher}`);
+      }
+
+      if (selectedMonth) {
+        params.push(`month_number=${selectedMonth}`);
+      }
+
+      if (params.length > 0) {
+        endpoint += `&${params.join("&")}`;
+      }
+
+      return endpoint;
+    } else {
+      // Use coaching endpoint for other actions
+      let endpoint = `dashboard/coaching?page=${currentPage}&status=current`;
+      if (selectedTeacher) {
+        endpoint += `&teacher_id=${selectedTeacher}`;
+      }
+      return endpoint;
+    }
+  }, [action, currentPage, selectedTeacher, selectedMonth, pathname]);
+
+  // Fetch data from API
   const {
-    data: coachingData,
+    data: data,
     isLoading,
     error,
     refetch,
   } = useGetData({
-    endpoint: selectedTeacher
-      ? `dashboard/coaching?teacher_id=${selectedTeacher}`
-      : "dashboard/coaching",
-    queryKey: ["coaching", selectedTeacher],
+    endpoint: buildEndpoint,
+    queryKey: ["coaching", action, selectedTeacher, selectedMonth, currentPage],
   });
 
-  const coachingList = coachingData?.data || [];
+  const dataList = data?.data?.sessions || [];
 
-  // Mutation for completing coaching
-  const completeCoachingMutation = useMutate({
+  // Mutation for completing coaching/reports
+  const completeMutation = useMutate({
     method: "POST",
-    endpoint: `dashboard/status-report/${selectedCoaching?.id}`,
-    queryKeysToInvalidate: [["coaching"]],
+    endpoint: `dashboard/update-session-status/${selectedCoaching?.id}`,
+    queryKeysToInvalidate: [["coaching", action]],
     text: "Coaching completed successfully!",
     onSuccess: () => {
       setShowConfirmDialog(false);
@@ -72,6 +103,10 @@ const CoachingTableStatus = ({ selectedTeacher }) => {
       label: "Session",
     },
     {
+      key: "id",
+      label: "ID",
+    },
+    {
       key: "date",
       label: "Date",
     },
@@ -79,10 +114,15 @@ const CoachingTableStatus = ({ selectedTeacher }) => {
       key: "purpose",
       label: "Purpose",
     },
-    {
-      key: "action",
-      label: "Action",
-    },
+
+    ...(action === "qa-reports" || action === "board"
+      ? [
+          {
+            key: "action",
+            label: "Action",
+          },
+        ]
+      : []),
   ];
 
   const [columnFilters, setColumnFilters] = useState([]);
@@ -90,7 +130,7 @@ const CoachingTableStatus = ({ selectedTeacher }) => {
   const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
-    data: coachingList,
+    data: dataList,
     columns,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -113,7 +153,7 @@ const CoachingTableStatus = ({ selectedTeacher }) => {
 
   const handleConfirmComplete = async () => {
     if (selectedCoaching) {
-      await completeCoachingMutation.mutateAsync();
+      await completeMutation.mutateAsync();
     }
   };
 
@@ -150,40 +190,70 @@ const CoachingTableStatus = ({ selectedTeacher }) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {coachingList.length === 0 ? (
+            {dataList.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="text-center py-8"
                 >
                   {selectedTeacher
-                    ? "No coaching sessions found for the selected teacher"
-                    : "Please select a teacher to view coaching sessions"}
+                    ? `No ${
+                        action === "qa-reports" || action === "board"
+                          ? "reports"
+                          : "coaching sessions"
+                      } found for the selected teacher`
+                    : `No ${
+                        action === "qa-reports" || action === "board"
+                          ? "reports"
+                          : "coaching sessions"
+                      } found`}
                 </TableCell>
               </TableRow>
             ) : (
-              coachingList.map((coaching) => (
-                <TableRow key={coaching.id} className="hover:bg-default-100">
+              dataList.map((item) => (
+                <TableRow key={item.id} className="hover:bg-default-100">
                   <TableCell className="font-medium">
-                    {coaching.teacher?.name || coaching.id}
+                    {item.teacher?.name || item.id}
                   </TableCell>
+                  <TableCell>{item.id}</TableCell>
                   <TableCell>
                     {new Date(
-                      coaching.date || coaching.created_at
+                      item.date || item.created_at
                     ).toLocaleDateString()}
                   </TableCell>
-                  <TableCell>{coaching.purpose || "N/A"}</TableCell>
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleCompleteCoaching(coaching)}
-                      disabled={coaching.completed}
-                    >
-                      <Icon icon="heroicons:check" className="w-4 h-4 mr-1" />
-                      {coaching.completed ? "Completed" : "Mark Done"}
-                    </Button>
-                  </TableCell>
+                  <TableCell>{item.purpose || "N/A"}</TableCell>
+                  {action === "qa-reports" ||
+                    (action === "board" && (
+                      <TableCell>
+                        {item?.status === "done" ? (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            className="w-8 h-8 text-green-500"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleCompleteCoaching(item)}
+                            disabled={item.completed}
+                          >
+                            <Icon
+                              icon="heroicons:check"
+                              className="w-4 h-4 mr-1"
+                            />
+                            Mark Done
+                          </Button>
+                        )}
+                      </TableCell>
+                    ))}
                 </TableRow>
               ))
             )}
@@ -191,73 +261,80 @@ const CoachingTableStatus = ({ selectedTeacher }) => {
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4">
-        <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-
-        <div className="flex gap-2 items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-left"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-
-          {table.getPageOptions().map((page, pageIdx) => (
-            <Button
-              key={`basic-data-table-${pageIdx}`}
-              onClick={() => table.setPageIndex(pageIdx)}
-              variant={`${
-                pageIdx === table.getState().pagination.pageIndex
-                  ? ""
-                  : "outline"
-              }`}
-              className={cn("w-8 h-8")}
-            >
-              {page + 1}
-            </Button>
-          ))}
-
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-right"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-        </div>
-      </div>
+      {/* Pagination */}
+      <Pagination
+        last_page={data?.data?.pagination?.last_page}
+        setCurrentPage={setCurrentPage}
+        current_page={currentPage}
+        studentsPagination={false}
+      />
 
       {/* Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Complete Coaching Session</AlertDialogTitle>
+            <AlertDialogTitle>
+              {action === "archive"
+                ? "Complete Report"
+                : "Complete Coaching Session"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to mark this coaching session as completed?
-              This action cannot be undone.
+              Are you sure you want to mark this{" "}
+              {action === "archive" ? "report" : "coaching session"} as
+              completed?
+              <br />
+              <br />
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="font-medium">
+                    {action === "archive" ? "Student:" : "Teacher:"}
+                  </span>
+                  <span>
+                    {action === "archive"
+                      ? selectedCoaching?.lesson?.student?.name || "N/A"
+                      : selectedCoaching?.teacher?.name || "N/A"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">ID:</span>
+                  <span>{selectedCoaching?.id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Date:</span>
+                  <span>
+                    {action === "archive"
+                      ? selectedCoaching?.lesson?.created_at
+                        ? new Date(selectedCoaching.lesson.created_at)
+                            .toLocaleString()
+                            .split(",")[0]
+                        : "N/A"
+                      : selectedCoaching?.date ||
+                        selectedCoaching?.created_at ||
+                        "N/A"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">
+                    {action === "archive" ? "Target:" : "Purpose:"}
+                  </span>
+                  <span>{selectedCoaching?.purpose || "N/A"}</span>
+                </div>
+              </div>
+              <br />
+              <span className="text-orange-600 font-medium">
+                ⚠️ This action cannot be undone once completed.
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={completeMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
             <LoadingButton
               onClick={handleConfirmComplete}
-              loading={completeCoachingMutation.isPending}
+              loading={completeMutation.isPending}
             >
-              Complete
+              {action === "archive" ? "Mark as Done" : "Complete"}
             </LoadingButton>
           </AlertDialogFooter>
         </AlertDialogContent>

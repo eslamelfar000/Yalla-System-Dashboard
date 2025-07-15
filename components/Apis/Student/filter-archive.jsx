@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Icon } from "@iconify/react";
 
-function FilterArchiveComponent() {
+function FilterArchiveComponent({ onApply, onReset, initialFilters = {} }) {
   const types = [
     { id: 1, name: "Trail Lesson" },
     { id: 2, name: "Pay After Lesson" },
@@ -27,9 +27,22 @@ function FilterArchiveComponent() {
 
   const sessionCount = 8;
 
-  const [selectedTypes, setSelectedTypes] = useState([]);
-  const [selectedSessions, setSelectedSessions] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState([]);
+  const [selectedTypes, setSelectedTypes] = useState(
+    initialFilters.types || []
+  );
+  const [selectedSessions, setSelectedSessions] = useState(
+    initialFilters.sessions || []
+  );
+  const [selectedMonth, setSelectedMonth] = useState(
+    initialFilters.months || []
+  );
+
+  // Update local state when initialFilters change
+  useEffect(() => {
+    setSelectedTypes(initialFilters.types || []);
+    setSelectedSessions(initialFilters.sessions || []);
+    setSelectedMonth(initialFilters.months || []);
+  }, [initialFilters]);
 
   const toggleType = (id) => {
     setSelectedTypes((prev) =>
@@ -53,6 +66,20 @@ function FilterArchiveComponent() {
     setSelectedTypes([]);
     setSelectedSessions([]);
     setSelectedMonth([]);
+    if (onReset) {
+      onReset();
+    }
+  };
+
+  const handleApply = () => {
+    const filters = {
+      types: selectedTypes,
+      sessions: selectedSessions,
+      months: selectedMonth,
+    };
+    if (onApply) {
+      onApply(filters);
+    }
   };
 
   return (
@@ -65,7 +92,9 @@ function FilterArchiveComponent() {
             </Button>
           </li>
           <li>
-            <Button variant="soft">Apply</Button>
+            <Button variant="soft" onClick={handleApply}>
+              Apply
+            </Button>
           </li>
         </ul>
       </div>

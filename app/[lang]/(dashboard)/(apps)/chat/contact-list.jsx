@@ -5,65 +5,88 @@ import { cn, formatTime } from "@/lib/utils";
 import { Icon } from "@iconify/react";
 
 const ContactList = ({ contact, openChat, selectedChatId }) => {
-  const { avatar, id, fullName, status, about, chat, unreadmessage, date } =
-    contact;
+  // Handle different data structures from API
+  const {
+    id,
+    chat_id,
+    user_id,
+    name,
+    fullName,
+    avatar,
+    image,
+    status = "offline",
+    about,
+    bio,
+    last_message,
+    lastMessage,
+    unread_count,
+    unreadmessage,
+    updated_at,
+    created_at,
+    date,
+  } = contact;
+
+  // Use the appropriate fields based on what's available
+  const chatId = id || chat_id;
+  const userName = name || fullName;
+  const userAvatar = avatar?.src || image || avatar;
+  const userAbout = about || bio;
+  const lastMsg = last_message || lastMessage;
+  const unreadCount = unread_count || unreadmessage || 0;
+  const lastDate = updated_at || created_at || date;
 
   return (
     <div
       className={cn(
-        " gap-4 py-2 lg:py-2.5 px-3 border-l-2 border-transparent   hover:bg-default-200 cursor-pointer flex ",
+        "flex items-center gap-3 p-3 border-l-2 border-transparent hover:bg-muted/50 cursor-pointer transition-colors",
         {
-          "lg:border-primary/70 lg:bg-default-200 ": id === selectedChatId,
+          "border-primary bg-muted/50": chatId === selectedChatId,
         }
       )}
-      onClick={() => openChat(id)}
+      onClick={() => openChat(chatId)}
     >
-      <div className="flex-1 flex  gap-3 ">
-        <div className="relative inline-block ">
-          <Avatar>
-            <AvatarImage src={avatar.src} />
-            <AvatarFallback className="uppercase">
-              {fullName.slice(0, 2)}
-            </AvatarFallback>
-          </Avatar>
-          <Badge
-            className=" h-2 w-2  p-0 ring-1 ring-border ring-offset-[1px]   items-center justify-center absolute
-             left-[calc(100%-8px)] top-[calc(100%-10px)]"
-            color={status === "online" ? "success" : "secondary"}
-          ></Badge>
-        </div>
-        <div className="block">
-          <div className="truncate max-w-[120px]">
-            <span className="text-sm text-default-900 font-medium">
-              {" "}
-              {fullName}
-            </span>
-          </div>
-          <div className="truncate  max-w-[120px]">
-            <span className=" text-xs  text-default-600 ">
-              {chat?.lastMessage ? chat?.lastMessage : about}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div className="flex-none  flex-col items-end  gap-2 hidden lg:flex">
-        <span className="text-xs text-default-600 text-end uppercase">
-          {date}
-        </span>
-        <span
+      <div className="relative">
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={userAvatar} />
+          <AvatarFallback className="uppercase text-xs">
+            {userName?.slice(0, 2) || "U"}
+          </AvatarFallback>
+        </Avatar>
+        <Badge
           className={cn(
-            "h-[14px] w-[14px] flex items-center justify-center bg-default-400 rounded-full text-primary-foreground text-[10px] font-medium",
+            "h-2 w-2 p-0 absolute -bottom-0.5 -right-0.5 ring-2 ring-background",
             {
-              "bg-primary/70": unreadmessage > 0,
+              "bg-green-500": status === "online",
+              "bg-gray-400": status !== "online",
             }
           )}
-        >
-          {unreadmessage === 0 ? (
-            <Icon icon="uil:check" className="text-sm" />
-          ) : (
-            unreadmessage
+        />
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-foreground truncate">
+            {userName || "Unknown User"}
+          </span>
+          {lastDate && (
+            <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
+              {formatTime(lastDate)}
+            </span>
           )}
-        </span>
+        </div>
+        <div className="flex items-center justify-between mt-1">
+          <span className="text-xs text-muted-foreground truncate">
+            {lastMsg || userAbout || "No messages yet"}
+          </span>
+          {unreadCount > 0 && (
+            <Badge
+              variant="destructive"
+              className="h-5 w-5 p-0 text-xs flex items-center justify-center ml-2 flex-shrink-0"
+            >
+              {unreadCount}
+            </Badge>
+          )}
+        </div>
       </div>
     </div>
   );

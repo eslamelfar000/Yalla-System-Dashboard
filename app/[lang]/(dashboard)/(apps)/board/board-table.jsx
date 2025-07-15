@@ -28,6 +28,7 @@ import { useMutate } from "@/hooks/useMutate";
 import LoadingButton from "@/components/Shared/loading-button";
 import toast from "react-hot-toast";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
+import Pagination from "@/components/Shared/Pagination/Pagination";
 
 import {
   Popover,
@@ -43,8 +44,9 @@ const BoardTableStatus = ({ selectedTeacher }) => {
     teacher_report: null,
     admin_report: null,
   });
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Get sessions data using custom hook with teacher filter
+  // Get sessions data using custom hook with teacher filter and pagination
   const {
     data: sessionsData,
     isLoading,
@@ -52,18 +54,18 @@ const BoardTableStatus = ({ selectedTeacher }) => {
     refetch,
   } = useGetData({
     endpoint: selectedTeacher
-      ? `dashboard/complete-sessions?teacher_id=${selectedTeacher}`
-      : "dashboard/complete-sessions",
-    queryKey: ["sessions", selectedTeacher],
+      ? `dashboard/reports-complete-sessions?teacher_id=${selectedTeacher}&page=${currentPage}`
+      : `dashboard/reports-complete-sessions?page=${currentPage}`,
+    queryKey: ["sessions", selectedTeacher, currentPage],
   });
 
-  const sessions = sessionsData?.data || [];
+  const lessons = sessionsData?.data?.lessons || [];
 
   // Create report mutation using custom hook
   const createReportMutation = useMutate({
     method: "POST",
     endpoint: "dashboard/reports",
-    queryKeysToInvalidate: [["sessions"]],
+    queryKeysToInvalidate: [["lessons"]],
     text: "Report created successfully",
     onSuccess: (data) => {
       setSelectedSession(null);
@@ -140,30 +142,6 @@ const BoardTableStatus = ({ selectedTeacher }) => {
     },
   ];
 
-  const [sorting, setSorting] = useState([]);
-  const [columnFilters, setColumnFilters] = useState([]);
-  const [columnVisibility, setColumnVisibility] = useState({});
-  const [rowSelection, setRowSelection] = useState({});
-
-  const table = useReactTable({
-    data: sessions,
-    columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  });
-
   if (isLoading) {
     return (
       <Card>
@@ -197,7 +175,7 @@ const BoardTableStatus = ({ selectedTeacher }) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sessions.length === 0 ? (
+            {lessons.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
@@ -205,11 +183,11 @@ const BoardTableStatus = ({ selectedTeacher }) => {
                 >
                   {selectedTeacher
                     ? "No sessions found for the selected teacher"
-                    : "Please select a teacher to view sessions"}
+                    : "No sessions found"}
                 </TableCell>
               </TableRow>
             ) : (
-              sessions.map((session) => (
+              lessons.map((session) => (
                 <TableRow key={session.id} className="hover:bg-default-100">
                   <TableCell className="font-medium text-card-foreground/80">
                     <div className="flex gap-3 items-center">
@@ -224,8 +202,14 @@ const BoardTableStatus = ({ selectedTeacher }) => {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>{session.id}</TableCell>
-                  <TableCell>{session.day}</TableCell>
+                  <TableCell>{session?.student?.id}</TableCell>
+                  <TableCell>
+                    {
+                      new Date(session?.created_at)
+                        .toLocaleString()
+                        .split(",")[0]
+                    }
+                  </TableCell>
                   <TableCell>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -326,55 +310,13 @@ const BoardTableStatus = ({ selectedTeacher }) => {
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4">
-        <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-
-        <div className="flex gap-2 items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-left"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-
-          {table.getPageOptions().map((page, pageIdx) => (
-            <Button
-              key={`basic-data-table-${pageIdx}`}
-              onClick={() => table.setPageIndex(pageIdx)}
-              variant={`${
-                pageIdx === table.getState().pagination.pageIndex
-                  ? ""
-                  : "outline"
-              }`}
-              className={cn("w-8 h-8")}
-            >
-              {page + 1}
-            </Button>
-          ))}
-
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-right"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-        </div>
-      </div>
+      {/* Pagination */}
+      <Pagination
+        last_page={sessionsData?.data?.pagination?.last_page}
+        setCurrentPage={setCurrentPage}
+        current_page={currentPage}
+        studentsPagination={false}
+      />
     </>
   );
 };

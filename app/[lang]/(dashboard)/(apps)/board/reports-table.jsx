@@ -33,12 +33,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Link from "next/link";
+import Pagination from "@/components/Shared/Pagination/Pagination";
 
 const ReportsTable = ({ selectedTeacher }) => {
   const [selectedReport, setSelectedReport] = useState(null);
   const [sendConfirmOpen, setSendConfirmOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Get reports data using custom hook with teacher filter
+  // Get reports data using custom hook with teacher filter and pagination
   const {
     data: reportsData,
     isLoading,
@@ -46,12 +48,12 @@ const ReportsTable = ({ selectedTeacher }) => {
     refetch,
   } = useGetData({
     endpoint: selectedTeacher
-      ? `dashboard/reports?teacher_id=${selectedTeacher}`
-      : "dashboard/reports",
-    queryKey: ["reports", selectedTeacher],
+      ? `dashboard/reports?send=pending&teacher_id=${selectedTeacher}&page=${currentPage}`
+      : `dashboard/reports?send=pending&page=${currentPage}`,
+    queryKey: ["reports", selectedTeacher, currentPage],
   });
 
-  const reports = reportsData?.data || [];
+  const reports = reportsData?.data?.reports || [];
 
   // Send report mutation using custom hook
   const sendReportMutation = useMutate({
@@ -248,13 +250,18 @@ const ReportsTable = ({ selectedTeacher }) => {
                       </Button>
                     ) : (
                       <div size="sm" className="flex items-start">
-                        <div className="flex items-center gap-2 bg-green-500 text-white rounded-md p-2 select-none">
-                          <span className="">Done</span>
-                          <Icon
-                            icon="heroicons:check-circle"
-                            className="w-5 h-5"
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="w-8 h-8 text-green-500"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+                            clipRule="evenodd"
                           />
-                        </div>
+                        </svg>
                       </div>
                     )}
                   </TableCell>
@@ -265,55 +272,13 @@ const ReportsTable = ({ selectedTeacher }) => {
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4">
-        <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-
-        <div className="flex gap-2 items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-left"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-
-          {table.getPageOptions().map((page, pageIdx) => (
-            <Button
-              key={`basic-data-table-${pageIdx}`}
-              onClick={() => table.setPageIndex(pageIdx)}
-              variant={`${
-                pageIdx === table.getState().pagination.pageIndex
-                  ? ""
-                  : "outline"
-              }`}
-              className={cn("w-8 h-8")}
-            >
-              {page + 1}
-            </Button>
-          ))}
-
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-right"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-        </div>
-      </div>
+      {/* Pagination */}
+      <Pagination
+        last_page={reportsData?.data?.pagination?.last_page}
+        setCurrentPage={setCurrentPage}
+        current_page={currentPage}
+        studentsPagination={false}
+      />
 
       {/* Send Report Confirmation Dialog */}
       <Dialog open={sendConfirmOpen} onOpenChange={setSendConfirmOpen}>

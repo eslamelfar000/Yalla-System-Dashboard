@@ -12,35 +12,65 @@ import {
 } from "@/components/ui/select";
 import { useGetData } from "@/hooks/useGetData";
 import { useAuth } from "@/hooks/use-auth";
+import { Skeleton } from "../ui/skeleton";
 
-const TeacherFilter = ({ selectedTeacher, onTeacherChange, onClearFilter }) => {
+const TeacherFilter = ({
+  selectedTeacher,
+  onTeacherChange,
+  onClearFilter,
+  clearButton = true,
+  quality = false,
+}) => {
   const { user } = useAuth();
 
   // Get teachers data for filter
-  const { data: teachersData, isLoading: teachersLoading } = useGetData({
+  const {
+    data: teachersData,
+    isLoading: teachersLoading,
+    error: teachersError,
+  } = useGetData({
     endpoint: "dashboard/teachers",
     queryKey: ["teachers"],
   });
 
   const teachers = teachersData?.data || [];
 
-  // Set default teacher to current user if they are a teacher
+  // Set default teacher to first teacher in list for quality role
   useEffect(() => {
-    if (user && user.role === "teacher" && user.id && !selectedTeacher) {
+    if (quality && teachers.length > 0 && !selectedTeacher) {
+      // Use user_id for quality role
+      onTeacherChange(teachers[0].user_id.toString());
+    } else if (user && user.role === "teacher" && user.id && !selectedTeacher) {
       onTeacherChange(user.id.toString());
     }
-  }, [user, selectedTeacher, onTeacherChange]);
+  }, [user, selectedTeacher, onTeacherChange, quality, teachers]);
 
   const handleClearFilter = () => {
     onClearFilter();
   };
 
+  if (teachersLoading) {
+    return <Skeleton className="h-10 w-[200px]" />;
+  }
+
+  if (teachersError) {
+    return <div className="text-red-500">Error loading teachers</div>;
+  }
+
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-4">
+      {selectedTeacher && clearButton && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleClearFilter}
+          className="h-8"
+        >
+          <Icon icon="heroicons:x-mark" className="w-4 h-4 mr-1" />
+          Clear Filter
+        </Button>
+      )}
       <div className="flex items-center gap-4">
-        <Label htmlFor="teacher-filter" className="text-sm font-medium">
-          Filter by Teacher:
-        </Label>
         <Select
           value={selectedTeacher || "Select your teacher"}
           onValueChange={onTeacherChange}
@@ -53,24 +83,18 @@ const TeacherFilter = ({ selectedTeacher, onTeacherChange, onClearFilter }) => {
               Select your teacher
             </SelectItem>
             {teachers.map((teacher) => (
-              <SelectItem key={teacher.id} value={teacher.id.toString()}>
+              <SelectItem
+                key={teacher.id}
+                value={
+                  quality ? teacher.user_id.toString() : teacher.id.toString()
+                }
+              >
                 {teacher.name || teacher.email}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
-      {selectedTeacher && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleClearFilter}
-          className="h-8"
-        >
-          <Icon icon="heroicons:x-mark" className="w-4 h-4 mr-1" />
-          Clear Filter
-        </Button>
-      )}
     </div>
   );
 };

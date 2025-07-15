@@ -43,16 +43,26 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import LoadingButton from "@/components/Shared/loading-button";
+import TeacherFilter from "@/components/Shared/TeacherFilter";
+import Pagination from "@/components/Shared/Pagination/Pagination";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const columns = [
   {
     accessorKey: "student-name",
     header: "Student Name",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.student_name || row?.original?.user?.name || "N/A"}
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <Avatar className="rounded-full">
+            <AvatarImage src={row?.original?.lesson?.student?.image} />
+            <AvatarFallback>
+              {row?.original?.lesson?.student?.name?.charAt(0) || "S"}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-sm text-card-foreground whitespace-nowrap">
+            {row?.original?.lesson?.student?.name || "N/A"}
           </span>
         </div>
       </div>
@@ -62,9 +72,9 @@ const columns = [
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
             {row?.original?.id}
           </span>
         </div>
@@ -75,9 +85,9 @@ const columns = [
     accessorKey: "date",
     header: "Date",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
             {row?.original?.date || row?.original?.created_at || "N/A"}
           </span>
         </div>
@@ -88,9 +98,9 @@ const columns = [
     accessorKey: "target",
     header: "Target",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
             {row?.original?.target || "N/A"}
           </span>
         </div>
@@ -101,10 +111,14 @@ const columns = [
     accessorKey: "admin report",
     header: "Admin Report",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            <Link href={row?.original?.admin_report_url || ""} className="">
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            <Link
+              href={row?.original?.admin_report || ""}
+              target="_blank"
+              className=""
+            >
               <button className="text-primary flex items-center text-[12px] border px-4 py-1 border-solid border-primary rounded-full">
                 <span className="text-sm font-bold">Check</span>
                 <ArrowBigRightDash className="inline-block ml-1 w-6 h-6" />
@@ -119,10 +133,14 @@ const columns = [
     accessorKey: "Teacher report",
     header: "Teacher Report",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            <Link href={row?.original?.teacher_report_url || ""} className="">
+      <div className="font-medium">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] whitespace-nowrap">
+            <Link
+              href={row?.original?.teacher_report || ""}
+              target="_blank"
+              className=""
+            >
               <button className="text-primary flex items-center text-[12px] border px-4 py-1 border-solid border-primary rounded-full">
                 <span className="text-sm font-bold">Check</span>
                 <ArrowBigRightDash className="inline-block ml-1 w-6 h-6" />
@@ -136,34 +154,187 @@ const columns = [
   {
     accessorKey: "action",
     header: "Action",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="rtl:space-x-reverse items-center">
-          <Toggle
-            aria-label="Toggle italic"
-            size="icon"
-            className="w-6 h-6 p-1 rounded-full bg-transparent text-primary border border-solid border-primary"
-            pressed={row?.original?.status === "completed"}
-            disabled={row?.original?.status === "completed"}
-            onClick={() =>
-              row.original.onToggle && row.original.onToggle(row.original)
-            }
-          >
-            <Check className="w-6 h-6" />
-          </Toggle>
+    cell: ({ row }) => {
+      const isRowLoading = row.original.isLoading;
+      const isCompleted = row?.original?.status === "completed";
+
+      return (
+        <div className="font-medium text-card-foreground/80">
+          <div className="rtl:space-x-reverse items-center">
+            {isRowLoading ? (
+              <div className="flex items-center justify-center w-6 h-6">
+                <Icon
+                  icon="eos-icons:loading"
+                  className="w-4 h-4 animate-spin text-primary"
+                />
+              </div>
+            ) : isCompleted ? (
+              <div className="flex items-center justify-center w-6 h-6">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-6 h-6 text-green-500"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            ) : (
+              <Toggle
+                aria-label="Toggle italic"
+                size="icon"
+                className="w-6 h-6 p-1 rounded-full bg-transparent text-primary border border-solid border-primary hover:bg-primary hover:text-white transition-colors"
+                pressed={false}
+                disabled={false}
+                onClick={() =>
+                  row.original.onToggle && row.original.onToggle(row.original)
+                }
+              >
+                <Check className="w-6 h-6" />
+              </Toggle>
+            )}
+          </div>
         </div>
-      </div>
-    ),
+      );
+    },
   },
 ];
 
-export function ReportsDataTable() {
+// Custom loading skeleton for QA reports table
+const QAReportsSkeleton = () => {
+  return (
+    <Card>
+      <div className="flex items-center flex-wrap gap-2 mb-5">
+        <Skeleton className="h-10 w-[200px]" />
+        <Skeleton className="h-10 w-[200px]" />
+      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              Student Name
+            </TableHead>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              ID
+            </TableHead>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              Date
+            </TableHead>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              Target
+            </TableHead>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              Admin Report
+            </TableHead>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              Teacher Report
+            </TableHead>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              Action
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: 8 }).map((_, rowIndex) => (
+            <TableRow key={rowIndex}>
+              <TableCell>
+                <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-12" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-24" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-16" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-8 w-20 rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-8 w-20 rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-6 w-6 rounded-full" />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Card>
+  );
+};
+
+const ReportsDataTableComponent = () => {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [selectedReport, setSelectedReport] = React.useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
+  const [selectedTeacher, setSelectedTeacher] = React.useState(null);
+  const [selectedMonth, setSelectedMonth] = React.useState("");
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [loadingRows, setLoadingRows] = React.useState(new Set());
+
+  const handleTeacherChange = React.useCallback((teacherId) => {
+    setSelectedTeacher(teacherId);
+    setCurrentPage(1);
+  }, []);
+
+  const handleMonthChange = React.useCallback((month) => {
+    setSelectedMonth(month);
+    setCurrentPage(1);
+  }, []);
+
+  const handleClearFilter = React.useCallback(() => {
+    setSelectedTeacher(null);
+    setSelectedMonth("");
+  }, []);
+
+  // Generate all 12 months
+  const months = React.useMemo(() => {
+    const months = [];
+    const currentYear = new Date().getFullYear();
+
+    for (let month = 1; month <= 12; month++) {
+      const date = new Date(currentYear, month - 1, 1); // month - 1 because getMonth() is 0-based
+      const monthNumber = month; // 1-12 format
+      const monthLabel = date.toLocaleDateString("en-US", {
+        month: "long",
+      });
+      months.push({ value: monthNumber.toString(), label: monthLabel });
+    }
+    return months;
+  }, []);
+
+  // Build API endpoint with filters - memoized for performance
+  const buildEndpoint = React.useMemo(() => {
+    let endpoint = `dashboard/reports?page=${currentPage}`;
+    const params = [];
+
+    if (selectedTeacher) {
+      params.push(`teacher_id=${selectedTeacher}`);
+    }
+
+    if (selectedMonth) {
+      params.push(`month_number=${selectedMonth}`);
+    }
+
+    if (params.length > 0) {
+      endpoint += `&${params.join("&")}`;
+    }
+
+    return endpoint;
+  }, [currentPage, selectedTeacher, selectedMonth]);
 
   // Fetch reports data from API
   const {
@@ -172,11 +343,11 @@ export function ReportsDataTable() {
     error,
     refetch,
   } = useGetData({
-    endpoint: "dashboard/reports",
-    queryKey: ["reports"],
+    endpoint: buildEndpoint,
+    queryKey: ["reports", selectedTeacher, selectedMonth, currentPage],
   });
 
-  const reportsList = reportsData?.data || [];
+  const reportsList = reportsData?.data?.reports || [];
 
   // Mutation for updating report status
   const updateReportStatusMutation = useMutate({
@@ -187,29 +358,45 @@ export function ReportsDataTable() {
     onSuccess: () => {
       setShowConfirmDialog(false);
       setSelectedReport(null);
+      setLoadingRows((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(selectedReport?.id);
+        return newSet;
+      });
       refetch();
+    },
+    onError: () => {
+      setLoadingRows((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(selectedReport?.id);
+        return newSet;
+      });
     },
   });
 
-  const handleToggleReport = (report) => {
+  const handleToggleReport = React.useCallback((report) => {
     if (report.status === "completed") {
       return; // Don't allow changes if already completed
     }
     setSelectedReport(report);
     setShowConfirmDialog(true);
-  };
+  }, []);
 
-  const handleConfirmStatusUpdate = async () => {
+  const handleConfirmStatusUpdate = React.useCallback(async () => {
     if (selectedReport) {
+      setLoadingRows((prev) => new Set(prev).add(selectedReport.id));
       await updateReportStatusMutation.mutateAsync();
     }
-  };
+  }, [selectedReport, updateReportStatusMutation]);
 
-  // Add onToggle function to each report item
-  const reportsWithActions = reportsList.map((report) => ({
-    ...report,
-    onToggle: handleToggleReport,
-  }));
+  // Add onToggle function and loading state to each report item - memoized for performance
+  const reportsWithActions = React.useMemo(() => {
+    return reportsList.map((report) => ({
+      ...report,
+      onToggle: handleToggleReport,
+      isLoading: loadingRows.has(report.id),
+    }));
+  }, [reportsList, loadingRows, handleToggleReport]);
 
   const table = useReactTable({
     data: reportsWithActions,
@@ -232,17 +419,83 @@ export function ReportsDataTable() {
 
   if (isLoading) {
     return (
-      <Card>
-        <div className="flex items-center justify-center p-8">
-          <div className="text-center">
-            <Icon
-              icon="eos-icons:loading"
-              className="w-8 h-8 animate-spin mx-auto mb-2"
-            />
-            <p>Loading reports data...</p>
-          </div>
+      <>
+        <div className="flex items-center flex-wrap gap-2 mb-5">
+          <TeacherFilter
+            selectedTeacher={selectedTeacher}
+            onTeacherChange={handleTeacherChange}
+            clearButton={false}
+          />
+          <Select value={selectedMonth} onValueChange={handleMonthChange}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue
+                placeholder="Select Month"
+                className="whitespace-nowrap"
+              />
+            </SelectTrigger>
+            <SelectContent className="h-[300px] overflow-y-auto">
+              <SelectItem value="">All Months</SelectItem>
+              {months.map((month) => (
+                <SelectItem key={month.value} value={month.value}>
+                  {month.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </Card>
+        <Card title="Simple">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 3 }).map((_, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  <TableCell>
+                    <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-12" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-20 rounded-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-20 rounded-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      </>
     );
   }
 
@@ -268,39 +521,33 @@ export function ReportsDataTable() {
   return (
     <>
       <div className="flex items-center flex-wrap gap-2 mb-5">
-        <Select className="w-[280px]">
-          <SelectTrigger className="w-[200px]">
-            <SelectValue
-              placeholder="Select Teacher"
-              className="whitespace-nowrap"
-            />
-          </SelectTrigger>
-          <SelectContent className="h-[300px] overflow-y-auto ">
-            {reportsList?.map((item) => (
-              <SelectItem
-                key={item?.id}
-                value={item?.teacher_name || item?.user?.name}
-              >
-                {item?.teacher_name || item?.user?.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select className="w-[280px]">
+        <TeacherFilter
+          selectedTeacher={selectedTeacher}
+          onTeacherChange={handleTeacherChange}
+          clearButton={false}
+        />
+        <Select value={selectedMonth} onValueChange={handleMonthChange}>
           <SelectTrigger className="w-[200px]">
             <SelectValue
               placeholder="Select Month"
               className="whitespace-nowrap"
             />
           </SelectTrigger>
-          <SelectContent className="h-[300px] overflow-y-auto ">
-            {reportsList?.map((item) => (
-              <SelectItem key={item?.id} value={item?.date || item?.created_at}>
-                {item?.date || item?.created_at}
+          <SelectContent className="h-[300px] overflow-y-auto">
+            <SelectItem value="">All Months</SelectItem>
+            {months.map((month) => (
+              <SelectItem key={month.value} value={month.value}>
+                {month.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        {(selectedMonth || selectedTeacher) && (
+          <Button variant="outline" onClick={handleClearFilter}>
+            <Icon icon="heroicons:x-mark" className="w-4 h-4" />
+            Clear Filters
+          </Button>
+        )}
       </div>
       <Card title="Simple">
         <Table>
@@ -324,25 +571,22 @@ export function ReportsDataTable() {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table
-                .getRowModel()
-                .rows.slice(0, 4)
-                .map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-default-100"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="hover:bg-default-100"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : (
               <TableRow>
                 <TableCell
@@ -357,55 +601,13 @@ export function ReportsDataTable() {
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4 px-4 pb-5">
-        <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-
-        <div className="flex gap-2  items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-left"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-
-          {table.getPageOptions().map((page, pageIdx) => (
-            <Button
-              key={`basic-data-table-${pageIdx}`}
-              onClick={() => table.setPageIndex(pageIdx)}
-              variant={`${
-                pageIdx === table.getState().pagination.pageIndex
-                  ? ""
-                  : "outline"
-              }`}
-              className={cn("w-8 h-8")}
-            >
-              {page + 1}
-            </Button>
-          ))}
-
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-right"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-        </div>
-      </div>
+      {/* Pagination */}
+      <Pagination
+        last_page={reportsData?.data?.pagination?.last_page}
+        setCurrentPage={setCurrentPage}
+        current_page={currentPage}
+        studentsPagination={false}
+      />
 
       {/* Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
@@ -415,16 +617,33 @@ export function ReportsDataTable() {
             <AlertDialogDescription>
               Are you sure you want to mark this report as completed?
               <br />
-              <strong>Student:</strong>{" "}
-              {selectedReport?.student_name || selectedReport?.user?.name}
               <br />
-              <strong>ID:</strong> {selectedReport?.id}
-              <br />
-              <strong>Date:</strong>{" "}
-              {selectedReport?.date || selectedReport?.created_at}
-              <br />
-              <strong>Target:</strong> {selectedReport?.target || "N/A"}
-              <br />
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="font-medium">Student:</span>
+                  <span>{selectedReport?.lesson?.student?.name || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Report ID:</span>
+                  <span>{selectedReport?.id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Date:</span>
+                  <span>
+                    {selectedReport?.date ||
+                      selectedReport?.created_at ||
+                      "N/A"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Target:</span>
+                  <span>{selectedReport?.target || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Teacher:</span>
+                  <span>{selectedReport?.teacher?.name || "N/A"}</span>
+                </div>
+              </div>
               <br />
               <span className="text-orange-600 font-medium">
                 ⚠️ This action cannot be undone once completed.
@@ -447,6 +666,9 @@ export function ReportsDataTable() {
       </AlertDialog>
     </>
   );
-}
+};
 
+const ReportsDataTable = React.memo(ReportsDataTableComponent);
+
+export { ReportsDataTable };
 export default ReportsDataTable;

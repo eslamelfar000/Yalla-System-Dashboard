@@ -21,7 +21,6 @@ const ROUTE_PERMISSIONS = {
   // Admin-only routes
   '/users': 'admin',
   '/payrolls': 'admin',
-  '/target': 'admin',
   '/compelete-sessions': 'admin',
   '/reservation': 'admin',
   '/requests': 'admin',
@@ -39,6 +38,8 @@ const ROUTE_PERMISSIONS = {
   // Teacher routes
   '/lessons-board': 'teacher',
   '/chat': 'teacher',
+  '/target': 'teacher',
+
 
   
   // Multi-role routes

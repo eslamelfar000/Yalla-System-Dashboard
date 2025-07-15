@@ -51,7 +51,6 @@ export const useStudents = (params = {}, page = 1) => {
   // Debounce search/filter params
   const debouncedParams = useDebounce(params, 500);
 
-  console.log(debouncedParams);
 
   // Build query string
   const queryString = useMemo(() => {

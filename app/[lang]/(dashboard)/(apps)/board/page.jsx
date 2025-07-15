@@ -24,14 +24,17 @@ function page() {
         {/* <BoardStepsLineSpacs/> */}
 
         {/* Global Teacher Filter */}
-        <Card>
-          <div className="p-4 border-b">
+        <Card className="p-4 flex justify-between items-center">
+          <div className="title">
+            <h3 className="text-xl font-medium text-default-700 opacity-60">
+              Board Sessions
+            </h3>
+          </div>
             <TeacherFilter
               selectedTeacher={selectedTeacher}
               onTeacherChange={handleTeacherChange}
               onClearFilter={handleClearFilter}
             />
-          </div>
         </Card>
 
         <div className="cover space-y-5">

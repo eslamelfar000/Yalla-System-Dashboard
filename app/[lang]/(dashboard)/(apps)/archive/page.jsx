@@ -11,35 +11,6 @@ function page() {
 
   return (
     <div>
-      {/* <div className="cover">
-        <ul className="flex items-center gap-2 mb-5">
-          <li>
-            <Button
-              disabled={role === "admin"}
-              onClick={() => setRole("admin")}
-            >
-              Admin
-            </Button>
-          </li>
-          <li>
-            <Button
-              disabled={role === "teacher"}
-              onClick={() => setRole("teacher")}
-            >
-              Teacher
-            </Button>
-          </li>
-          <li>
-            <Button
-              disabled={role === "quality"}
-              onClick={() => setRole("quality")}
-            >
-              Quality
-            </Button>
-          </li>
-        </ul>
-      </div> */}
-
       {role === "teacher" ? (
         <div className="cover">
           <div className="flex-1">

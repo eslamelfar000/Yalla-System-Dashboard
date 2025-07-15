@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { useState, useCallback } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -8,13 +9,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,10 +21,15 @@ import {
 } from "@/components/ui/table";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useGetData } from "@/hooks/useGetData";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import Pagination from "@/components/Shared/Pagination/Pagination";
+import { useEffect } from "react";
+import { useStudents } from "@/hooks/useUsers";
 
 const columns = [
   {
@@ -40,11 +39,13 @@ const columns = [
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <Avatar className=" rounded-full">
-            <AvatarImage src={row?.original?.user.avatar} />
-            <AvatarFallback>AB</AvatarFallback>
+            <AvatarImage src={row?.original?.image || row?.original?.avatar} />
+            <AvatarFallback>
+              {row?.original?.name?.charAt(0) || "C"}
+            </AvatarFallback>
           </Avatar>
           <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+            {row?.original?.name || "N/A"}
           </span>
         </div>
       </div>
@@ -57,7 +58,7 @@ const columns = [
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+            {row?.original?.id || "N/A"}
           </span>
         </div>
       </div>
@@ -70,7 +71,7 @@ const columns = [
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+            {row?.original?.phone || "N/A"}
           </span>
         </div>
       </div>
@@ -83,7 +84,7 @@ const columns = [
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+            {row?.original?.email || "N/A"}
           </span>
         </div>
       </div>
@@ -96,7 +97,7 @@ const columns = [
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+            {row?.original?.teacher?.name || "N/A"}
           </span>
         </div>
       </div>
@@ -105,13 +106,51 @@ const columns = [
 ];
 
 export function ContactsDataTable() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Get current page from URL
+  const pageFromUrl = searchParams.get("page");
+  const initialPage = pageFromUrl ? parseInt(pageFromUrl) : 1;
+
+  // State for search
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(initialPage);
+
+  // Update URL when page changes
+  React.useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", currentPage.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  }, [currentPage, pathname, router, searchParams]);
+
+  // Get contacts data with search
+  // Update URL when page changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", currentPage.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  }, [currentPage, pathname, router, searchParams]);
+
+  // Fetch students with filters/search
+  const { data: contactsData, isLoading, isError, error, refetch } = useStudents(
+    {
+      search,
+    },
+    currentPage
+  );
+
+  const contacts = contactsData?.data?.data || [];
+
+  // Table state
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
-    data,
+    data: contacts,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -129,34 +168,44 @@ export function ContactsDataTable() {
     },
   });
 
+  // Memoize handlers to prevent recreation
+  const handleSearchChange = useCallback((event) => {
+    setSearch(event.target.value);
+  }, []);
+
+  const handlePreviousPage = useCallback(() => {
+    table.previousPage();
+  }, [table]);
+
+  const handleNextPage = useCallback(() => {
+    table.nextPage();
+  }, [table]);
+
+  const handlePageChange = useCallback(
+    (pageIdx) => {
+      table.setPageIndex(pageIdx);
+    },
+    [table]
+  );
+
+  const handleRetry = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  // Handler for Pagination component
+  const handleSetCurrentPage = useCallback((page) => {
+    setCurrentPage(page);
+  }, []);
+
   return (
     <>
       <div className="flex items-center flex-wrap gap-2 mb-5">
         <Input
-          placeholder="Filter emails..."
-          value={table.getColumn("email")?.getFilterValue() || ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
+          placeholder="Search contacts..."
+          value={search}
+          onChange={handleSearchChange}
           className="max-w-sm min-w-[200px] h-10"
         />
-        {/* <Select className="w-[280px]">
-          <SelectTrigger className="w-[200px]">
-            <SelectValue
-              placeholder="Select Teacher"
-              className="whitespace-nowrap"
-            />
-          </SelectTrigger>
-          <SelectContent className="h-[300px] overflow-y-auto ">
-            {data?.map((item) => (
-              <SelectItem key={item?.user?.name} value={item?.user?.name}>
-                {item?.user?.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select> */}
-
-        {/* <ReservationDrawer /> */}
       </div>
       <Card title="Simple">
         <Table>
@@ -179,33 +228,49 @@ export function ContactsDataTable() {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table
-                .getRowModel()
-                .rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-default-100"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-                .slice(0, 8)
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  {columns.map((column, colIndex) => (
+                    <TableCell key={colIndex}>
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : error ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center text-red-500"
+                >
+                  {error?.message || "Error loading contacts"}
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="hover:bg-default-100"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No contacts found.
                 </TableCell>
               </TableRow>
             )}
@@ -213,55 +278,13 @@ export function ContactsDataTable() {
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4 px-4 py-4">
-        <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-
-        <div className="flex gap-2  items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-left"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-
-          {table.getPageOptions().map((page, pageIdx) => (
-            <Button
-              key={`basic-data-table-${pageIdx}`}
-              onClick={() => table.setPageIndex(pageIdx)}
-              variant={`${
-                pageIdx === table.getState().pagination.pageIndex
-                  ? ""
-                  : "outline"
-              }`}
-              className={cn("w-8 h-8")}
-            >
-              {page + 1}
-            </Button>
-          ))}
-
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-right"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-        </div>
-      </div>
+      {/* Pagination */}
+      <Pagination
+        last_page={contactsData?.data?.last_page}
+        setCurrentPage={handleSetCurrentPage}
+        current_page={currentPage}
+        studentsPagination={true}
+      />
     </>
   );
 }

@@ -7,14 +7,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { users } from "../../../(tables)/tailwindui-table/data";
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { ArrowBigRightDash } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -24,8 +23,100 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
+import { useGetData } from "@/hooks/useGetData";
+import { useMutate } from "@/hooks/useMutate";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import LoadingButton from "@/components/Shared/loading-button";
+import Pagination from "@/components/Shared/Pagination/Pagination";
 
-const ReviewTableStatus = () => {
+const ReviewTableStatus = ({ selectedTeacher, selectedMonth, searchQuery }) => {
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loadingRows, setLoadingRows] = useState(new Set());
+
+  // Build API endpoint with filters
+  const buildEndpoint = useMemo(() => {
+    let endpoint = `dashboard/reports?page=${currentPage}`;
+    const params = [];
+
+    if (selectedTeacher) {
+      params.push(`teacher_id=${selectedTeacher}`);
+    }
+
+    if (selectedMonth) {
+      params.push(`month_number=${selectedMonth}`);
+    }
+
+    if (params.length > 0) {
+      endpoint += `&${params.join("&")}`;
+    }
+
+    return endpoint;
+  }, [currentPage, selectedTeacher, selectedMonth]);
+
+  // Fetch reports data from API
+  const {
+    data: reportsData,
+    isLoading,
+    error,
+    refetch,
+  } = useGetData({
+    endpoint: buildEndpoint,
+    queryKey: ["reports", selectedTeacher, selectedMonth, currentPage],
+  });
+
+  const reportsList = reportsData?.data?.reports || [];
+
+  // Mutation for updating report status to "done"
+  const updateReportStatusMutation = useMutate({
+    method: "POST",
+    endpoint: `dashboard/status-report/${selectedReport?.id}`,
+    queryKeysToInvalidate: [["reports"]],
+    text: "Report status updated successfully!",
+    onSuccess: () => {
+      setShowConfirmDialog(false);
+      setSelectedReport(null);
+      setLoadingRows((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(selectedReport?.id);
+        return newSet;
+      });
+      refetch();
+    },
+    onError: () => {
+      setLoadingRows((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(selectedReport?.id);
+        return newSet;
+      });
+    },
+  });
+
+  const handleToggleReport = useCallback((report) => {
+    if (report.status === "done") {
+      return; // Don't allow changes if already done
+    }
+    setSelectedReport(report);
+    setShowConfirmDialog(true);
+  }, []);
+
+  const handleConfirmStatusUpdate = useCallback(async () => {
+    if (selectedReport) {
+      setLoadingRows((prev) => new Set(prev).add(selectedReport.id));
+      await updateReportStatusMutation.mutateAsync();
+    }
+  }, [selectedReport, updateReportStatusMutation]);
+
   const columns = [
     {
       key: "student-name",
@@ -48,19 +139,26 @@ const ReviewTableStatus = () => {
       label: "Admin Report",
     },
     {
-      key: "Teacher Reaport",
-      label: "Teacher Reaport",
+      key: "Teacher Report",
+      label: "Teacher Report",
     },
   ];
 
-
+  // Add onToggle function and loading state to each report item
+  const reportsWithActions = useMemo(() => {
+    return reportsList.map((report) => ({
+      ...report,
+      onToggle: handleToggleReport,
+      isLoading: loadingRows.has(report.id),
+    }));
+  }, [reportsList, loadingRows, handleToggleReport]);
 
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
-    data: users,
+    data: reportsWithActions,
     columns,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -76,6 +174,26 @@ const ReviewTableStatus = () => {
     },
   });
 
+  if (isLoading) {
+    return (
+      <Card>
+        <TableSkeleton columns={columns} rows={5} />
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">Error loading reports data</p>
+            <Button onClick={() => refetch()}>Retry</Button>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <>
@@ -85,32 +203,50 @@ const ReviewTableStatus = () => {
             <TableRow>
               {columns.map((column) => (
                 <TableHead key={column.key} className="text-right!">
-                  {" "}
                   {column.label}
                 </TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users
-              .map((item) => (
-                <TableRow key={item.email} className="hover:bg-default-100">
-                  <TableCell className=" font-medium  text-card-foreground/80">
+            {reportsList.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-8"
+                >
+                  {selectedTeacher
+                    ? "No reports found for the selected teacher"
+                    : "No reports found"}
+                </TableCell>
+              </TableRow>
+            ) : (
+              reportsList.map((report) => (
+                <TableRow key={report.id} className="hover:bg-default-100">
+                  <TableCell className="font-medium text-card-foreground/80">
                     <div className="flex gap-3 items-center">
                       <Avatar className="rounded-lg">
-                        <AvatarImage src={item.avatar} />
-                        <AvatarFallback>AB</AvatarFallback>
+                        <AvatarImage src={report?.lesson?.student?.image} />
+                        <AvatarFallback>
+                          {report?.lesson?.student?.name?.charAt(0) || "S"}
+                        </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm  text-default-600">
-                        {item.name}
+                      <span className="text-sm text-default-600">
+                        {report?.lesson?.student?.name || "Unknown Student"}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>{item.id}</TableCell>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.email}</TableCell>
+                  <TableCell>{report.id}</TableCell>
                   <TableCell>
-                    <Link href={""} className="">
+                    {
+                      new Date(report?.lesson?.created_at)
+                        .toLocaleString()
+                        .split(",")[0]
+                    }
+                  </TableCell>
+                  <TableCell>{report.target}%</TableCell>
+                  <TableCell>
+                    <Link href={report.admin_report} target="_blank">
                       <button className="text-primary text-[12px] border px-4 py-1 border-solid border-primary rounded-full">
                         Check
                         <ArrowBigRightDash className="inline-block ml-1 w-6 h-6" />
@@ -118,7 +254,7 @@ const ReviewTableStatus = () => {
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Link href={""} className="">
+                    <Link href={report.teacher_report} target="_blank">
                       <button className="text-primary text-[12px] border px-4 py-1 border-solid border-primary rounded-full">
                         Check
                         <ArrowBigRightDash className="inline-block ml-1 w-6 h-6" />
@@ -126,60 +262,73 @@ const ReviewTableStatus = () => {
                     </Link>
                   </TableCell>
                 </TableRow>
-              ))}
+              ))
+            )}
           </TableBody>
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4 px-4 py-4">
-        <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
+      {/* Pagination */}
+      <Pagination
+        last_page={reportsData?.data?.pagination?.last_page}
+        setCurrentPage={setCurrentPage}
+        current_page={currentPage}
+        studentsPagination={false}
+      />
 
-        <div className="flex gap-2  items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-left"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-
-          {table.getPageOptions().map((page, pageIdx) => (
-            <Button
-              key={`basic-data-table-${pageIdx}`}
-              onClick={() => table.setPageIndex(pageIdx)}
-              variant={`${
-                pageIdx === table.getState().pagination.pageIndex
-                  ? ""
-                  : "outline"
-              }`}
-              className={cn("w-8 h-8")}
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Report Status Update</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to mark this report as done?
+              <br />
+              <br />
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="font-medium">Student:</span>
+                  <span>{selectedReport?.lesson?.student?.name || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Report ID:</span>
+                  <span>{selectedReport?.id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Date:</span>
+                  <span>
+                    {selectedReport?.lesson?.created_at
+                      ? new Date(selectedReport.lesson.created_at)
+                          .toLocaleString()
+                          .split(",")[0]
+                      : "N/A"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Target:</span>
+                  <span>{selectedReport?.target || "N/A"}%</span>
+                </div>
+              </div>
+              <br />
+              <span className="text-orange-600 font-medium">
+                ⚠️ This action cannot be undone once completed.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={updateReportStatusMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <LoadingButton
+              loading={updateReportStatusMutation.isPending}
+              onClick={handleConfirmStatusUpdate}
+              variant="default"
             >
-              {page + 1}
-            </Button>
-          ))}
-
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-right"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-        </div>
-      </div>
+              Mark as Done
+            </LoadingButton>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
