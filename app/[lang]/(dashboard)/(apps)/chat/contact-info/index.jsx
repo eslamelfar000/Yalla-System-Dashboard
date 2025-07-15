@@ -18,55 +18,76 @@ import ChangeTheme from "./change-theme";
 import BlockUser from "./block-user";
 import MediaSheet from "./media-sheet";
 import { AlertTriangle, FolderClosed, Image } from "lucide-react";
+import { fixImageUrl, getAvatarInitials } from "@/lib/image-utils";
+import { safeToString } from "@/lib/utils";
 
-const ContactInfo = ({ handleSetIsOpenSearch, handleShowInfo, contact }) => {
+const ContactInfo = ({ handleShowInfo, contact }) => {
   const [showDrawer, setShowDrawer] = useState(null);
+
   const handleDrawer = (itemKey) => {
     setShowDrawer(itemKey);
   };
-  return (
-    <div className="flex-none w-[285px] absolute xl:relative  right-0 h-full z-50 ">
-      {showDrawer !== null && (
-        <MediaSheet showDrawer={showDrawer} handleDrawer={handleDrawer} />
-      )}
 
-      <Card className="h-full overflow-hidden ">
+  // Safety check: ensure contact is a valid object
+  if (!contact || typeof contact !== "object") {
+    console.warn("Invalid contact object in ContactInfo:", contact);
+    return null;
+  }
+
+  // Handle different data structures from API
+  const {
+    id,
+    chat_id,
+    user_id,
+    name,
+    fullName,
+    role,
+    avatar,
+    image,
+    status = "offline",
+    about,
+    bio,
+    last_message,
+    lastMessage,
+    unread_count,
+    unreadmessage,
+    unseenMsgs,
+    updated_at,
+    created_at,
+    date,
+  } = contact;
+
+  // Use the appropriate fields based on what's available
+  const chatId = id || chat_id;
+  const userName = safeToString(name || fullName || role || "Unknown User");
+  const userAvatar = fixImageUrl(avatar?.src || image || avatar);
+  const userAbout = safeToString(about || bio || "No status");
+
+  // If MediaSheet is active, show it instead of the main content
+  if (showDrawer !== null) {
+    return (
+      <div className="h-full">
+        <MediaSheet showDrawer={showDrawer} handleDrawer={handleDrawer} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full">
+      <Card className="h-full rounded-md border-0">
         <CardHeader className="mb-0">
-          <div className="absolute xl:hidden">
-            <Button
-              size="icon"
-              className="rounded-full bg-default-100 text-default-500 hover:bg-default-200"
-              onClick={handleShowInfo}
-            >
-              <Icon icon="formkit:arrowright" className="text-sm" />
-            </Button>
-          </div>
           <div className="flex flex-col items-center">
             <Avatar className="w-16 h-16 lg:h-24 lg:w-24">
-              <AvatarImage src={contact?.avatar.src} alt="" />
-              <AvatarFallback>{contact?.fullName.slice(0, 2)}</AvatarFallback>
+              <AvatarImage src={userAvatar} alt={userName} />
+              <AvatarFallback>{getAvatarInitials(userName)}</AvatarFallback>
             </Avatar>
             <div className="mt-3 text-lg lg:text-xl font-semibold text-default-900">
-              {contact?.fullName}
+              {userName}
             </div>
             <span className="text-sm text-default-600 capitalize  text-center line-clamp-2">
-              {contact?.about}
+              {userAbout}
             </span>
           </div>
-          {/* <div className="flex justify-center gap-6  pt-3">
-            <div className="flex flex-col items-center gap-1">
-              <Link
-                href="/chat"
-                className="h-10 w-10 rounded-full bg-secondary dark:bg-default-500/50 flex justify-center items-center"
-              >
-                <Icon
-                  icon="fa-regular:user"
-                  className="text-lg text-default-900"
-                />
-              </Link>
-              <span className="text-xs text-default-900">Profile</span>
-            </div>
-          </div> */}
         </CardHeader>
 
         <CardContent className="px-0 border-0 h-[calc(100%-260px)] overflow-hidden ">

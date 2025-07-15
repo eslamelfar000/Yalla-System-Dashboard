@@ -61,7 +61,7 @@
   }
 
   .fc-h-event .fc-event-main-frame {
-    @apply flex justify-center items-center text-center w-max mx-auto;
+    @apply flex justify-center items-center text-center w-full mx-0;
     }
 
     .fc-event-time {
@@ -69,7 +69,27 @@
   }
 
                  .fc-timegrid-event .fc-event-main {
-      @apply p-0 flex justify-center items-center gap-1;
+      @apply p-0 flex justify-center items-center gap-1 w-full;
+  }
+
+  // Make events take full width of their slots
+  .fc-timegrid-event-harness {
+    @apply w-full !important;
+    
+    .fc-timegrid-event {
+      @apply w-full !important;
+      margin: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+    }
+  }
+
+  // Ensure event content takes full width
+  .fc-event {
+    @apply w-full !important;
+    margin: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
   }
 
   .fc-event-title {
@@ -105,7 +125,22 @@
                                  }
                 
                                  .fc-timegrid-event-harness>.fc-timegrid-event {
-                                   @apply static;
+                                   @apply static w-full;
+                                   margin: 0 !important;
+                                   left: 0 !important;
+                                   right: 0 !important;
+                                 }
+
+                                 // Additional full-width styling
+                                 .fc-timegrid-col-events {
+                                   @apply w-full;
+                                 }
+
+                                 .fc-timegrid-event-harness {
+                                   @apply w-full;
+                                   margin: 0 !important;
+                                   left: 0 !important;
+                                   right: 0 !important;
                                  }
   @media (max-width: 981px) {
 

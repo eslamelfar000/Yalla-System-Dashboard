@@ -238,7 +238,7 @@ export const ChatPage = () => {
                             You pinned a message.{" "}
                             <Dialog>
                               <DialogTrigger asChild>
-                                <span className=" font-bold   text-primary cursor-pointer">
+                                <span className="font-bold text-primary cursor-pointer">
                                   See All
                                 </span>
                               </DialogTrigger>
@@ -256,7 +256,6 @@ export const ChatPage = () => {
                                               className="w-full h-full rounded-full object-cover"
                                             />
                                           </div>
-
                                           {pinnedMessage.note}
                                         </div>
                                       )

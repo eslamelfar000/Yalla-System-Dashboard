@@ -12,7 +12,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+import { cn, safeToString } from "@/lib/utils";
 import { notifications } from "./notification-data";
 import shortImage from "@/public/images/all-img/short-image-2.png";
 
@@ -50,43 +50,51 @@ const NotificationMessage = () => {
         </DropdownMenuLabel>
         <div className="h-[300px] xl:h-[350px]">
           <ScrollArea className="h-full">
-            {notifications.map((item, index) => (
-              <DropdownMenuItem
-                key={`inbox-${index}`}
-                className="flex gap-9 py-2 px-4 cursor-pointer dark:hover:bg-background"
-              >
-                <div className="flex-1 flex items-center gap-2">
-                  <Avatar className="h-10 w-10 rounded">
-                    <AvatarImage src={item.avatar.src} />
-                    <AvatarFallback>SN</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="text-sm font-medium text-default-900 mb-[2px] whitespace-nowrap">
-                      {item.fullName}
-                    </div>
-                    <div className="text-xs text-default-900 truncate max-w-[100px] lg:max-w-[185px]">
-                      {" "}
-                      {item.message}
+            {notifications.map((item, index) => {
+              // Safety check: ensure item is a valid object
+              if (!item || typeof item !== "object") {
+                console.warn("Invalid item in notifications:", item);
+                return null;
+              }
+
+              return (
+                <DropdownMenuItem
+                  key={`inbox-${index}`}
+                  className="flex gap-9 py-2 px-4 cursor-pointer dark:hover:bg-background"
+                >
+                  <div className="flex-1 flex items-center gap-2">
+                    <Avatar className="h-10 w-10 rounded">
+                      <AvatarImage src={item.avatar?.src} />
+                      <AvatarFallback>SN</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="text-sm font-medium text-default-900 mb-[2px] whitespace-nowrap">
+                        {safeToString(item.fullName)}
+                      </div>
+                      <div className="text-xs text-default-900 truncate max-w-[100px] lg:max-w-[185px]">
+                        {" "}
+                        {safeToString(item.message)}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div
-                  className={cn(
-                    "text-xs font-medium text-default-900 whitespace-nowrap",
-                    {
-                      "text-default-600": !item.unreadmessage,
-                    }
-                  )}
-                >
-                  {item.date}
-                </div>
-                <div
-                  className={cn("w-2 h-2 rounded-full mr-2", {
-                    "bg-primary": !item.unreadmessage,
-                  })}
-                ></div>
-              </DropdownMenuItem>
-            ))}
+                  <div
+                    className={cn(
+                      "text-xs font-medium text-default-900 whitespace-nowrap",
+                      {
+                        "text-default-600": !item.unreadmessage,
+                      }
+                    )}
+                  >
+                    {safeToString(item.date)}
+                  </div>
+                  <div
+                    className={cn("w-2 h-2 rounded-full mr-2", {
+                      "bg-primary": !item.unreadmessage,
+                    })}
+                  ></div>
+                </DropdownMenuItem>
+              );
+            })}
           </ScrollArea>
         </div>
         <DropdownMenuSeparator />

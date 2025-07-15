@@ -23,7 +23,6 @@ import {
   getUserProfile,
   sendMessage,
   deleteChatMessage,
-  createChat,
 } from "./chat-config";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -31,9 +30,6 @@ import MyProfileHeader from "./my-profile-header";
 import EmptyMessage from "./empty-message";
 import Loader from "./loader";
 import { isObjectNotEmpty } from "@/lib/utils";
-import SearchMessages from "./contact-info/search-messages";
-import PinnedMessages from "./pin-messages";
-import ForwardMessage from "./forward-message";
 import ContactInfo from "./contact-info";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
@@ -58,13 +54,6 @@ const ChatPage = () => {
   // reply state
   const [replay, setReply] = useState(false);
   const [replayData, setReplyData] = useState({});
-
-  // search state
-  const [isOpenSearch, setIsOpenSearch] = useState(false);
-
-  const [pinnedMessages, setPinnedMessages] = useState([]);
-  // Forward State
-  const [isForward, setIsForward] = useState(false);
 
   // Get all chats
   const {
@@ -135,31 +124,8 @@ const ChatPage = () => {
     },
   });
 
-  const createChatMutation = useMutation({
-    mutationFn: createChat,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries(["chats"]);
-      // If chat was created successfully, open it
-      if (data.success && data.data?.id) {
-        setSelectedChatId(data.data.id);
-        setMessagePage(1);
-      }
-    },
-  });
-
   const onDelete = (messageId) => {
     deleteMutation.mutate(messageId);
-
-    // Remove the deleted message from pinnedMessages if it exists
-    const updatedPinnedMessages = pinnedMessages.filter(
-      (msg) => msg.messageId !== messageId
-    );
-
-    setPinnedMessages(updatedPinnedMessages);
-  };
-
-  const handleCreateChat = (chatData) => {
-    createChatMutation.mutate(chatData);
   };
 
   const openChat = (chatId) => {
@@ -181,6 +147,7 @@ const ChatPage = () => {
     const newMessage = {
       chat_id: selectedChatId,
       message: message,
+      time: new Date().toISOString(),
       replayMetadata: isObjectNotEmpty(replayData),
     };
     messageMutation.mutate(newMessage);
@@ -199,66 +166,6 @@ const ChatPage = () => {
     setReplyData(newObj);
   };
 
-  useEffect(() => {
-    if (chatHeightRef.current) {
-      chatHeightRef.current.scrollTo({
-        top: chatHeightRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [handleSendMessage, chatsData]);
-
-  useEffect(() => {
-    if (chatHeightRef.current) {
-      chatHeightRef.current.scrollTo({
-        top: chatHeightRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [pinnedMessages]);
-
-  // handle search bar
-  const handleSetIsOpenSearch = () => {
-    setIsOpenSearch(!isOpenSearch);
-  };
-
-  // handle pin note
-  const handlePinMessage = (note) => {
-    const updatedPinnedMessages = [...pinnedMessages];
-
-    const existingIndex = updatedPinnedMessages.findIndex(
-      (msg) => msg.note === note.note
-    );
-
-    if (existingIndex !== -1) {
-      updatedPinnedMessages.splice(existingIndex, 1); // Remove the message
-    } else {
-      updatedPinnedMessages.push(note); // Add the message
-    }
-
-    setPinnedMessages(updatedPinnedMessages);
-  };
-
-  const handleUnpinMessage = (pinnedMessage) => {
-    // Create a copy of the current pinned messages array
-    const updatedPinnedMessages = [...pinnedMessages];
-
-    // Find the index of the message to unpin in the updatedPinnedMessages array
-    const index = updatedPinnedMessages.findIndex(
-      (msg) =>
-        msg.note === pinnedMessage.note && msg.avatar === pinnedMessage.avatar
-    );
-
-    if (index !== -1) {
-      updatedPinnedMessages.splice(index, 1); // Remove the message
-      setPinnedMessages(updatedPinnedMessages);
-    }
-  };
-
-  const handleForward = () => {
-    setIsForward(!isForward);
-  };
-
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   const chats = chatsData?.data || [];
@@ -266,34 +173,48 @@ const ChatPage = () => {
   const chatInfo = chatInfoData?.data || {};
   const profile = profileData?.data || {};
 
-  if (chatsLoading) {
-    return <Loader />;
-  }
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (chatHeightRef.current) {
+      chatHeightRef.current.scrollTo({
+        top: chatHeightRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages, handleSendMessage, chatsData]);
 
   return (
-    <div className="h-screen flex">
+    <div className="h-screen flex gap-5">
       {/* Contact List Sidebar */}
-      <div className="w-full lg:w-80 xl:w-96 border-r border-border flex flex-col">
-        <Card className="h-full rounded-none border-0">
+      <div className="w-full lg:w-80 xl:w-86 border-r border-border flex flex-col">
+        <Card className="h-full rounded-md border-0">
           <CardContent className="p-0 h-full flex flex-col">
             {/* User Profile Header */}
             <div className="p-4 border-b border-border">
-              <MyProfileHeader
-                profile={profile}
-                onCreateChat={handleCreateChat}
-                isLoading={createChatMutation.isLoading}
-              />
+              <MyProfileHeader profile={profile} />
             </div>
 
             {/* Chat List */}
             <div className="flex-1 overflow-y-auto">
-              {chats.length > 0 ? (
+              {chatsLoading ? (
+                // Show skeleton loading for multiple chat items
+                Array.from({ length: 4 }).map((_, index) => (
+                  <ContactList
+                    key={`skeleton-${index}`}
+                    contact={{}}
+                    openChat={() => {}}
+                    selectedChatId={null}
+                    isLoading={true}
+                  />
+                ))
+              ) : chats.length > 0 ? (
                 chats.map((chat) => (
                   <ContactList
                     key={chat.id}
                     contact={chat}
                     openChat={openChat}
                     selectedChatId={selectedChatId}
+                    isLoading={false}
                   />
                 ))
               ) : (
@@ -308,7 +229,7 @@ const ChatPage = () => {
 
       {/* Chat Messages Area */}
       <div className="flex-1 flex flex-col">
-        <Card className="h-full rounded-none border-0">
+        <Card className="h-full rounded-md border-0">
           <CardContent className="p-0 h-full flex flex-col">
             {selectedChatId ? (
               <>
@@ -317,11 +238,6 @@ const ChatPage = () => {
                   contact={chatInfo}
                   handleShowInfo={handleShowInfo}
                   showInfo={showInfo}
-                  handleSetIsOpenSearch={handleSetIsOpenSearch}
-                  isOpenSearch={isOpenSearch}
-                  handlePinMessage={handlePinMessage}
-                  handleForward={handleForward}
-                  isForward={isForward}
                 />
 
                 {/* Messages Area */}
@@ -336,8 +252,6 @@ const ChatPage = () => {
                       selectedChatId={selectedChatId}
                       onDelete={onDelete}
                       handleReply={handleReply}
-                      pinnedMessages={pinnedMessages}
-                      handleUnpinMessage={handleUnpinMessage}
                       chatHeightRef={chatHeightRef}
                     />
                   )}
@@ -361,34 +275,13 @@ const ChatPage = () => {
 
       {/* Contact Info Sidebar */}
       {showInfo && selectedChatId && (
-        <div className="w-80 border-l border-border">
+        <div className="hidden xl:block w-80 border-l border-border">
           <ContactInfo
             contact={chatInfo}
             handleShowInfo={handleShowInfo}
             showInfo={showInfo}
           />
         </div>
-      )}
-
-      {/* Search Messages */}
-      {isOpenSearch && (
-        <SearchMessages
-          handleSetIsOpenSearch={handleSetIsOpenSearch}
-          isOpenSearch={isOpenSearch}
-        />
-      )}
-
-      {/* Pinned Messages */}
-      {pinnedMessages.length > 0 && (
-        <PinnedMessages
-          pinnedMessages={pinnedMessages}
-          handleUnpinMessage={handleUnpinMessage}
-        />
-      )}
-
-      {/* Forward Message */}
-      {isForward && (
-        <ForwardMessage handleForward={handleForward} isForward={isForward} />
       )}
     </div>
   );

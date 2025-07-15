@@ -63,11 +63,6 @@ export const getTeacherSessions = async (teacherId = null) => {
     
     return response.data;
   } catch (error) {
-    console.error("Error fetching teacher sessions:", error);
-    console.error("Error details:", error.response?.data);
-    console.error("Error status:", error.response?.status);
-    console.error("Error message:", error.message);
-    
     // If first endpoint fails, try alternative
     try {
       const url = `/dashboard/calendars/${teacherId}`;
@@ -75,8 +70,6 @@ export const getTeacherSessions = async (teacherId = null) => {
       const response = await api.get(url);
       return response.data;
     } catch (secondError) {
-      console.error("Alternative endpoint also failed:", secondError);
-      console.error("Second error details:", secondError.response?.data);
       return { success: false, message: "Failed to fetch sessions", data: [] };
     }
   }
@@ -104,11 +97,6 @@ export const createTeacherSession = async (data, userRole = null) => {
     const response = await api.post("/dashboard/calendar", apiData);
     return response.data;
   } catch (error) {
-    console.error("Error creating teacher session:", error);
-    console.error("Create error details:", error.response?.data);
-    console.error("Create error status:", error.response?.status);
-    console.error("Create error message:", error.message);
-    
     // Try alternative endpoint
     try {
       const apiData = {
@@ -122,11 +110,9 @@ export const createTeacherSession = async (data, userRole = null) => {
         apiData.teacher_id = data.teacher_id;
       }
       
-      const response = await api.post("/dashboard/calendars", apiData);
+      const response = await api.post("/dashboard/calendar", apiData);
       return response.data;
     } catch (secondError) {
-      console.error("Alternative create endpoint also failed:", secondError);
-      console.error("Second create error details:", secondError.response?.data);
       return { success: false, message: "Failed to create session" };
     }
   }
@@ -154,7 +140,7 @@ export const updateTeacherSession = async (id, data) => {
         end_time: data.end_time.substring(0, 5),
       };
       
-      const response = await api.post(`/dashboard/calendars/${id}`, apiData);
+      const response = await api.post(`/dashboard/calendar/${id}`, apiData);
       return response.data;
     } catch (secondError) {
       console.error("Alternative update endpoint also failed:", secondError);
@@ -171,7 +157,7 @@ export const deleteTeacherSession = async (id) => {
     
     // Try alternative endpoint
     try {
-      const response = await api.delete(`/dashboard/calendars/${id}`);
+      const response = await api.delete(`/dashboard/calendar/${id}`);
       return response.data;
     } catch (secondError) {
       return { success: false, message: "Failed to delete session" };
@@ -208,10 +194,55 @@ export const getTeacherSession = async (id) => {
     
     // Try alternative endpoint
     try {
-      const response = await api.get(`/dashboard/calendars/${id}`);
+      const response = await api.get(`/dashboard/calendar/${id}`);
       return response.data;
     } catch (secondError) {
       return { success: false, message: "Failed to fetch session" };
+    }
+  }
+};
+
+// Bulk create multiple sessions
+export const createBulkTeacherSessions = async (rangeData, userRole = null) => {
+  try {
+    const token = getAuthToken();
+    
+    // Transform range data to match your API format
+    const apiData = {
+      day: rangeData.date,
+      start_time: rangeData.start_time.substring(0, 5), // Remove seconds
+      end_time: rangeData.end_time.substring(0, 5), // Remove seconds
+    };
+    
+    // Handle different roles
+    if (userRole === "quality" && rangeData.teacher_id) {
+      // Quality role: create session for specific teacher
+      apiData.teacher_id = rangeData.teacher_id;
+    }
+    
+    const response = await api.post("/dashboard/calendar", apiData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating bulk sessions:", error);
+    
+    // Try alternative endpoint
+    try {
+      const apiData = {
+        day: rangeData.date,
+        start_time: rangeData.start_time.substring(0, 5),
+        end_time: rangeData.end_time.substring(0, 5),
+      };
+      
+      // Handle different roles
+      if (userRole === "quality" && rangeData.teacher_id) {
+        apiData.teacher_id = rangeData.teacher_id;
+      }
+      
+      const response = await api.post("/dashboard/calendar", apiData);
+      return response.data;
+    } catch (secondError) {
+      console.error("Alternative endpoint also failed:", secondError);
+      return { success: false, message: "Failed to create bulk sessions" };
     }
   }
 };

@@ -12,7 +12,7 @@ import shortImage from "@/public/images/all-img/short-image.png";
 import Link from "next/link";
 import { contacts } from "./data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+import { cn, safeToString } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Inbox = () => {
@@ -52,43 +52,55 @@ const Inbox = () => {
         </DropdownMenuLabel>
         <div className="h-[350px] xl:h-[420px]">
           <ScrollArea className="h-full">
-            {contacts.map((item, index) => (
-              <DropdownMenuItem
-                key={`inbox-${index}`}
-                className="flex gap-9 py-2 px-4 cursor-pointer dark:hover:bg-background rounded-none"
-              >
-                <div className="flex-1 flex items-center gap-2">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={item.avatar} />
-                    <AvatarFallback>SN</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="text-sm font-medium text-default-900 mb-[2px] whitespace-nowrap">
-                      {item.fullName}
-                    </div>
-                    <div className="text-xs text-default-900 truncate max-w-[100px] lg:max-w-[185px]">
-                      {" "}
-                      {item?.lastMessage ? item?.lastMessage : item.about}
+            {contacts.map((item, index) => {
+              // Safety check: ensure item is a valid object
+              if (!item || typeof item !== "object") {
+                console.warn("Invalid item in inbox:", item);
+                return null;
+              }
+
+              const safeLastMessage = safeToString(item?.lastMessage);
+              const safeAbout = safeToString(item?.about);
+              const messageContent = safeLastMessage || safeAbout;
+
+              return (
+                <DropdownMenuItem
+                  key={`inbox-${index}`}
+                  className="flex gap-9 py-2 px-4 cursor-pointer dark:hover:bg-background rounded-none"
+                >
+                  <div className="flex-1 flex items-center gap-2">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={item.avatar} />
+                      <AvatarFallback>SN</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="text-sm font-medium text-default-900 mb-[2px] whitespace-nowrap">
+                        {safeToString(item.fullName)}
+                      </div>
+                      <div className="text-xs text-default-900 truncate max-w-[100px] lg:max-w-[185px]">
+                        {" "}
+                        {messageContent}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div
-                  className={cn(
-                    "text-xs font-medium text-default-900 whitespace-nowrap",
-                    {
-                      "text-default-600": !item.unreadmessage,
-                    }
-                  )}
-                >
-                  {item.date}
-                </div>
-                <div
-                  className={cn("w-2 h-2 rounded-full mr-2", {
-                    "bg-primary": !item.unreadmessage,
-                  })}
-                ></div>
-              </DropdownMenuItem>
-            ))}
+                  <div
+                    className={cn(
+                      "text-xs font-medium text-default-900 whitespace-nowrap",
+                      {
+                        "text-default-600": !item.unreadmessage,
+                      }
+                    )}
+                  >
+                    {safeToString(item.date)}
+                  </div>
+                  <div
+                    className={cn("w-2 h-2 rounded-full mr-2", {
+                      "bg-primary": !item.unreadmessage,
+                    })}
+                  ></div>
+                </DropdownMenuItem>
+              );
+            })}
           </ScrollArea>
         </div>
       </DropdownMenuContent>

@@ -8,7 +8,11 @@ import listPlugin from "@fullcalendar/list";
 import TeacherSessionSheet from "./teacher-session-sheet";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
-import { getTeacherSessions } from "@/config/calendar.config";
+import {
+  getTeacherSessions,
+  createTeacherSession,
+  createBulkTeacherSessions,
+} from "@/config/calendar.config";
 import toast from "react-hot-toast";
 import { Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +24,8 @@ const TeacherCalendarView = ({ sessions = [] }) => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedRange, setSelectedRange] = useState(null);
+  const [isCreatingMultiple, setIsCreatingMultiple] = useState(false);
 
   // Function to convert 12-hour time to 24-hour format
   const convertTo24Hour = (timeStr) => {
@@ -55,17 +61,14 @@ const TeacherCalendarView = ({ sessions = [] }) => {
     const start24 = convertTo24Hour(startTime);
     const end24 = convertTo24Hour(endTime);
 
-    // Parse times to compare
     const startHour = parseInt(start24.split(":")[0]);
     const startMinute = parseInt(start24.split(":")[1]);
     const endHour = parseInt(end24.split(":")[0]);
     const endMinute = parseInt(end24.split(":")[1]);
 
-    // Convert to minutes for comparison
     const startMinutes = startHour * 60 + startMinute;
     const endMinutes = endHour * 60 + endMinute;
 
-    // If end time is before or equal to start time, add 1 hour to end time
     if (endMinutes <= startMinutes) {
       const newEndHour = startHour + 1;
       const newEndTime = `${String(newEndHour).padStart(2, "0")}:${String(
@@ -206,11 +209,13 @@ const TeacherCalendarView = ({ sessions = [] }) => {
       // Show booked session details but don't allow editing
       setSelectedSession(arg.event);
       setSelectedDate(null);
+      setSelectedRange(null);
       setSheetOpen(true);
     } else {
       // Allow editing for available sessions
       setSelectedSession(arg.event);
       setSelectedDate(null);
+      setSelectedRange(null);
       setSheetOpen(true);
     }
   };
@@ -229,7 +234,108 @@ const TeacherCalendarView = ({ sessions = [] }) => {
 
     setSelectedDate(arg);
     setSelectedSession(null);
+    setSelectedRange(null);
     setSheetOpen(true);
+  };
+
+  // Range selection handler
+  const handleSelect = (selectInfo) => {
+    const startDate = new Date(selectInfo.start);
+    const endDate = new Date(selectInfo.end);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Check if any part of the range is in the past
+    if (startDate < today) {
+      toast.error("Cannot create sessions in the past");
+      return;
+    }
+
+    // Calculate the number of sessions to create
+    const timeDiff = endDate.getTime() - startDate.getTime();
+    const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+    console.log("Range selection:", {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      timeDiff: timeDiff,
+      hoursDiff: hoursDiff,
+      roundedHours: Math.ceil(hoursDiff),
+    });
+
+    if (hoursDiff < 1) {
+      toast.error("Please select at least 1 hour range");
+      return;
+    }
+
+    if (hoursDiff > 24) {
+      toast.error("Cannot create more than 24 sessions at once");
+      return;
+    }
+
+    setSelectedRange({
+      start: startDate,
+      end: endDate,
+      hours: Math.ceil(hoursDiff), // Use ceil instead of floor to ensure we create all sessions
+    });
+    setSelectedSession(null);
+    setSelectedDate(null);
+    setSheetOpen(true);
+  };
+
+  // Create multiple sessions
+  const handleCreateMultipleSessions = async () => {
+    if (!selectedRange || !user?.id) {
+      toast.error("Invalid selection or user not found");
+      return;
+    }
+
+    setIsCreatingMultiple(true);
+
+    try {
+      const startTime = new Date(selectedRange.start);
+      const endTime = new Date(selectedRange.end);
+
+      // Use the hours from selectedRange to ensure we create the correct number
+      const hoursToCreate = selectedRange.hours;
+
+      console.log("Creating bulk sessions:", {
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        hoursToCreate: hoursToCreate,
+      });
+
+      // Prepare range data for bulk creation
+      const rangeData = {
+        date: formatDate(startTime),
+        start_time: `${String(startTime.getHours()).padStart(2, "0")}:00:00`,
+        end_time: `${String(endTime.getHours()).padStart(2, "0")}:00:00`,
+        teacher_id: user.id,
+      };
+
+      console.log("Sending range data:", rangeData);
+
+      // Send bulk request
+      const response = await createBulkTeacherSessions(rangeData, user.role);
+
+      if (response?.success) {
+        toast.success(
+          `Successfully created ${hoursToCreate} session${
+            hoursToCreate > 1 ? "s" : ""
+          }`
+        );
+        setSheetOpen(false);
+        setSelectedRange(null);
+        fetchSessions();
+      } else {
+        toast.error(response?.message || "Failed to create sessions");
+      }
+    } catch (error) {
+      console.error("Error in bulk session creation:", error);
+      toast.error("Error creating sessions");
+    } finally {
+      setIsCreatingMultiple(false);
+    }
   };
 
   // Close modal
@@ -237,6 +343,7 @@ const TeacherCalendarView = ({ sessions = [] }) => {
     setSheetOpen(false);
     setSelectedSession(null);
     setSelectedDate(null);
+    setSelectedRange(null);
   };
 
   // Handle session updates
@@ -323,6 +430,7 @@ const TeacherCalendarView = ({ sessions = [] }) => {
             eventClassNames={handleClassName}
             dateClick={handleDateClick}
             eventClick={handleEventClick}
+            select={handleSelect}
             initialView="timeGridWeek"
             views={{
               timeGridWeek: {
@@ -355,7 +463,10 @@ const TeacherCalendarView = ({ sessions = [] }) => {
         onClose={handleCloseModal}
         session={selectedSession}
         selectedDate={selectedDate}
+        selectedRange={selectedRange}
         onSessionUpdated={handleSessionUpdated}
+        onCreateMultipleSessions={handleCreateMultipleSessions}
+        isCreatingMultiple={isCreatingMultiple}
       />
     </>
   );

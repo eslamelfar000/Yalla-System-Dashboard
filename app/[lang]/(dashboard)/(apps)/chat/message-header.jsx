@@ -2,7 +2,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, safeToString } from "@/lib/utils";
 import { Icon } from "@iconify/react";
 import {
   Tooltip,
@@ -13,18 +13,16 @@ import {
 } from "@/components/ui/tooltip";
 import { Menu } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { fixImageUrl, getAvatarInitials } from "@/lib/image-utils";
 
-const MessageHeader = ({
-  contact,
-  showInfo,
-  handleShowInfo,
-  handleSetIsOpenSearch,
-  isOpenSearch,
-  handlePinMessage,
-  handleForward,
-  isForward,
-}) => {
+const MessageHeader = ({ contact, showInfo, handleShowInfo }) => {
   const isLg = useMediaQuery("(max-width: 1024px)");
+
+  // Safety check: ensure contact is a valid object
+  if (!contact || typeof contact !== "object") {
+    console.warn("Invalid contact object in MessageHeader:", contact);
+    return null;
+  }
 
   // Handle different data structures from API
   const {
@@ -33,6 +31,7 @@ const MessageHeader = ({
     user_id,
     name,
     fullName,
+    role,
     avatar,
     image,
     status = "offline",
@@ -42,6 +41,7 @@ const MessageHeader = ({
     lastMessage,
     unread_count,
     unreadmessage,
+    unseenMsgs,
     updated_at,
     created_at,
     date,
@@ -49,11 +49,11 @@ const MessageHeader = ({
 
   // Use the appropriate fields based on what's available
   const chatId = id || chat_id;
-  const userName = name || fullName || "Unknown User";
-  const userAvatar = avatar?.src || image || avatar;
-  const userAbout = about || bio || "No status";
-  const lastMsg = last_message || lastMessage;
-  const unreadCount = unread_count || unreadmessage || 0;
+  const userName = safeToString(name || fullName || role || "Unknown User");
+  const userAvatar = fixImageUrl(avatar?.src || image || avatar);
+  const userAbout = safeToString(about || bio || "No status");
+  const lastMsg = safeToString(last_message || lastMessage);
+  const unreadCount = unread_count || unreadmessage || unseenMsgs || 0;
   const lastDate = updated_at || created_at || date;
 
   const isActive = status === "online";
@@ -71,7 +71,7 @@ const MessageHeader = ({
           <Avatar>
             <AvatarImage src={userAvatar} alt={userName} />
             <AvatarFallback className="uppercase">
-              {userName?.slice(0, 2) || "U"}
+              {getAvatarInitials(userName)}
             </AvatarFallback>
           </Avatar>
           <Badge
@@ -89,82 +89,6 @@ const MessageHeader = ({
         </div>
       </div>
       <div className="flex-none space-x-2 rtl:space-x-reverse">
-        {/* Search Messages */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                size="icon"
-                className={cn(
-                  "bg-transparent hover:bg-default-50 rounded-full",
-                  {
-                    "text-primary": !isOpenSearch,
-                  }
-                )}
-                onClick={handleSetIsOpenSearch}
-              >
-                <span className="text-xl text-primary ">
-                  <Icon icon="heroicons:magnifying-glass" />
-                </span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" align="end">
-              <p>Search messages</p>
-              <TooltipArrow className="fill-primary" />
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        {/* Pin Messages */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                size="icon"
-                className="bg-transparent hover:bg-default-50 rounded-full"
-                onClick={handlePinMessage}
-              >
-                <span className="text-xl text-primary ">
-                  <Icon icon="ion:pin-sharp" />
-                </span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" align="end">
-              <p>Pin messages</p>
-              <TooltipArrow className="fill-primary" />
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        {/* Forward Messages */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                size="icon"
-                className={cn(
-                  "bg-transparent hover:bg-default-50 rounded-full",
-                  {
-                    "text-primary": !isForward,
-                  }
-                )}
-                onClick={handleForward}
-              >
-                <span className="text-xl text-primary ">
-                  <Icon icon="material-symbols:forward" />
-                </span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" align="end">
-              <p>Forward messages</p>
-              <TooltipArrow className="fill-primary" />
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
         {/* Contact Info */}
         <TooltipProvider>
           <Tooltip>

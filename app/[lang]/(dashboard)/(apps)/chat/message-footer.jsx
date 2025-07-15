@@ -71,55 +71,18 @@ const MessageFooter = ({ handleSendMessage, replay, setReply, replayData }) => {
       )}
 
       <div
-        className="w-full flex items-end gap-1 lg:gap-4 lg:px-4 relative px-2 "
+        className="w-full flex items-end gap-1 lg:gap-4 lg:px-4 relative p-2 "
         style={{
           boxSizing: "border-box",
         }}
       >
         <div className="flex-none flex gap-1 absolute md:static top-0 left-1.5 z-10 ">
           <DropdownMenu>
-            {/* <DropdownMenuTrigger asChild>
-              <div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        size="icon"
-                        className="bg-transparent rounded-full hover:bg-default-50"
-                      >
-                        <span className="h-6 w-6 rounded-full bg-primary">
-                          <Icon
-                            icon="mdi:plus"
-                            className="text-2xl text-primary-foreground "
-                          />
-                        </span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" align="start">
-                      <p>Open More Actions </p>
-                      <TooltipArrow className="fill-primary" />
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </DropdownMenuTrigger> */}
             <DropdownMenuContent
               className="w-[196px] p-2.5 rounded-xl"
               align="start"
               side="top"
             >
-              {/* <DropdownMenuItem className="py-2 px-2 rounded-xl">
-                <div className="flex items-center gap-1">
-                  <Icon
-                    icon="material-symbols:mic"
-                    className="text-xl text-primary"
-                  />
-                  <span className="text-sm font-medium text-default-900">
-                    Send a voice clip
-                  </span>
-                </div>
-              </DropdownMenuItem> */}
               {message.length > 0 && (
                 <>
                   <DropdownMenuItem className="py-2 px-2 rounded-xl">
@@ -134,17 +97,6 @@ const MessageFooter = ({ handleSendMessage, replay, setReply, replayData }) => {
                       </span>
                     </Label>
                   </DropdownMenuItem>
-                  {/* <DropdownMenuItem className="py-2 px-2 rounded-xl">
-                    <div className="flex items-center gap-1">
-                      <Icon
-                        icon="fluent:sticker-12-filled"
-                        className="text-xl text-primary"
-                      />
-                      <span className="text-sm font-medium text-defualt-900 inline-block ml-1">
-                        Choose a sticker
-                      </span>
-                    </div>
-                  </DropdownMenuItem> */}
                 </>
               )}
             </DropdownMenuContent>
@@ -176,28 +128,6 @@ const MessageFooter = ({ handleSendMessage, replay, setReply, replayData }) => {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              {/* <div className="hidden lg:block">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        size="icon"
-                        className="bg-transparent rounded-full hover:bg-default-50 cursor-pointer"
-                      >
-                        <Icon
-                          icon="fluent:sticker-12-filled"
-                          className="text-2xl text-primary/80"
-                        />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent align="start">
-                      <p> Choose a sticker </p>
-                      <TooltipArrow className="fill-primary" />
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div> */}
             </>
           )}
         </div>

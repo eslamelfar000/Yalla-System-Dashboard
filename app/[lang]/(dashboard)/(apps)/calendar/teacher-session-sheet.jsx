@@ -19,7 +19,16 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, CalendarIcon, User, Star, Mail, Phone, Info } from "lucide-react";
+import {
+  Loader2,
+  CalendarIcon,
+  User,
+  Star,
+  Mail,
+  Phone,
+  Info,
+  Clock,
+} from "lucide-react";
 import {
   createTeacherSession,
   updateTeacherSession,
@@ -62,20 +71,24 @@ const TeacherSessionSheet = ({
   onClose,
   session,
   selectedDate,
+  selectedRange,
   onSessionUpdated,
+  onCreateMultipleSessions,
+  isCreatingMultiple,
   userRole = null,
-  availableSessions = [],
   showBookingButton = false,
   onBookSession = null,
   bookingLoading = false,
 }) => {
   const { user } = useAuth();
   const [startDate, setStartDate] = useState(new Date());
-  const [startTime, setStartTime] = useState("09:00");
-  const [endTime, setEndTime] = useState("10:00");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   const [isPending, startTransition] = React.useTransition();
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [sessionIdToDelete, setSessionIdToDelete] = useState(null);
+  const startTimeRef = React.useRef(null);
+  const endTimeRef = React.useRef(null);
 
   const sessionData = session?.extendedProps?.sessionData;
   const isBooked = sessionData?.is_booked;
@@ -111,7 +124,6 @@ const TeacherSessionSheet = ({
         teacher_id: user.id,
       };
 
-
       if (!session) {
         // Create new session
         const response = await createTeacherSession(sessionData, user.role);
@@ -140,28 +152,66 @@ const TeacherSessionSheet = ({
 
   useEffect(() => {
     if (selectedDate) {
-      // Fix date handling - use the date directly without timezone conversion
-      const date = new Date(selectedDate.date);
-      // Set the time to noon to avoid timezone issues
-      date.setHours(12, 0, 0, 0);
-      setStartDate(date);
+      console.log("Selected date object:", selectedDate);
+
+      // Extract the clicked date and time from FullCalendar arg
+      const clickedDate = new Date(selectedDate.date);
+      console.log("Clicked date:", clickedDate);
+
+      // Set the start date for the calendar picker
+      setStartDate(clickedDate);
 
       // Format date as YYYY-MM-DD
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
+      const year = clickedDate.getFullYear();
+      const month = String(clickedDate.getMonth() + 1).padStart(2, "0");
+      const day = String(clickedDate.getDate()).padStart(2, "0");
       const dateStr = `${year}-${month}-${day}`;
 
       setValue("date", dateStr);
 
-      // Set empty times for new sessions (user must enter manually)
-      setStartTime("");
-      setEndTime("");
-      setValue("start_time", "");
-      setValue("end_time", "");
+      // Extract time from clicked slot and set dynamically
+      let clickedHour = clickedDate.getHours();
+      let clickedMinute = clickedDate.getMinutes();
+
+      // Ensure hour is within reasonable bounds (9 AM to 9 PM)
+      clickedHour = Math.max(9, Math.min(21, clickedHour));
+
+      // Set start time to clicked hour (hours only, no minutes)
+      const startHour = clickedHour;
+      const endHour = startHour + 1; // End time is next hour
+
+      const startTimeStr = `${String(startHour).padStart(2, "0")}:00`;
+      const endTimeStr = `${String(endHour).padStart(2, "0")}:00`;
+
+      // Set times immediately
+      setStartTime(startTimeStr);
+      setEndTime(endTimeStr);
+      setValue("start_time", startTimeStr + ":00");
+      setValue("end_time", endTimeStr + ":00");
+
+      // Force update the input values directly
+      setTimeout(() => {
+        if (startTimeRef.current) {
+          startTimeRef.current.value = startTimeStr;
+          startTimeRef.current.dispatchEvent(
+            new Event("input", { bubbles: true })
+          );
+        }
+        if (endTimeRef.current) {
+          endTimeRef.current.value = endTimeStr;
+          endTimeRef.current.dispatchEvent(
+            new Event("input", { bubbles: true })
+          );
+        }
+      }, 50);
 
       console.log("Selected date set:", dateStr);
-      console.log("Times set to empty for manual entry");
+      console.log("Dynamic times set based on clicked slot:", {
+        start: startTimeStr,
+        end: endTimeStr,
+        clickedHour: clickedHour,
+        clickedMinute: clickedMinute,
+      });
     }
     if (session) {
       const sessionData = session.extendedProps.sessionData;
@@ -237,6 +287,85 @@ const TeacherSessionSheet = ({
       });
     }
   }, [session, selectedDate, setValue]);
+
+  // Reset form when sheet opens/closes
+  useEffect(() => {
+    if (!open) {
+      setStartTime("");
+      setEndTime("");
+      reset();
+    }
+  }, [reset]);
+
+  // Update refs when state changes
+  useEffect(() => {
+    if (startTimeRef.current && startTime) {
+      startTimeRef.current.value = startTime;
+    }
+    if (endTimeRef.current && endTime) {
+      endTimeRef.current.value = endTime;
+    }
+  }, [startTime, endTime]);
+
+  // Force update inputs when sheet opens with selectedDate
+  useEffect(() => {
+    if (open && selectedDate && !session) {
+      const clickedDate = new Date(selectedDate.date);
+      const clickedHour = Math.max(9, Math.min(21, clickedDate.getHours()));
+      const startTimeStr = `${String(clickedHour).padStart(2, "0")}:00`;
+      const endTimeStr = `${String(clickedHour + 1).padStart(2, "0")}:00`;
+
+      console.log("Sheet opened - forcing time update:", {
+        startTimeStr,
+        endTimeStr,
+      });
+
+      // Force update after a short delay to ensure DOM is ready
+      setTimeout(() => {
+        setStartTime(startTimeStr);
+        setEndTime(endTimeStr);
+        setValue("start_time", startTimeStr + ":00");
+        setValue("end_time", endTimeStr + ":00");
+
+        if (startTimeRef.current) {
+          startTimeRef.current.value = startTimeStr;
+        }
+        if (endTimeRef.current) {
+          endTimeRef.current.value = endTimeStr;
+        }
+      }, 100);
+    }
+  }, [open, selectedDate, session, setValue]);
+
+  // Force update inputs when sheet opens with selectedDate
+  useEffect(() => {
+    if (open && selectedDate && !session) {
+      const clickedDate = new Date(selectedDate.date);
+      const clickedHour = Math.max(9, Math.min(21, clickedDate.getHours()));
+      const startTimeStr = `${String(clickedHour).padStart(2, "0")}:00`;
+      const endTimeStr = `${String(clickedHour + 1).padStart(2, "0")}:00`;
+
+      console.log("Sheet opened - forcing time update:", {
+        startTimeStr,
+        endTimeStr,
+      });
+
+      // Force update after a short delay to ensure DOM is ready
+      setTimeout(() => {
+        setStartTime(startTimeStr);
+        setEndTime(endTimeStr);
+        setValue("start_time", startTimeStr + ":00");
+        setValue("end_time", endTimeStr + ":00");
+
+        if (startTimeRef.current) {
+          startTimeRef.current.value = startTimeStr;
+        }
+        if (endTimeRef.current) {
+          endTimeRef.current.value = endTimeStr;
+        }
+      }, 100);
+    }
+  }, [open, selectedDate, session, setValue]);
 
   const onDeleteSessionAction = async () => {
     try {
@@ -410,149 +539,211 @@ const TeacherSessionSheet = ({
 
                     {/* Form Fields */}
                     <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="date" className="mb-1.5">
-                          Date
-                        </Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-between text-left font-normal border-default-200 text-default-600",
-                                !startDate && "text-muted-foreground"
-                              )}
-                              disabled={isReadOnly || bookingLoading}
-                            >
-                              {startDate ? (
-                                formatDate(startDate, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="h-4 w-4" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={startDate}
-                              onSelect={(date) => {
-                                if (!isBooked && date && !bookingLoading) {
-                                  // Set the time to noon to avoid timezone issues
-                                  date.setHours(12, 0, 0, 0);
-                                  setStartDate(date);
+                      {/* Show range selection info if range is selected */}
+                      {selectedRange && (
+                        <Card className="bg-blue-50 border-blue-200">
+                          <CardContent className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <h3 className="font-medium text-blue-900">
+                                  Range Selection
+                                </h3>
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-blue-100 text-blue-800"
+                                >
+                                  {selectedRange.hours} session
+                                  {selectedRange.hours !== 1 ? "s" : ""}
+                                </Badge>
+                              </div>
+                              <div className="space-y-2 text-sm text-blue-700">
+                                <div className="flex items-center gap-2">
+                                  <CalendarIcon className="w-4 h-4" />
+                                  <span>
+                                    {selectedRange.start.toLocaleDateString()} -{" "}
+                                    {selectedRange.end.toLocaleDateString()}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Clock className="w-4 h-4" />
+                                  <span>
+                                    {selectedRange.start.toLocaleTimeString(
+                                      [],
+                                      { hour: "2-digit", minute: "2-digit" }
+                                    )}{" "}
+                                    -{" "}
+                                    {selectedRange.end.toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="text-xs text-blue-600">
+                                This will create {selectedRange.hours}{" "}
+                                consecutive 1-hour sessions.
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
 
-                                  // Format date as YYYY-MM-DD
-                                  const year = date.getFullYear();
-                                  const month = String(
-                                    date.getMonth() + 1
-                                  ).padStart(2, "0");
-                                  const day = String(date.getDate()).padStart(
-                                    2,
-                                    "0"
-                                  );
-                                  const dateStr = `${year}-${month}-${day}`;
+                      {/* Show regular form fields for single session */}
+                      {!selectedRange && (
+                        <>
+                          <div>
+                            <Label htmlFor="date" className="mb-1.5">
+                              Date
+                            </Label>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-between text-left font-normal border-default-200 text-default-600",
+                                    !startDate && "text-muted-foreground"
+                                  )}
+                                  disabled={isReadOnly || bookingLoading}
+                                >
+                                  {startDate ? (
+                                    formatDate(startDate, "PPP")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="h-4 w-4" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                  mode="single"
+                                  selected={startDate}
+                                  onSelect={(date) => {
+                                    if (!isBooked && date && !bookingLoading) {
+                                      // Set the time to noon to avoid timezone issues
+                                      date.setHours(12, 0, 0, 0);
+                                      setStartDate(date);
 
-                                  setValue("date", dateStr);
-                                  console.log(
-                                    "Calendar date selected:",
-                                    dateStr
-                                  );
-                                }
-                              }}
-                              disabled={(date) =>
-                                date <
-                                  new Date(new Date().setHours(0, 0, 0, 0)) ||
-                                isReadOnly ||
-                                bookingLoading
-                              }
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        {errors.date && (
-                          <div className="text-destructive text-sm mt-1">
-                            {errors.date.message}
+                                      // Format date as YYYY-MM-DD
+                                      const year = date.getFullYear();
+                                      const month = String(
+                                        date.getMonth() + 1
+                                      ).padStart(2, "0");
+                                      const day = String(
+                                        date.getDate()
+                                      ).padStart(2, "0");
+                                      const dateStr = `${year}-${month}-${day}`;
+
+                                      setValue("date", dateStr);
+                                      console.log(
+                                        "Calendar date selected:",
+                                        dateStr
+                                      );
+                                    }
+                                  }}
+                                  disabled={(date) =>
+                                    date <
+                                      new Date(
+                                        new Date().setHours(0, 0, 0, 0)
+                                      ) ||
+                                    isReadOnly ||
+                                    bookingLoading
+                                  }
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            {errors.date && (
+                              <div className="text-destructive text-sm mt-1">
+                                {errors.date.message}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="start_time" className="mb-1.5">
-                            Start Time
-                          </Label>
-                          <Input
-                            id="start_time"
-                            type="time"
-                            value={startTime}
-                            onChange={(e) => {
-                              if (bookingLoading) return;
-                              const newStartTime = e.target.value;
-                              setStartTime(newStartTime);
-                              setValue("start_time", newStartTime + ":00");
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="start_time" className="mb-1.5">
+                                Start Time
+                              </Label>
+                              <Input
+                                id="start_time"
+                                type="time"
+                                value={startTime}
+                                ref={startTimeRef}
+                                key={`start-${startTime}`}
+                                onChange={(e) => {
+                                  if (bookingLoading) return;
+                                  const newStartTime = e.target.value;
+                                  setStartTime(newStartTime);
+                                  setValue("start_time", newStartTime + ":00");
 
-                              // Auto-adjust end time if it's before start time
-                              if (
-                                newStartTime &&
-                                endTime &&
-                                newStartTime >= endTime
-                              ) {
-                                const startHour = parseInt(
-                                  newStartTime.split(":")[0]
-                                );
-                                const startMinute = parseInt(
-                                  newStartTime.split(":")[1]
-                                );
-                                const newEndHour = startHour + 1;
-                                const newEndTime = `${String(
-                                  newEndHour
-                                ).padStart(2, "0")}:${String(
-                                  startMinute
-                                ).padStart(2, "0")}`;
-                                setEndTime(newEndTime);
-                                setValue("end_time", newEndTime + ":00");
-                              }
-                            }}
-                            disabled={isReadOnly || bookingLoading}
-                            placeholder="Select start time"
-                          />
-                          {errors.start_time && (
-                            <div className="text-destructive text-sm mt-1">
-                              {errors.start_time.message}
+                                  // Auto-adjust end time if it's before start time
+                                  if (
+                                    newStartTime &&
+                                    endTime &&
+                                    newStartTime >= endTime
+                                  ) {
+                                    const startHour = parseInt(
+                                      newStartTime.split(":")[0]
+                                    );
+                                    const startMinute = parseInt(
+                                      newStartTime.split(":")[1]
+                                    );
+                                    const newEndHour = startHour + 1;
+                                    const newEndTime = `${String(
+                                      newEndHour
+                                    ).padStart(2, "0")}:${String(
+                                      startMinute
+                                    ).padStart(2, "0")}`;
+                                    setEndTime(newEndTime);
+                                    setValue("end_time", newEndTime + ":00");
+                                  }
+                                }}
+                                disabled={isReadOnly || bookingLoading}
+                                placeholder="Select start time"
+                              />
+                              {errors.start_time && (
+                                <div className="text-destructive text-sm mt-1">
+                                  {errors.start_time.message}
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
 
-                        <div>
-                          <Label htmlFor="end_time" className="mb-1.5">
-                            End Time
-                          </Label>
-                          <Input
-                            id="end_time"
-                            type="time"
-                            value={endTime}
-                            onChange={(e) => {
-                              if (bookingLoading) return;
-                              const newEndTime = e.target.value;
-                              setEndTime(newEndTime);
-                              setValue("end_time", newEndTime + ":00");
-                            }}
-                            disabled={isReadOnly || bookingLoading}
-                            min={startTime} // Set minimum time to start time
-                            placeholder="Select end time"
-                          />
-                          {errors.end_time && (
-                            <div className="text-destructive text-sm mt-1">
-                              {errors.end_time.message}
+                            <div>
+                              <Label htmlFor="end_time" className="mb-1.5">
+                                End Time
+                              </Label>
+                              <Input
+                                id="end_time"
+                                type="time"
+                                value={endTime || ""}
+                                ref={endTimeRef}
+                                key={`end-${endTime}`}
+                                onChange={(e) => {
+                                  if (bookingLoading) return;
+                                  const newEndTime = e.target.value;
+                                  setEndTime(newEndTime);
+                                  setValue("end_time", newEndTime + ":00");
+                                }}
+                                disabled={isReadOnly || bookingLoading}
+                                min={startTime} // Set minimum time to start time
+                                placeholder="Select end time"
+                              />
+                              {errors.end_time && (
+                                <div className="text-destructive text-sm mt-1">
+                                  {errors.end_time.message}
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      </div>
+                          </div>
+                        </>
+                      )}
+
                       <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <Info className="w-16 h-16 text-yellow-600" />
+                        <Info className="w-14 h-14 text-yellow-600" />
                         <span>
-                           You can create some session in one time by select a range of time like from 01:00 to 10:00 this will create 9 sessions.
+                          {selectedRange
+                            ? `You can create ${selectedRange.hours} sessions at once by clicking "Create Multiple Sessions" below.`
+                            : "You can create multiple sessions at once by selecting a range of time slots in the calendar."}
                         </span>
                       </div>
                     </div>
@@ -560,30 +751,53 @@ const TeacherSessionSheet = ({
                 </ScrollArea>
               </div>
               <div className="pb-12 flex flex-wrap gap-2 px-6">
-                <Button
-                  type="submit"
-                  disabled={isPending || isReadOnly || bookingLoading}
-                  className="flex-1"
-                >
-                  {isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {session ? "Updating..." : "Creating..."}
-                    </>
-                  ) : isReadOnly ? (
-                    isAdminRole ? (
-                      "View Only (Admin Role)"
-                    ) : isQualityRole ? (
-                      "View Only (Quality Role)"
+                {/* Show different buttons based on selection type */}
+                {selectedRange ? (
+                  // Range selection - show multiple session creation button
+                  <Button
+                    type="button"
+                    onClick={onCreateMultipleSessions}
+                    disabled={isCreatingMultiple || isReadOnly}
+                    className="flex-1"
+                  >
+                    {isCreatingMultiple ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating {selectedRange.hours} Sessions...
+                      </>
                     ) : (
-                      "Session Booked (Cannot Edit)"
-                    )
-                  ) : session ? (
-                    "Update Session"
-                  ) : (
-                    "Create Session"
-                  )}
-                </Button>
+                      `Create ${selectedRange.hours} Session${
+                        selectedRange.hours !== 1 ? "s" : ""
+                      }`
+                    )}
+                  </Button>
+                ) : (
+                  // Single session - show regular create/update button
+                  <Button
+                    type="submit"
+                    disabled={isPending || isReadOnly || bookingLoading}
+                    className="flex-1"
+                  >
+                    {isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {session ? "Updating..." : "Creating..."}
+                      </>
+                    ) : isReadOnly ? (
+                      isAdminRole ? (
+                        "View Only (Admin Role)"
+                      ) : isQualityRole ? (
+                        "View Only (Quality Role)"
+                      ) : (
+                        "Session Booked (Cannot Edit)"
+                      )
+                    ) : session ? (
+                      "Update Session"
+                    ) : (
+                      "Create Session"
+                    )}
+                  </Button>
+                )}
 
                 {/* Show booking button for quality users on available sessions */}
                 {showBookingButton &&
@@ -608,7 +822,7 @@ const TeacherSessionSheet = ({
                     </Button>
                   )}
 
-                {session && !isReadOnly && !isAdminRole && (
+                {session && !isReadOnly && !isAdminRole && !selectedRange && (
                   <Button
                     type="button"
                     variant="destructive"
