@@ -62,9 +62,6 @@ const Messages = ({
     }
   }, [messages, chatHeightRef]);
 
-  // Debug: Log messages to see their structure
-  console.log("Messages data:", messages);
-
   const handleDeleteClick = (messageId) => {
     setMessageToDelete(messageId);
     setDeleteDialogOpen(true);
@@ -97,7 +94,7 @@ const Messages = ({
   return (
     <>
       <div
-        className="h-full py-4 overflow-y-auto no-scrollbar"
+        className="h-full py-4 overflow-y-auto no-scrollbar min-h-0"
         ref={chatHeightRef}
       >
         {messages
@@ -155,14 +152,7 @@ const Messages = ({
   );
 };
 
-const MessageItem = ({
-  message,
-  index,
-  selectedChatId,
-  onDelete,
-  handleReply,
-  currentUserId,
-}) => {
+const MessageItem = ({ message, onDelete, currentUserId }) => {
   // Safety check: ensure message has required properties
   if (!message || typeof message !== "object") {
     console.warn("Invalid message in MessageItem:", message);
@@ -189,6 +179,7 @@ const MessageItem = ({
     sender?.avatar || user?.avatar || sender?.image || user?.image
   );
 
+
   // Get safe message content
   const safeMessageContent = getSafeMessageContent(chatMessage);
 
@@ -196,29 +187,34 @@ const MessageItem = ({
     <div className="block md:px-6 px-0">
       {isOwnMessage ? (
         <>
-          <div className="flex space-x-2 items-start justify-end group w-full rtl:space-x-reverse mb-4">
-            <div className=" flex flex-col  gap-1">
+          <div className="flex space-x-2 items-end justify-end group w-full rtl:space-x-reverse mb-4">
+            <div className=" flex flex-col items-end gap-1">
+              {/* {user?.role === "teacher" && ( */}
+                <span className="text-xs text-default-500">{senderName}</span>
+              {/* )} */}
               <div className="flex items-center gap-1">
                 <div className="opacity-0 invisible group-hover:opacity-100 group-hover:visible ">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <span className="w-7 h-7 rounded-full bg-default-200 flex items-center justify-center">
-                        <Icon
-                          icon="bi:three-dots-vertical"
-                          className="text-lg"
-                        />
-                      </span>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-20 p-0"
-                      align="center"
-                      side="top"
-                    >
-                      <DropdownMenuItem onClick={() => onDelete(id)}>
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {user?.role === "teacher" && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <span className="w-7 h-7 rounded-full bg-default-200 flex items-center justify-center">
+                          <Icon
+                            icon="bi:three-dots-vertical"
+                            className="text-lg"
+                          />
+                        </span>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        className="w-20 p-0"
+                        align="center"
+                        side="top"
+                      >
+                        <DropdownMenuItem onClick={() => onDelete(id)}>
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
                 <div className="whitespace-pre-wrap break-all">
                   <div className="bg-primary text-primary-foreground  text-sm  py-2 px-3 rounded-2xl  flex-1  ">
@@ -251,6 +247,9 @@ const MessageItem = ({
             </Avatar>
           </div>
           <div className="flex-1 flex flex-col gap-2">
+            {/* {user?.role === "admin" && ( */}
+              <span className="text-xs text-default-500">{senderName}</span>
+            {/* )} */}
             <div className="flex items-center gap-1">
               <div className="whitespace-pre-wrap break-all relative z-[1]">
                 <div className="bg-default-200  text-sm  py-2 px-3 rounded-2xl  flex-1  ">

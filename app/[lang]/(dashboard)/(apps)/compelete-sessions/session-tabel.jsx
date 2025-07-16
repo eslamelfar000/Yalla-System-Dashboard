@@ -29,6 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useGetData } from "@/hooks/useGetData";
 import { useMutate } from "@/hooks/useMutate";
 import TeacherFilter from "@/components/Shared/TeacherFilter";
+import { useDebounce } from "@/hooks/use-debounce";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -185,17 +186,41 @@ export function SessionsDataTable() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Get complete sessions data with teacher filter
+  // Local state for search input
+  const [localSearchValue, setLocalSearchValue] = useState("");
+
+  // Debounce the search value to avoid excessive API calls
+  const debouncedSearchValue = useDebounce(localSearchValue, 500);
+
+  // Build endpoint with search and teacher filter
+  const buildEndpoint = useMemo(() => {
+    let endpoint = "dashboard/complete-sessions";
+    const params = [];
+
+    if (selectedTeacher) {
+      params.push(`teacher_id=${selectedTeacher}`);
+    }
+
+    if (debouncedSearchValue) {
+      params.push(`search=${encodeURIComponent(debouncedSearchValue)}`);
+    }
+
+    if (params.length > 0) {
+      endpoint += `?${params.join("&")}`;
+    }
+
+    return endpoint;
+  }, [selectedTeacher, debouncedSearchValue]);
+
+  // Get complete sessions data with search and teacher filter
   const {
     data: sessionsData,
     isLoading: sessionsLoading,
     error: sessionsError,
     refetch: refetchSessions,
   } = useGetData({
-    endpoint: selectedTeacher
-      ? `dashboard/complete-sessions?teacher_id=${selectedTeacher}`
-      : "dashboard/complete-sessions",
-    queryKey: ["complete-sessions", selectedTeacher],
+    endpoint: buildEndpoint,
+    queryKey: ["complete-sessions", selectedTeacher, debouncedSearchValue],
   });
 
   const sessions = sessionsData?.data?.sessions || [];
@@ -261,13 +286,9 @@ export function SessionsDataTable() {
     setSelectedTeacher("");
   }, []);
 
-  const handleStudentFilterChange = useCallback(
-    (event) => {
-      table.getColumn("student")?.setFilterValue(event.target.value);
-    },
-    [table]
-  );
-
+  const handleSearchChange = useCallback((value) => {
+    setLocalSearchValue(value);
+  }, []);
 
   const handleRetry = useCallback(() => {
     refetchSessions();
@@ -279,9 +300,9 @@ export function SessionsDataTable() {
       <>
         <div className="flex items-center flex-wrap gap-4 mb-5">
           <Input
-            placeholder="Filter sessions..."
-            value={table.getColumn("student")?.getFilterValue() || ""}
-            onChange={handleStudentFilterChange}
+            placeholder="Search by student name..."
+            value={localSearchValue}
+            onChange={(event) => handleSearchChange(event.target.value)}
             className="max-w-sm min-w-[200px] h-10"
           />
           <TeacherFilter
@@ -359,9 +380,9 @@ export function SessionsDataTable() {
     <>
       <div className="flex items-center flex-wrap gap-4 mb-5">
         <Input
-          placeholder="Filter sessions..."
-          value={table.getColumn("student")?.getFilterValue() || ""}
-          onChange={handleStudentFilterChange}
+          placeholder="Search by student name..."
+          value={localSearchValue}
+          onChange={(event) => handleSearchChange(event.target.value)}
           className="max-w-sm min-w-[200px] h-10"
         />
         {!sessionsError && (

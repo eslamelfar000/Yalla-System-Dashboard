@@ -20,106 +20,133 @@ import {
 } from "@/components/ui/table";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useGetData } from "@/hooks/useGetData";
+import { useDebounce } from "@/hooks/use-debounce";
+import { SharedAlertDialog } from "@/components/Shared/Drawer/shared-dialog";
+import Pagination from "@/components/Shared/Pagination/Pagination";
 
 const columns = [
   {
-    accessorKey: "user",
-    header: "User",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <Avatar className=" rounded-full">
-            <AvatarImage src={row?.original?.user.avatar} />
-            <AvatarFallback>AB</AvatarFallback>
-          </Avatar>
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
-          </span>
+    accessorKey: "student",
+    header: "Student",
+    cell: ({ row }) => {
+      const student = row?.original?.student;
+      if (!student) return <Skeleton className="h-10 w-32" />;
+
+      return (
+        <div className="font-medium text-card-foreground/80">
+          <div className="flex space-x-3 rtl:space-x-reverse items-center">
+            <Avatar className="rounded-full">
+              <AvatarImage src={student.image} />
+              <AvatarFallback>
+                {student.name?.charAt(0)?.toUpperCase() || "S"}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+              {student.name}
+            </span>
+          </div>
         </div>
-      </div>
-    ),
+      );
+    },
   },
   {
-    accessorKey: "id",
+    accessorKey: "user_id",
     header: "ID",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.id}
+    cell: ({ row }) => {
+      if (!row?.original?.user_id) return <Skeleton className="h-4 w-8" />;
+
+      return (
+        <div className="font-medium text-card-foreground/80">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row.original.user_id}
           </span>
         </div>
-      </div>
-    ),
+      );
+    },
   },
   {
-    accessorKey: "booked",
+    accessorKey: "count",
     header: "Booked",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+    cell: ({ row }) => {
+      if (!row?.original?.count) return <Skeleton className="h-4 w-8" />;
+
+      return (
+        <div className="font-medium text-card-foreground/80">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row.original.count > 1
+              ? `${row.original.count} Sessions`
+              : "1 Session"}
           </span>
         </div>
-      </div>
-    ),
+      );
+    },
   },
   {
     accessorKey: "type",
     header: "Type",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+    cell: ({ row }) => {
+      if (!row?.original?.type) return <Skeleton className="h-4 w-16" />;
+
+      return (
+        <div className="font-medium text-card-foreground/80">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap capitalize">
+            {row.original.type}
           </span>
         </div>
-      </div>
-    ),
+      );
+    },
   },
   {
-    accessorKey: "teacher",
+    accessorKey: "teacher_name",
     header: "Teacher Name",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+    cell: ({ row }) => {
+      // Teacher name might be null, show placeholder
+      return (
+        <div className="font-medium text-card-foreground/80">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row.original.teacher_id
+              ? `Teacher ${row.original.teacher_id}`
+              : "Not Assigned"}
           </span>
         </div>
-      </div>
-    ),
+      );
+    },
   },
   {
-    accessorKey: "payed",
+    accessorKey: "price",
     header: "Payed",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+    cell: ({ row }) => {
+      if (!row?.original?.price) return <Skeleton className="h-4 w-12" />;
+
+      return (
+        <div className="font-medium text-card-foreground/80">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row.original.price}$
           </span>
         </div>
-      </div>
-    ),
+      );
+    },
   },
   {
-    accessorKey: "method",
+    accessorKey: "payment_type",
     header: "Method",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+    cell: ({ row }) => {
+      if (!row?.original?.payment_type)
+        return <Skeleton className="h-4 w-16" />;
+
+      return (
+        <div className="font-medium text-card-foreground/80">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap capitalize">
+            {row.original.payment_type}
           </span>
         </div>
-      </div>
-    ),
+      );
+    },
   },
 ];
 
@@ -128,9 +155,29 @@ export function ReservationDataTable() {
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [currentPage, setCurrentPage] = React.useState(1);
+  // Local state for search input
+  const [localSearchValue, setLocalSearchValue] = React.useState("");
+
+  // Debounce the search value to avoid excessive API calls
+  const debouncedSearchValue = useDebounce(localSearchValue, 500);
+
+  // Get reservations data with debounced search parameter
+  const {
+    data: reservationsData,
+    isLoading: reservationsLoading,
+    error: reservationsError,
+  } = useGetData({
+    endpoint: `dashboard/reservations?type[0]=paybefore&type[1]=trail${
+      debouncedSearchValue ? `&search=${debouncedSearchValue}` : ""
+    }`,
+    queryKey: ["reservations", "trail", debouncedSearchValue],
+  });
+
+  const reservations = reservationsData?.data || [];
 
   const table = useReactTable({
-    data,
+    data: reservations,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -148,36 +195,23 @@ export function ReservationDataTable() {
     },
   });
 
+  // Update local search value immediately for responsive UI
+  const handleTrailSearch = (value) => {
+    setLocalSearchValue(value);
+  };
+
   return (
     <>
       <div className="flex items-center flex-wrap gap-2 mb-5">
         <Input
-          placeholder="Filter emails..."
-          value={table.getColumn("email")?.getFilterValue() || ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
+          placeholder="Search by student name..."
+          value={localSearchValue}
+          onChange={(event) => handleTrailSearch(event.target.value)}
           className="max-w-sm min-w-[200px] h-10"
         />
-        {/* <Select className="w-[280px]">
-          <SelectTrigger className="w-[200px]">
-            <SelectValue
-              placeholder="Select Teacher"
-              className="whitespace-nowrap"
-            />
-          </SelectTrigger>
-          <SelectContent className="h-[300px] overflow-y-auto ">
-            {data?.map((item) => (
-              <SelectItem key={item?.user?.name} value={item?.user?.name}>
-                {item?.user?.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select> */}
-
-        {/* <SharedDrawer /> */}
       </div>
-      <Card title="Simple">
+
+      <Card title="Trail Reservations">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -198,33 +232,43 @@ export function ReservationDataTable() {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table
-                .getRowModel()
-                .rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-default-100"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-                .slice(0, 4)
+            {reservationsLoading ? (
+              // Loading skeleton rows
+              Array.from({ length: 4 }).map((_, index) => (
+                <TableRow key={`skeleton-${index}`}>
+                  {columns.map((column, colIndex) => (
+                    <TableCell key={`skeleton-cell-${colIndex}`}>
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="hover:bg-default-100"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {reservationsError
+                    ? "Error loading data"
+                    : "No reservations found."}
                 </TableCell>
               </TableRow>
             )}
@@ -232,55 +276,13 @@ export function ReservationDataTable() {
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4 px-4 py-4">
-        <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-
-        <div className="flex gap-2  items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-left"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-
-          {table.getPageOptions().map((page, pageIdx) => (
-            <Button
-              key={`basic-data-table-${pageIdx}`}
-              onClick={() => table.setPageIndex(pageIdx)}
-              variant={`${
-                pageIdx === table.getState().pagination.pageIndex
-                  ? ""
-                  : "outline"
-              }`}
-              className={cn("w-8 h-8")}
-            >
-              {page + 1}
-            </Button>
-          ))}
-
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-right"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-        </div>
-      </div>
+      {/* Pagination */}
+      <Pagination
+        last_page={reservationsData?.data?.pagination?.last_page}
+        setCurrentPage={setCurrentPage}
+        current_page={currentPage}
+        studentsPagination={false}
+      />
     </>
   );
 }

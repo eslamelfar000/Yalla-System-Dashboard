@@ -71,7 +71,7 @@ const MessageFooter = ({ handleSendMessage, replay, setReply, replayData }) => {
       )}
 
       <div
-        className="w-full flex items-end gap-1 lg:gap-4 lg:px-4 relative p-2 "
+        className="w-full flex items-end gap-1 lg:gap-4 lg:px-4 relative p-2 py-4 border-t border-default-200"
         style={{
           boxSizing: "border-box",
         }}

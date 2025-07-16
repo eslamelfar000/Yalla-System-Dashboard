@@ -102,7 +102,7 @@ export const menusConfig = {
         title: "chat",
         icon: Messages,
         href: "/chat",
-        roles: ['teacher'],
+        roles: ['teacher', 'admin'],
       },
       {
         title: "Reservation",

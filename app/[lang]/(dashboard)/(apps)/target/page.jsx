@@ -13,7 +13,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 function page() {
   return (
-    <ProtectedRoute requiredRoles={["admin"]}>
+    <ProtectedRoute requiredRoles={["teacher"]}>
       <div className="space-y-10">
         <TargetsPage />
 

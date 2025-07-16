@@ -11,10 +11,38 @@ import {
 } from "@/components/ui/dialog";
 import { Icon } from "@iconify/react";
 import LoadingButton from "../loading-button";
+import { useMutate } from "@/hooks/useMutate";
+import { useState } from "react";
 
 export function SharedAlertDialog({ type, info, onConfirm, isDeleting }) {
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Mutation for updating reservation status
+  const updateReservationStatusMutation = useMutate({
+    method: "POST",
+    endpoint: `dashboard/reservations/${info?.id}/status`,
+    queryKeysToInvalidate: [["reservations", "payafter"]],
+    text: "Reservation status updated successfully!",
+    onSuccess: () => {
+      setIsUpdating(false);
+      setIsOpen(false);
+    },
+    onError: () => {
+      setIsUpdating(false);
+      setIsOpen(false);
+    },
+  });
+
+  const handleAcceptReservation = () => {
+    if (info?.id) {
+      setIsUpdating(true);
+      updateReservationStatusMutation.mutate();
+    }
+  };
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         {[
           "delete-teacher",
@@ -65,7 +93,7 @@ export function SharedAlertDialog({ type, info, onConfirm, isDeleting }) {
             ].includes(type) ? (
               <span className="text-sm text-default-600">
                 This action cannot be undone. This will permanently accept this
-                request?
+                reservation and update its status.
               </span>
             ) : (
               <span className="text-sm text-default-600">
@@ -88,9 +116,14 @@ export function SharedAlertDialog({ type, info, onConfirm, isDeleting }) {
             "accept-after-pay-request",
             "accept-patAfter-reservation",
           ].includes(type) ? (
-            <Button type="submit" color="success" onClick={onConfirm}>
-              Accept
-            </Button>
+            <LoadingButton
+              loading={isUpdating}
+              onClick={handleAcceptReservation}
+              variant="default"
+              color="success"
+            >
+              {isUpdating ? "Accepting..." : "Accept"}
+            </LoadingButton>
           ) : (
             <LoadingButton
               loading={isDeleting}

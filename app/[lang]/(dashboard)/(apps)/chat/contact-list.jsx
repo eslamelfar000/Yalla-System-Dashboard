@@ -81,8 +81,6 @@ const ContactList = ({
     date,
   } = contact;
 
-  console.log(contact);
-
   // Use the appropriate fields based on what's available
   const chatId = id || chat_id;
   const userName = safeToString(name || fullName || role || "Unknown User");
@@ -105,7 +103,7 @@ const ContactList = ({
       <div className="relative">
         <Avatar className="h-10 w-10">
           <AvatarImage src={userAvatar} />
-          <AvatarFallback className="uppercase text-xs">
+          <AvatarFallback className="uppercase text-xs bg-primary/50">
             {getAvatarInitials(userName)}
           </AvatarFallback>
         </Avatar>

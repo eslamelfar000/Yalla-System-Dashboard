@@ -101,7 +101,7 @@ const columns = [
       <div className="font-medium text-card-foreground/80">
         <div className="flex space-x-3 rtl:space-x-reverse items-center">
           <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.target || "N/A"}
+            {row?.original?.target || "N/A"}%
           </span>
         </div>
       </div>
@@ -155,34 +155,22 @@ const columns = [
     accessorKey: "action",
     header: "Action",
     cell: ({ row }) => {
-      const isRowLoading = row.original.isLoading;
-      const isCompleted = row?.original?.status === "completed";
-
       return (
         <div className="font-medium text-card-foreground/80">
           <div className="rtl:space-x-reverse items-center">
-            {isRowLoading ? (
-              <div className="flex items-center justify-center w-6 h-6">
-                <Icon
-                  icon="eos-icons:loading"
-                  className="w-4 h-4 animate-spin text-primary"
+            {row?.original?.admin_status === "done" ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="w-8 h-8 text-green-500"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+                  clipRule="evenodd"
                 />
-              </div>
-            ) : isCompleted ? (
-              <div className="flex items-center justify-center w-6 h-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-6 h-6 text-green-500"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
+              </svg>
             ) : (
               <Toggle
                 aria-label="Toggle italic"
@@ -307,11 +295,11 @@ const ReportsDataTableComponent = () => {
 
     for (let month = 1; month <= 12; month++) {
       const date = new Date(currentYear, month - 1, 1); // month - 1 because getMonth() is 0-based
-      const monthNumber = month; // 1-12 format
+      const monthNumber = month.toString().padStart(2, "0"); // 01-12 format
       const monthLabel = date.toLocaleDateString("en-US", {
         month: "long",
       });
-      months.push({ value: monthNumber.toString(), label: monthLabel });
+      months.push({ value: monthNumber, label: monthLabel });
     }
     return months;
   }, []);
@@ -326,7 +314,7 @@ const ReportsDataTableComponent = () => {
     }
 
     if (selectedMonth) {
-      params.push(`month_number=${selectedMonth}`);
+      params.push(`month=${selectedMonth}`);
     }
 
     if (params.length > 0) {

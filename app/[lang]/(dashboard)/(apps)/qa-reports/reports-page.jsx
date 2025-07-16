@@ -9,7 +9,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Icon } from "@iconify/react";
-import { Separator } from '@/components/ui/separator';
 
 const monthTargets = [
   { week: 1, target: 80.45 },

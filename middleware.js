@@ -37,12 +37,12 @@ const ROUTE_PERMISSIONS = {
   
   // Teacher routes
   '/lessons-board': 'teacher',
-  '/chat': 'teacher',
-  '/target': 'teacher',
+  '/target': ['teacher'],
 
 
   
   // Multi-role routes
+    '/chat': ['teacher', 'admin'],
   '/income': ['admin', 'teacher', 'quality'],
   '/archive': ['admin', 'teacher', 'quality'],
   '/user-profile': ['admin', 'teacher', 'quality'],

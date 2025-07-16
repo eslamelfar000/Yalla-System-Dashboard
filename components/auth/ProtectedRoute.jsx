@@ -17,7 +17,7 @@ const LoadingSpinner = () => (
 
 // Unauthorized access component
 const UnauthorizedAccess = ({ userRole, requiredRoles }) => (
-  <div className="min-h-screen flex items-center justify-center">
+  <div className="min-h-[calc(100vh-250px)] flex items-center justify-center">
     <div className="text-center max-w-md px-4">
       <div className="text-6xl mb-4">🚫</div>
       <h1 className="text-2xl font-bold text-default-900 mb-2">

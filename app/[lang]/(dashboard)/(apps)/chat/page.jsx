@@ -184,18 +184,18 @@ const ChatPage = () => {
   }, [messages, handleSendMessage, chatsData]);
 
   return (
-    <div className="h-screen flex gap-5">
+    <div className="h-[calc(100vh-250px)] flex flex-col lg:flex-row gap-5 overflow-hidden">
       {/* Contact List Sidebar */}
-      <div className="w-full lg:w-80 xl:w-86 border-r border-border flex flex-col">
+      <div className="w-full lg:w-80 xl:w-86 border-r border-border flex flex-col h-full">
         <Card className="h-full rounded-md border-0">
           <CardContent className="p-0 h-full flex flex-col">
             {/* User Profile Header */}
-            <div className="p-4 border-b border-border">
+            <div className="p-4 border-b border-border flex-shrink-0">
               <MyProfileHeader profile={profile} />
             </div>
 
             {/* Chat List */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto min-h-0">
               {chatsLoading ? (
                 // Show skeleton loading for multiple chat items
                 Array.from({ length: 4 }).map((_, index) => (
@@ -228,7 +228,7 @@ const ChatPage = () => {
       </div>
 
       {/* Chat Messages Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-full">
         <Card className="h-full rounded-md border-0">
           <CardContent className="p-0 h-full flex flex-col">
             {selectedChatId ? (
@@ -241,7 +241,7 @@ const ChatPage = () => {
                 />
 
                 {/* Messages Area */}
-                <div className="flex-1 relative overflow-hidden">
+                <div className="flex-1 relative overflow-hidden min-h-0">
                   {messageLoading ? (
                     <div className="h-full flex items-center justify-center">
                       <Loader />
@@ -258,13 +258,15 @@ const ChatPage = () => {
                 </div>
 
                 {/* Message Footer */}
+                {user?.role === "teacher" && (
                 <MessageFooter
                   handleSendMessage={handleSendMessage}
                   replay={replay}
                   setReply={setReply}
                   replayData={replayData}
-                  setReplyData={setReplyData}
-                />
+                    setReplyData={setReplyData}
+                  />
+                )}
               </>
             ) : (
               <Blank />
@@ -275,7 +277,7 @@ const ChatPage = () => {
 
       {/* Contact Info Sidebar */}
       {showInfo && selectedChatId && (
-        <div className="hidden xl:block w-80 border-l border-border">
+        <div className="hidden xl:block w-80 border-l border-border h-full">
           <ContactInfo
             contact={chatInfo}
             handleShowInfo={handleShowInfo}
