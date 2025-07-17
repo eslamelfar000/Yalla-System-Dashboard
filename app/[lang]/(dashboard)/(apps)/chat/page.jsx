@@ -45,10 +45,13 @@ const ChatPage = () => {
 
   const queryClient = useQueryClient();
 
-  // Memoize getMessages using useCallback
+  // Get user role for API calls
+  const userRole = user?.role || null;
+
+  // Memoize getMessages using useCallback with user role
   const getMessagesCallback = useCallback(
-    (chatId, page) => getChatMessages(chatId, page),
-    []
+    (chatId, page) => getChatMessages(chatId, page, userRole),
+    [userRole]
   );
 
   // reply state
@@ -63,8 +66,8 @@ const ChatPage = () => {
     error: chatsErrorData,
     refetch: refetchChats,
   } = useQuery({
-    queryKey: ["chats", currentPage],
-    queryFn: () => getAllChats(currentPage),
+    queryKey: ["chats", currentPage, userRole],
+    queryFn: () => getAllChats(currentPage, userRole),
     keepPreviousData: true,
   });
 
@@ -76,7 +79,7 @@ const ChatPage = () => {
     error: messageError,
     refetch: refetchMessages,
   } = useQuery({
-    queryKey: ["messages", selectedChatId, messagePage],
+    queryKey: ["messages", selectedChatId, messagePage, userRole],
     queryFn: () => getMessagesCallback(selectedChatId, messagePage),
     enabled: !!selectedChatId,
     keepPreviousData: true,
@@ -90,8 +93,8 @@ const ChatPage = () => {
     error: chatInfoErrorData,
     refetch: refetchChatInfo,
   } = useQuery({
-    queryKey: ["chatInfo", selectedChatId],
-    queryFn: () => getChatInfo(selectedChatId),
+    queryKey: ["chatInfo", selectedChatId, userRole],
+    queryFn: () => getChatInfo(selectedChatId, userRole),
     enabled: !!selectedChatId,
     keepPreviousData: true,
   });
@@ -141,17 +144,35 @@ const ChatPage = () => {
     setShowInfo(!showInfo);
   };
 
-  const handleSendMessage = (message) => {
-    if (!selectedChatId || !message) return;
+  const handleSendMessage = (messageData) => {
+    if (!selectedChatId) return;
+
+    // Handle both old string format and new object format
+    let messageText = "";
+    let attachments = [];
+
+    if (typeof messageData === "string") {
+      // Old format - just text
+      messageText = messageData;
+    } else if (typeof messageData === "object") {
+      // New format - object with message and attachments
+      messageText = messageData.message || "";
+      attachments = messageData.attachments || [];
+    }
+
+    if (!messageText.trim() && attachments.length === 0) return;
 
     const newMessage = {
       chat_id: selectedChatId,
-      message: message,
-      time: new Date().toISOString(),
-      replayMetadata: isObjectNotEmpty(replayData),
+      message: messageText,
+      time: messageData.time || new Date().toISOString(),
+      replayMetadata:
+        messageData.replayMetadata || isObjectNotEmpty(replayData),
+      attachments: attachments,
     };
+
     messageMutation.mutate(newMessage);
-    console.log(message, "ami msg");
+    console.log("Sending message:", newMessage);
   };
 
   const chatHeightRef = useRef(null);
@@ -257,13 +278,13 @@ const ChatPage = () => {
                   )}
                 </div>
 
-                {/* Message Footer */}
-                {user?.role === "teacher" && (
-                <MessageFooter
-                  handleSendMessage={handleSendMessage}
-                  replay={replay}
-                  setReply={setReply}
-                  replayData={replayData}
+                {/* Message Footer - Only show for teachers, admin can only view */}
+                {userRole === "teacher" && (
+                  <MessageFooter
+                    handleSendMessage={handleSendMessage}
+                    replay={replay}
+                    setReply={setReply}
+                    replayData={replayData}
                     setReplyData={setReplyData}
                   />
                 )}

@@ -50,51 +50,107 @@ export async function GET(request, response) {
 }
 
 export async function POST(request, response) {
-  const obj = await request.json();
+  try {
+    let chatId, message, time, replayMetadata, attachments = [];
 
-  // Handle both old and new data structures
-  const chatId = obj.chat_id || obj.contact?.id;
-  const message = obj.message;
-  const time = obj.time || new Date().toISOString();
-  const replayMetadata = obj.replayMetadata || false;
+    // Check if the request is multipart/form-data (file upload)
+    const contentType = request.headers.get('content-type') || '';
+    
+    if (contentType.includes('multipart/form-data')) {
+      // Handle file upload with FormData
+      const formData = await request.formData();
+      
+      chatId = formData.get('chat_id');
+      message = formData.get('message') || '';
+      time = formData.get('time') || new Date().toISOString();
+      replayMetadata = JSON.parse(formData.get('replayMetadata') || 'false');
+      
+      // Process attachments
+      const attachmentIndices = new Set();
+      for (const [key, value] of formData.entries()) {
+        if (key.startsWith('attachments[') && key.includes('][type]')) {
+          const index = key.match(/attachments\[(\d+)\]/)?.[1];
+          if (index) attachmentIndices.add(index);
+        }
+      }
+      
+      for (const index of attachmentIndices) {
+        const type = formData.get(`attachments[${index}][type]`);
+        const name = formData.get(`attachments[${index}][name]`);
+        const size = formData.get(`attachments[${index}][size]`);
+        const url = formData.get(`attachments[${index}][url]`);
+        const file = formData.get(`attachments[${index}][file]`);
+        
+        const attachment = {
+          type,
+          name,
+          size: size ? parseInt(size) : null,
+          url: url || null,
+          file: file || null,
+        };
+        
+        attachments.push(attachment);
+      }
+    } else {
+      // Handle regular JSON request
+      const obj = await request.json();
+      
+      chatId = obj.chat_id || obj.contact?.id;
+      message = obj.message;
+      time = obj.time || new Date().toISOString();
+      replayMetadata = obj.replayMetadata || false;
+      attachments = obj.attachments || [];
+    }
 
-  if (!chatId || !message) {
+    if (!chatId) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: "chat_id is required" 
+        }, 
+        { status: 400 }
+      );
+    }
+
+    let activeChat = chats.find((item) => item.id === parseInt(chatId));
+
+    const newMessageData = {
+      id: Date.now(),
+      message: message,
+      time: time,
+      senderId: 11,
+      replayMetadata: replayMetadata,
+      attachments: attachments,
+    };
+
+    if (!activeChat) {
+      activeChat = {
+        id: parseInt(chatId),
+        userId: parseInt(chatId),
+        unseenMsgs: 0,
+        chat: [newMessageData],
+      };
+      chats.push(activeChat);
+    } else {
+      activeChat.chat.push(newMessageData);
+    }
+
     return NextResponse.json(
-      { 
-        success: false, 
-        message: "chat_id and message are required" 
-      }, 
-      { status: 400 }
+      {
+        data: newMessageData,
+        success: true,
+        message: "Message sent successfully"
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Error processing message:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to send message"
+      },
+      { status: 500 }
     );
   }
-
-  let activeChat = chats.find((item) => item.id === parseInt(chatId));
-
-  const newMessageData = {
-    message: message,
-    time: time,
-    senderId: 11,
-    replayMetadata: replayMetadata,
-  };
-
-  if (!activeChat) {
-    activeChat = {
-      id: parseInt(chatId),
-      userId: parseInt(chatId),
-      unseenMsgs: 0,
-      chat: [newMessageData],
-    };
-    chats.push(activeChat);
-  } else {
-    activeChat.chat.push(newMessageData);
-  }
-
-  return NextResponse.json(
-    {
-      data: newMessageData,
-      success: true,
-      message: "Message sent successfully"
-    },
-    { status: 201 }
-  );
 }

@@ -14,9 +14,12 @@ import {
 import { Menu } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { fixImageUrl, getAvatarInitials } from "@/lib/image-utils";
+import { useAuth } from "@/hooks/use-auth";
 
 const MessageHeader = ({ contact, showInfo, handleShowInfo }) => {
   const isLg = useMediaQuery("(max-width: 1024px)");
+  const { user } = useAuth();
+  const userRole = user?.role || null;
 
   // Safety check: ensure contact is a valid object
   if (!contact || typeof contact !== "object") {
@@ -24,37 +27,43 @@ const MessageHeader = ({ contact, showInfo, handleShowInfo }) => {
     return null;
   }
 
-  // Handle different data structures from API
-  const {
-    id,
-    chat_id,
-    user_id,
-    name,
-    fullName,
-    role,
-    avatar,
-    image,
-    status = "offline",
-    about,
-    bio,
-    last_message,
-    lastMessage,
-    unread_count,
-    unreadmessage,
-    unseenMsgs,
-    updated_at,
-    created_at,
-    date,
-  } = contact;
+  // Handle different data structures based on user role
+  let chatId, userName, userAvatar, userAbout, status;
 
-  // Use the appropriate fields based on what's available
-  const chatId = id || chat_id;
-  const userName = safeToString(name || fullName || role || "Unknown User");
-  const userAvatar = fixImageUrl(avatar?.src || image || avatar);
-  const userAbout = safeToString(about || bio || "No status");
-  const lastMsg = safeToString(last_message || lastMessage);
-  const unreadCount = unread_count || unreadmessage || unseenMsgs || 0;
-  const lastDate = updated_at || created_at || date;
+  if (userRole === "admin") {
+    // Admin data structure - has both student and teacher info
+    const { id, student, teacher, status: chatStatus } = contact;
+
+    chatId = id;
+    userName = `${safeToString(
+      student?.name || "Unknown Student"
+    )} ↔ ${safeToString(teacher?.name || "Unknown Teacher")}`;
+    userAvatar = fixImageUrl(student?.image || teacher?.image);
+    userAbout = `Student: ${safeToString(
+      student?.name || "Unknown"
+    )} | Teacher: ${safeToString(teacher?.name || "Unknown")}`;
+    status = chatStatus || "offline";
+  } else {
+    // Teacher data structure - single user info
+    const {
+      id,
+      chat_id,
+      name,
+      fullName,
+      role,
+      avatar,
+      image,
+      status: userStatus = "offline",
+      about,
+      bio,
+    } = contact;
+
+    chatId = id || chat_id;
+    userName = safeToString(name || fullName || role || "Unknown User");
+    userAvatar = fixImageUrl(avatar?.src || image || avatar);
+    userAbout = safeToString(about || bio || "No status");
+    status = userStatus;
+  }
 
   const isActive = status === "online";
 

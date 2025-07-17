@@ -5,6 +5,7 @@ import { cn, formatTime, safeToString } from "@/lib/utils";
 import { Icon } from "@iconify/react";
 import { fixImageUrl, getAvatarInitials } from "@/lib/image-utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/use-auth";
 
 // Utility function to safely get last message content
 const getSafeLastMessage = (lastMessage) => {
@@ -48,6 +49,9 @@ const ContactList = ({
   selectedChatId,
   isLoading = false,
 }) => {
+  const { user } = useAuth();
+  const userRole = user?.role || null;
+
   // Show skeleton if loading
   if (isLoading) {
     return <ContactListSkeleton />;
@@ -59,36 +63,74 @@ const ContactList = ({
     return null;
   }
 
-  // Handle different data structures from API
-  const {
-    id,
-    chat_id,
-    name,
-    fullName,
-    role,
-    avatar,
-    image,
-    status = "offline",
-    about,
-    bio,
-    last_message,
-    lastMessage,
-    unread_count,
-    unreadmessage,
-    unseenMsgs,
-    updated_at,
-    created_at,
-    date,
-  } = contact;
+  // Handle different data structures based on user role
+  let chatId,
+    userName,
+    userAvatar,
+    userAbout,
+    lastMsg,
+    unreadCount,
+    lastDate,
+    status;
 
-  // Use the appropriate fields based on what's available
-  const chatId = id || chat_id;
-  const userName = safeToString(name || fullName || role || "Unknown User");
-  const userAvatar = fixImageUrl(avatar?.src || image || avatar);
-  const userAbout = safeToString(about || bio);
-  const lastMsg = getSafeLastMessage(last_message || lastMessage);
-  const unreadCount = unread_count || unreadmessage || unseenMsgs || 0;
-  const lastDate = updated_at || created_at || date;
+  if (userRole === "admin") {
+    // Admin data structure - has both student and teacher info
+    const {
+      id,
+      student_name,
+      teacher_name,
+      student_image,
+      teacher_image,
+      last_message,
+      last_message_time,
+      unread_count,
+      status: chatStatus,
+      created_at,
+      updated_at,
+    } = contact;
+
+    chatId = id;
+    userName = `${safeToString(student_name)} ↔ ${safeToString(teacher_name)}`;
+    userAvatar = fixImageUrl(student_image || teacher_image);
+    userAbout = `Student: ${safeToString(
+      student_name
+    )} | Teacher: ${safeToString(teacher_name)}`;
+    lastMsg = getSafeLastMessage(last_message);
+    unreadCount = unread_count || 0;
+    lastDate = last_message_time || updated_at || created_at;
+    status = chatStatus || "offline";
+  } else {
+    // Teacher data structure - single user info
+    const {
+      id,
+      chat_id,
+      name,
+      fullName,
+      role,
+      avatar,
+      image,
+      status: userStatus = "offline",
+      about,
+      bio,
+      last_message,
+      lastMessage,
+      unread_count,
+      unreadmessage,
+      unseenMsgs,
+      updated_at,
+      created_at,
+      date,
+    } = contact;
+
+    chatId = id || chat_id;
+    userName = safeToString(name || fullName || role || "Unknown User");
+    userAvatar = fixImageUrl(avatar?.src || image || avatar);
+    userAbout = safeToString(about || bio);
+    lastMsg = getSafeLastMessage(last_message || lastMessage);
+    unreadCount = unread_count || unreadmessage || unseenMsgs || 0;
+    lastDate = updated_at || created_at || date;
+    status = userStatus;
+  }
 
   return (
     <div

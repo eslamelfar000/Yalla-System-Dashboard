@@ -17,35 +17,34 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
-import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { ArrowBigRightDash } from "lucide-react";
+import { ArrowBigRightDash, Check } from "lucide-react";
 import Link from "next/link";
+import { useGetData } from "@/hooks/useGetData";
+import TeacherFilter from "@/components/Shared/TeacherFilter";
+import Pagination from "@/components/Shared/Pagination/Pagination";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useCallback } from "react";
+import { useState } from "react";
+import { useMemo } from "react";
 
 const columns = [
-  {
-    accessorKey: "session",
-    header: "Session",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
-          </span>
-        </div>
-      </div>
-    ),
-  },
   {
     accessorKey: "student-name",
     header: "Student Name",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <Avatar className="rounded-full">
+            <AvatarImage src={row?.original?.lesson?.student?.image} />
+            <AvatarFallback>
+              {row?.original?.lesson?.student?.name?.charAt(0) || "S"}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-sm text-card-foreground whitespace-nowrap">
+            {row?.original?.lesson?.student?.name || "N/A"}
           </span>
         </div>
       </div>
@@ -55,9 +54,9 @@ const columns = [
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
             {row?.original?.id}
           </span>
         </div>
@@ -68,10 +67,10 @@ const columns = [
     accessorKey: "date",
     header: "Date",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row?.original?.date || row?.original?.created_at || "N/A"}
           </span>
         </div>
       </div>
@@ -81,23 +80,49 @@ const columns = [
     accessorKey: "target",
     header: "Target",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row?.original?.target || "N/A"}%
           </span>
         </div>
       </div>
     ),
   },
   {
-    accessorKey: "report",
-    header: "Report",
+    accessorKey: "admin report",
+    header: "Admin Report",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            <Link href={""} className="">
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            <Link
+              href={row?.original?.admin_report || ""}
+              target="_blank"
+              className=""
+            >
+              <button className="text-primary flex items-center text-[12px] border px-4 py-1 border-solid border-primary rounded-full">
+                <span className="text-sm font-bold">Check</span>
+                <ArrowBigRightDash className="inline-block ml-1 w-6 h-6" />
+              </button>
+            </Link>{" "}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "Teacher report",
+    header: "Teacher Report",
+    cell: ({ row }) => (
+      <div className="font-medium">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] whitespace-nowrap">
+            <Link
+              href={row?.original?.teacher_report || ""}
+              target="_blank"
+              className=""
+            >
               <button className="text-primary flex items-center text-[12px] border px-4 py-1 border-solid border-primary rounded-full">
                 <span className="text-sm font-bold">Check</span>
                 <ArrowBigRightDash className="inline-block ml-1 w-6 h-6" />
@@ -110,14 +135,122 @@ const columns = [
   },
 ];
 
-export function TargetDataTable() {
-  const [sorting, setSorting] = React.useState([]);
-  const [columnFilters, setColumnFilters] = React.useState([]);
-  const [columnVisibility, setColumnVisibility] = React.useState({});
-  const [rowSelection, setRowSelection] = React.useState({});
+// Custom loading skeleton for QA reports table
+const TargetDataTableSkeleton = () => {
+  return (
+    <Card>
+      <div className="flex items-center flex-wrap gap-2 mb-5">
+        <Skeleton className="h-10 w-[200px]" />
+        <Skeleton className="h-10 w-[200px]" />
+      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              Student Name
+            </TableHead>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              ID
+            </TableHead>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              Date
+            </TableHead>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              Target
+            </TableHead>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              Admin Report
+            </TableHead>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              Teacher Report
+            </TableHead>
+            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+              Action
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: 8 }).map((_, rowIndex) => (
+            <TableRow key={rowIndex}>
+              <TableCell>
+                <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-12" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-24" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-16" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-8 w-20 rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-8 w-20 rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-6 w-6 rounded-full" />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Card>
+  );
+};
+
+const TargetDataTableComponent = () => {
+  const [sorting, setSorting] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [rowSelection, setRowSelection] = useState({});
+  const [selectedTeacher, setSelectedTeacher] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const handleTeacherChange = useCallback((teacherId) => {
+    setSelectedTeacher(teacherId);
+  }, []);
+
+  const handleClearFilter = useCallback(() => {
+    setSelectedTeacher("");
+  }, []);
+
+  // Build API endpoint with filters - memoized for performance
+  const buildEndpoint = useMemo(() => {
+    let endpoint = `dashboard/reports?page=${currentPage}`;
+    const params = [];
+
+    if (selectedTeacher) {
+      params.push(`teacher_id=${selectedTeacher}`);
+    }
+
+    if (params.length > 0) {
+      endpoint += `&${params.join("&")}`;
+    }
+
+    return endpoint;
+  }, [currentPage, selectedTeacher]);
+
+  // Fetch reports data from API
+  const {
+    data: reportsData,
+    isLoading,
+    error,
+    refetch,
+  } = useGetData({
+    endpoint: buildEndpoint,
+    queryKey: ["reports", selectedTeacher, currentPage],
+  });
+
+  const reportsList = reportsData?.data?.reports || [];
 
   const table = useReactTable({
-    data,
+    data: reportsList,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -135,8 +268,113 @@ export function TargetDataTable() {
     },
   });
 
+  if (isLoading) {
+    return (
+      <>
+        <div className="flex items-center flex-wrap justify-between gap-2 mb-5">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex-1">
+              <h3 className="text-xl font-medium text-default-700 opacity-60">
+                Reports
+              </h3>
+            </div>
+          </div>
+          <TeacherFilter
+            selectedTeacher={selectedTeacher}
+            onTeacherChange={handleTeacherChange}
+            onClearFilter={handleClearFilter}
+          />
+        </div>
+        <Card title="Simple">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 3 }).map((_, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  <TableCell>
+                    <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-12" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-20 rounded-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-20 rounded-full" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <Icon
+              icon="material-symbols:error-outline"
+              className="w-8 h-8 text-red-500 mx-auto mb-2"
+            />
+            <p className="text-red-500">Error loading reports data</p>
+            <Button onClick={() => refetch()} className="mt-2">
+              Retry
+            </Button>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <>
+      <div className="flex items-center flex-wrap justify-between gap-2 mb-5">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1">
+            <h3 className="text-xl font-medium text-default-700 opacity-60">
+              Reports
+            </h3>
+          </div>
+        </div>
+        {!error && (
+          <TeacherFilter
+            selectedTeacher={selectedTeacher}
+            onTeacherChange={handleTeacherChange}
+            onClearFilter={handleClearFilter}
+          />
+        )}
+      </div>
       <Card title="Simple">
         <Table>
           <TableHeader>
@@ -159,32 +397,29 @@ export function TargetDataTable() {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table
-                .getRowModel()
-                .rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-default-100"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-                .slice(0, 8)
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="hover:bg-default-100"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No reports available
                 </TableCell>
               </TableRow>
             )}
@@ -192,57 +427,18 @@ export function TargetDataTable() {
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4 px-4 py-4">
-        <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-
-        <div className="flex gap-2  items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-left"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-
-          {table.getPageOptions().map((page, pageIdx) => (
-            <Button
-              key={`basic-data-table-${pageIdx}`}
-              onClick={() => table.setPageIndex(pageIdx)}
-              variant={`${
-                pageIdx === table.getState().pagination.pageIndex
-                  ? ""
-                  : "outline"
-              }`}
-              className={cn("w-8 h-8")}
-            >
-              {page + 1}
-            </Button>
-          ))}
-
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-right"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-        </div>
-      </div>
+      {/* Pagination */}
+      <Pagination
+        last_page={reportsData?.data?.pagination?.last_page}
+        setCurrentPage={setCurrentPage}
+        current_page={currentPage}
+        studentsPagination={false}
+      />
     </>
   );
-}
+};
 
+const TargetDataTable = React.memo(TargetDataTableComponent);
+
+export { TargetDataTable };
 export default TargetDataTable;

@@ -1,9 +1,14 @@
 import { api } from "@/config/axios.config";
 
-// Get all chats with pagination
-export const getAllChats = async (page = 1) => {
+// Get all chats with pagination - handles both admin and teacher roles
+export const getAllChats = async (page = 1, userRole = null) => {
   try {
-    const response = await api.get(`/chat?page=${page}`);
+    // Use different endpoints based on user role
+    const endpoint = userRole === "admin" 
+      ? `dashboard/chats`
+      : `chat?page=${page}`;
+    
+    const response = await api.get(endpoint);
     return response.data;
   } catch (error) {
     console.error("Error fetching chats:", error);
@@ -11,10 +16,15 @@ export const getAllChats = async (page = 1) => {
   }
 };
 
-// Get single chat info
-export const getChatInfo = async (chatId) => {
+// Get single chat info - handles both admin and teacher roles
+export const getChatInfo = async (chatId, userRole = null) => {
   try {
-    const response = await api.get(`/chat/${chatId}`);
+    // Use different endpoints based on user role
+    const endpoint = userRole === "admin" 
+      ? `dashboard/chats/${chatId}`
+      : `chat/${chatId}`;
+    
+    const response = await api.get(endpoint);
     return response.data;
   } catch (error) {
     console.error("Error fetching chat info:", error);
@@ -22,10 +32,15 @@ export const getChatInfo = async (chatId) => {
   }
 };
 
-// Get chat messages with pagination
-export const getChatMessages = async (chatId, page = 1) => {
+// Get chat messages with pagination - handles both admin and teacher roles
+export const getChatMessages = async (chatId, page = 1, userRole = null) => {
   try {
-    const response = await api.get(`/chat_message?chat_id=${chatId}&page=${page}`);
+    // Use different endpoints based on user role
+    const endpoint = userRole === "admin" 
+      ? `dashboard/chats/${chatId}/messages?page=${page}`
+      : `chat_message?chat_id=${chatId}&page=${page}`;
+    
+    const response = await api.get(endpoint);
     return response.data;
   } catch (error) {
     console.error("Error fetching chat messages:", error);
@@ -78,11 +93,48 @@ export const getAvailableUsers = async () => {
   }
 };
 
-// Send message (updated to use new endpoint)
+// Send message (updated to handle attachments)
 export const sendMessage = async (messageData) => {
   try {
-    const response = await api.post("/chat_message", messageData);
-    return response.data;
+    // Check if we have attachments that need file upload
+    const hasFileAttachments = messageData.attachments?.some(att => att.file);
+    
+    if (hasFileAttachments) {
+      // Use FormData for file uploads
+      const formData = new FormData();
+      formData.append('chat_id', messageData.chat_id);
+      formData.append('message', messageData.message || ''); // Send as string
+      formData.append('time', messageData.time);
+      formData.append('replayMetadata', JSON.stringify(messageData.replayMetadata || false));
+      
+      // Add file attachments
+      messageData.attachments.forEach((attachment, index) => {
+        if (attachment.file) {
+          formData.append(`attachments[${index}][type]`, attachment.type);
+          formData.append(`attachments[${index}][name]`, attachment.name);
+          formData.append(`attachments[${index}][size]`, attachment.size);
+          formData.append(`attachments[${index}][file]`, attachment.file);
+        }
+      });
+      
+      const response = await api.post("/chat_message", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } else {
+      // Regular JSON request for text-only messages
+      const jsonData = {
+        chat_id: messageData.chat_id,
+        message: messageData.message || '', // Send as string
+        time: messageData.time,
+        replayMetadata: messageData.replayMetadata || false,
+      };
+      
+      const response = await api.post("/chat_message", jsonData);
+      return response.data;
+    }
   } catch (error) {
     console.error("Error sending message:", error);
     return { success: false, message: "Failed to send message" };
@@ -101,13 +153,13 @@ export const getUserProfile = async () => {
 };
 
 // Legacy functions for backward compatibility
-export const getContacts = async () => {
-  return getAllChats(1);
+export const getContacts = async (userRole = null) => {
+  return getAllChats(1, userRole);
 };
 
-export const getMessages = async (chatId) => {
+export const getMessages = async (chatId, userRole = null) => {
   if (!chatId) return { data: [], contact: {} };
-  return getChatMessages(chatId, 1);
+  return getChatMessages(chatId, 1, userRole);
 };
 
 export const deleteMessage = async (obj) => {
