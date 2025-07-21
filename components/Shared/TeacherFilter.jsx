@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { useGetData } from "@/hooks/useGetData";
 import { useAuth } from "@/hooks/use-auth";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const TeacherFilter = ({
   selectedTeacher,
