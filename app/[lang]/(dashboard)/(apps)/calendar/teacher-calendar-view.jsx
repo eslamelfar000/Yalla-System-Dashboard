@@ -36,12 +36,23 @@ const TeacherCalendarView = ({ sessions = [] }) => {
 
     // Check if it's already in 24-hour format (no am/pm)
     if (!cleanTime.includes("am") && !cleanTime.includes("pm")) {
+      // Handle seconds if present (e.g., "10:00:00" -> "10:00")
+      if (cleanTime.includes(":")) {
+        const parts = cleanTime.split(":");
+        if (parts.length >= 2) {
+          return `${parts[0]}:${parts[1]}`;
+        }
+      }
       return cleanTime;
     }
 
-    // Extract time and period
-    const match = cleanTime.match(/(\d{1,2}):(\d{2})\s*(am|pm)/);
-    if (!match) return "00:00";
+    // Handle different time formats with AM/PM
+    // Match patterns like: "10:00 am", "10:00:00 am", "2:00 pm", etc.
+    const match = cleanTime.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(am|pm)/);
+    if (!match) {
+      console.warn("Could not parse time format:", timeStr);
+      return "00:00";
+    }
 
     let [_, hours, minutes, period] = match;
     hours = parseInt(hours);
@@ -69,11 +80,17 @@ const TeacherCalendarView = ({ sessions = [] }) => {
     const startMinutes = startHour * 60 + startMinute;
     const endMinutes = endHour * 60 + endMinute;
 
+    // Handle cases where end time is before start time
     if (endMinutes <= startMinutes) {
+      // If end time is before or equal to start time, add 1 hour to end time
       const newEndHour = startHour + 1;
       const newEndTime = `${String(newEndHour).padStart(2, "0")}:${String(
         startMinute
       ).padStart(2, "0")}`;
+
+      console.warn(
+        `Invalid time range: ${startTime} - ${endTime}. Fixed to: ${start24} - ${newEndTime}`
+      );
       return { start: start24, end: newEndTime };
     }
 

@@ -9,6 +9,7 @@ import {
   Envelope,
 } from "@/components/svg";
 import { useUserData } from "../profile-layout";
+import Cookies from "js-cookie";
 
 const UserInfo = () => {
   const { userData, isLoading } = useUserData();
@@ -41,7 +42,7 @@ const UserInfo = () => {
 
   // Check if user is a teacher
   const isTeacher =
-    userData?.role === "teacher" || userData?.role === "Teacher";
+    userData?.role === "teacher" || userData?.role === "Teacher" || Cookies.get("user_role") === "teacher" || userData?.teacher?.role === "teacher";
 
   const userInfo = [
     {
@@ -67,7 +68,7 @@ const UserInfo = () => {
     {
       icon: CalenderCheck,
       label: "Target",
-      value: userData?.target || "85%",
+      value: `${userData?.target}%` || "85%",
     },
     // Only show language for teachers
     ...(isTeacher
@@ -75,7 +76,7 @@ const UserInfo = () => {
           {
             icon: ClipBoard,
             label: "Language",
-            value: userData?.language || "English",
+            value: userData?.teacher?.languages || userData?.languages || "English",
           },
         ]
       : []),
@@ -97,7 +98,7 @@ const UserInfo = () => {
                   {item.label}:
                 </span>
               </div>
-              <div className="flex-1 text-sm text-default-700 text-right">
+              <div className="flex-1 text-xs text-default-700 text-right">
                 {item.value}
               </div>
             </li>

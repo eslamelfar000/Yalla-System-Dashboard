@@ -279,11 +279,6 @@ const TargetDataTableComponent = () => {
               </h3>
             </div>
           </div>
-          <TeacherFilter
-            selectedTeacher={selectedTeacher}
-            onTeacherChange={handleTeacherChange}
-            onClearFilter={handleClearFilter}
-          />
         </div>
         <Card title="Simple">
           <Table>
@@ -367,13 +362,6 @@ const TargetDataTableComponent = () => {
             </h3>
           </div>
         </div>
-        {!error && (
-          <TeacherFilter
-            selectedTeacher={selectedTeacher}
-            onTeacherChange={handleTeacherChange}
-            onClearFilter={handleClearFilter}
-          />
-        )}
       </div>
       <Card title="Simple">
         <Table>

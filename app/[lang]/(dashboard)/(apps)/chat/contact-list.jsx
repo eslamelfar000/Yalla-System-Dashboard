@@ -22,6 +22,28 @@ const getSafeLastMessage = (lastMessage) => {
   return safeToString(lastMessage);
 };
 
+// Utility function to extract student and teacher from participants
+const extractStudentAndTeacher = (participants) => {
+  if (!participants || !Array.isArray(participants)) {
+    return { student: null, teacher: null };
+  }
+
+  let student = null;
+  let teacher = null;
+
+  participants.forEach((participant) => {
+    if (participant.user) {
+      if (participant.user.role === "student") {
+        student = participant.user;
+      } else if (participant.user.role === "teacher") {
+        teacher = participant.user;
+      }
+    }
+  });
+
+  return { student, teacher };
+};
+
 // Skeleton component for chat list items
 const ContactListSkeleton = () => {
   return (
@@ -74,31 +96,48 @@ const ContactList = ({
     status;
 
   if (userRole === "admin") {
-    // Admin data structure - has both student and teacher info
+    // Admin data structure - extract from participants array
     const {
       id,
-      student_name,
-      teacher_name,
-      student_image,
-      teacher_image,
+      participants,
       last_message,
-      last_message_time,
-      unread_count,
-      status: chatStatus,
-      created_at,
       updated_at,
+      created_at,
+      unread_messages_count,
+      message_count,
     } = contact;
 
+    // Extract student and teacher from participants
+    const { student, teacher } = extractStudentAndTeacher(participants);
+
     chatId = id;
-    userName = `${safeToString(student_name)} ↔ ${safeToString(teacher_name)}`;
-    userAvatar = fixImageUrl(student_image || teacher_image);
-    userAbout = `Student: ${safeToString(
-      student_name
-    )} | Teacher: ${safeToString(teacher_name)}`;
+    userName =
+      student && teacher
+        ? `${safeToString(student.name)} ↔ ${safeToString(teacher.name)}`
+        : student
+        ? safeToString(student.name)
+        : teacher
+        ? safeToString(teacher.name)
+        : "Unknown Chat";
+
+    // Use teacher image as main avatar, fallback to student image
+    userAvatar = fixImageUrl(teacher?.image || student?.image);
+
+    userAbout =
+      student && teacher
+        ? `Student: ${safeToString(student.name)} | Teacher: ${safeToString(
+            teacher.name
+          )}`
+        : student
+        ? `Student: ${safeToString(student.name)}`
+        : teacher
+        ? `Teacher: ${safeToString(teacher.name)}`
+        : "Chat";
+
     lastMsg = getSafeLastMessage(last_message);
-    unreadCount = unread_count || 0;
-    lastDate = last_message_time || updated_at || created_at;
-    status = chatStatus || "offline";
+    unreadCount = unread_messages_count || 0;
+    lastDate = last_message?.created_at || updated_at || created_at;
+    status = "offline"; // Default status for admin view
   } else {
     // Teacher data structure - single user info
     const {

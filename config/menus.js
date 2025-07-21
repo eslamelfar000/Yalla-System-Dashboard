@@ -135,6 +135,12 @@ export const menusConfig = {
         roles: ['admin'],
       },
       {
+        title: "Contact Us Messages",
+        icon: Contact2Icon,
+        href: "/contact-us-messages",
+        roles: ['admin'],
+      },
+      {
         title: "Lessons Board",
         icon: Box,
         href: "/lessons-board",

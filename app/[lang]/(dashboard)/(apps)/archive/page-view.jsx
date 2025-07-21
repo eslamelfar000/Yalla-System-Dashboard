@@ -9,9 +9,9 @@ function RoleArchive({ role }) {
       <div className="cover">
         {role === "quality" ? (
           <ShowQuality />
-        ) : role === "admin" ? (
+        ) : role === "admin" || role === "teacher" ? (
           <div className="">
-            <AdminArchiveTable />
+            <AdminArchiveTable role={role} />
           </div>
         ) : (
           ""

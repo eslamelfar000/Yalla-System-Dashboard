@@ -62,40 +62,64 @@ const MessageFooter = ({
   const handleFileSelect = (event, type = "file") => {
     const files = Array.from(event.target.files);
 
-    files.forEach((file) => {
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
+    // Check if user is trying to add more than one file
+    if (files.length > 1) {
+      toast({
+        title: "Multiple files not allowed",
+        description: "You can only attach one file at a time",
+        variant: "destructive",
+      });
+      event.target.value = "";
+      return;
+    }
+
+    // Check if there's already an attachment
+    if (attachments.length > 0) {
+      toast({
+        title: "File already attached",
+        description: "Please remove the current file before adding a new one",
+        variant: "destructive",
+      });
+      event.target.value = "";
+      return;
+    }
+
+    const file = files[0]; // Only take the first file
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "File size should be less than 10MB",
+        variant: "destructive",
+      });
+      event.target.value = "";
+      return;
+    }
+
+    // Validate file types
+    if (type === "image") {
+      if (!file.type.startsWith("image/")) {
         toast({
-          title: "File too large",
-          description: "File size should be less than 10MB",
+          title: "Invalid file type",
+          description: "Please select an image file",
           variant: "destructive",
         });
+        event.target.value = "";
         return;
       }
+    }
 
-      // Validate file types
-      if (type === "image") {
-        if (!file.type.startsWith("image/")) {
-          toast({
-            title: "Invalid file type",
-            description: "Please select an image file",
-            variant: "destructive",
-          });
-          return;
-        }
-      }
+    const attachment = {
+      id: Date.now() + Math.random(),
+      file,
+      type: type,
+      name: file.name,
+      size: file.size,
+      preview: type === "image" ? URL.createObjectURL(file) : null,
+    };
 
-      const attachment = {
-        id: Date.now() + Math.random(),
-        file,
-        type: type,
-        name: file.name,
-        size: file.size,
-        preview: type === "image" ? URL.createObjectURL(file) : null,
-      };
-
-      setAttachments((prev) => [...prev, attachment]);
-    });
+    setAttachments([attachment]); // Replace any existing attachments
 
     // Reset input
     event.target.value = "";
@@ -122,6 +146,17 @@ const MessageFooter = ({
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Require message when sending attachments
+    if (attachments.length > 0 && !message.trim()) {
+      toast({
+        title: "Message Required",
+        description: "Please add a message when sending files or images",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Don't send if no message and no attachments
     if (!message.trim() && attachments.length === 0) return;
 
     // Send everything as a single message with file data included
@@ -261,7 +296,6 @@ const MessageFooter = ({
             ref={fileInputRef}
             type="file"
             className="hidden"
-            multiple
             accept=".pdf,.doc,.docx,.txt,.zip,.rar,.mp3,.mp4,.avi,.mov"
             onChange={(e) => handleFileSelect(e, "file")}
           />
@@ -269,7 +303,6 @@ const MessageFooter = ({
             ref={imageInputRef}
             type="file"
             className="hidden"
-            multiple
             accept="image/*"
             onChange={(e) => handleFileSelect(e, "image")}
           />
@@ -281,8 +314,16 @@ const MessageFooter = ({
               <textarea
                 value={message}
                 onChange={handleChange}
-                placeholder="Type your message... (you can include links naturally)"
-                className="bg-background border border-default-200 outline-none focus:border-primary rounded-xl break-words pl-8 md:pl-3 px-3 flex-1 h-10 pt-2 p-1 pr-8 no-scrollbar"
+                placeholder={
+                  attachments.length > 0
+                    ? "Add a message to send with your file..."
+                    : "Type your message... (you can include links naturally)"
+                }
+                className={`bg-background border outline-none focus:border-primary rounded-xl break-words pl-8 md:pl-3 px-3 flex-1 h-10 pt-2 p-1 pr-8 no-scrollbar ${
+                  attachments.length > 0 && !message.trim()
+                    ? "border-orange-300 focus:border-orange-500"
+                    : "border-default-200"
+                }`}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -317,7 +358,9 @@ const MessageFooter = ({
 
               <Button
                 type="submit"
-                disabled={!message.trim() && attachments.length === 0}
+                disabled={
+                  !message.trim() || (attachments.length > 0 && !message.trim())
+                }
                 className="rounded-full bg-default-200 hover:bg-default-300 h-[42px] w-[42px] p-0 self-end disabled:opacity-50"
               >
                 <SendHorizontal className="w-5 h-8 text-primary rtl:rotate-180" />

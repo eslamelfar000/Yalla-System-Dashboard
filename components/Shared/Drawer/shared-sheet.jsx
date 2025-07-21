@@ -162,7 +162,7 @@ export function SharedSheet({
               <EditTeacherComponent user={user} info={true} />
             ) : type === "show-quality" ? (
               <EditQualityComponent user={user} info={true} />
-            ) : type === "filter-students" ? (
+            ) : type === "filter-students"  ? (
               <FilterStudentsComponent
                 onApply={handleSuccess}
                 onReset={handleReset}

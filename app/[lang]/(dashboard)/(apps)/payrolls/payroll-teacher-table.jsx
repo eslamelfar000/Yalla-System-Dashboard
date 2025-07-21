@@ -66,13 +66,15 @@ const columns = [
     ),
   },
   {
-    accessorKey: "booked",
-    header: "Booked",
+    accessorKey: "date",
+    header: "Date",
     cell: ({ row }) => (
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+            {row?.original?.created_at
+              ? new Date(row?.original?.created_at).toLocaleDateString()
+              : "N/A"}
           </span>
         </div>
       </div>

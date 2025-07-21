@@ -9,17 +9,21 @@ import RecentActivity from "./overview/recent-activity";
 import Projects from "./overview/projects";
 const Overview = () => {
   return (
-    <div className="pt-6 grid grid-cols-12 gap-6">
-      <div className="col-span-12 lg:col-span-5 space-y-6">
+    <div className="pt-6 space-y-6">
+      <div className="grid grid-cols-12 gap-6">
         {/* <ProfileProgress /> */}
-        <UserInfo />
+        <div className="col-span-5">
+          <UserInfo />
+        </div>
         {/* <Portfolio /> */}
         {/* <Skills /> */}
         {/* <Connections /> */}
         {/* <Teams /> */}
+        <div className="col-span-7">
+          <About />
+        </div>
       </div>
       <div className="col-span-12 lg:col-span-7 space-y-6">
-        <About />
         <About course={true} />
         {/* <RecentActivity /> */}
         {/* <Projects /> */}

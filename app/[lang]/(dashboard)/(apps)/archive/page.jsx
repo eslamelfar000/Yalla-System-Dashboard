@@ -11,7 +11,7 @@ function page() {
 
   return (
     <div>
-      {role === "teacher" ? (
+      {/* {role === "teacher" ? (
         <div className="cover">
           <div className="flex-1">
             <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
@@ -20,9 +20,9 @@ function page() {
           </div>
           <ArchiveDataTable />
         </div>
-      ) : (
+      ) : ( */}
         <RoleArchive role={role} />
-      )}
+      {/* )} */}
     </div>
   );
 }

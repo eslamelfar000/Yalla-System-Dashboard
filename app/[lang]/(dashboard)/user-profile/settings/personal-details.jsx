@@ -21,20 +21,39 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { setUserData } from "@/lib/auth-utils";
+import { setUserData, updateUserDataFromResponse } from "@/lib/auth-utils";
 import { useMutate } from "@/hooks/useMutate";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { useUserData } from "../profile-layout";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
+import { MultipleSelector } from "@/components/ui/multiple-selector";
+import Cookies from "js-cookie";
 
 const PersonalDetails = () => {
   const [date, setDate] = useState();
   const { userData, updateUserData, isLoading } = useUserData();
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedLanguages, setSelectedLanguages] = useState([]);
   const fileInputRef = useRef(null);
+
+  // Language options for multiple selector
+  const languageOptions = [
+    { value: "english", label: "English" },
+    { value: "bangla", label: "Bangla" },
+    { value: "arabic", label: "Arabic" },
+    { value: "french", label: "French" },
+    { value: "spanish", label: "Spanish" },
+    { value: "german", label: "German" },
+    { value: "italian", label: "Italian" },
+    { value: "portuguese", label: "Portuguese" },
+    { value: "russian", label: "Russian" },
+    { value: "chinese", label: "Chinese" },
+    { value: "japanese", label: "Japanese" },
+    { value: "korean", label: "Korean" },
+  ];
 
   // Initialize form with react-hook-form
   const {
@@ -48,7 +67,9 @@ const PersonalDetails = () => {
 
   // Check if user is a teacher
   const isTeacher =
-    userData?.role === "teacher" || userData?.role === "Teacher";
+    userData?.role === "teacher" ||
+    userData?.role === "Teacher" ||
+    Cookies.get("user_role") === "teacher";
 
   // Profile update mutation
   const profileMutation = useMutate({
@@ -57,59 +78,77 @@ const PersonalDetails = () => {
     text: "Profile updated successfully",
     onSuccess: (response) => {
       try {
-        // Update user data in localStorage and context
-        const updatedUserData = response.data;
-        setUserData(updatedUserData);
-        updateUserData(updatedUserData);
+        // Use the utility function to handle the response and update localStorage
+        const updatedUserData = updateUserDataFromResponse(response);
 
-        // Update form with latest data
-        const formResetData = {
-          name: updatedUserData.name || "",
-          phoneNumber: updatedUserData.phone || "",
-          email: updatedUserData.email || "",
-          country: updatedUserData.location
-            ? updatedUserData.location.split("/")[0]
-            : "",
-          city: updatedUserData.location
-            ? updatedUserData.location.split("/")[1]
-            : "",
-        };
+        if (updatedUserData) {
+          // Update the context with new data
+          updateUserData(updatedUserData);
 
-        // Only include teacher-specific fields if user is a teacher
-        if (
-          updatedUserData.role === "teacher" ||
-          updatedUserData.role === "Teacher"
-        ) {
-          formResetData.language = updatedUserData.language || "";
-          formResetData.aboutMe = updatedUserData.about_me || "";
-          formResetData.aboutCourse = updatedUserData.about_course || "";
+          // Update form with latest data from response
+          const formResetData = {
+            name: updatedUserData.name || "",
+            phoneNumber: updatedUserData.phone || "",
+            email: updatedUserData.email || "",
+            country: updatedUserData.location
+              ? updatedUserData.location.split("/")[0]
+              : "",
+            city: updatedUserData.location
+              ? updatedUserData.location.split("/")[1]
+              : "",
+          };
+
+          // Only include teacher-specific fields if user is a teacher
+          if (
+            updatedUserData.role === "teacher" ||
+            updatedUserData.role === "Teacher" ||
+            isTeacher
+          ) {
+            // Handle languages from teacher object
+            const teacherLanguages = updatedUserData.languages || "";
+            const languagesArray = teacherLanguages
+              ? teacherLanguages.split(",").map((lang) => lang.trim())
+              : [];
+            setSelectedLanguages(languagesArray);
+
+            formResetData.aboutMe = updatedUserData.about_me || "";
+            formResetData.aboutCourse = updatedUserData.about_course || "";
+            formResetData.video_link = updatedUserData.video_link || "";
+            formResetData.certificate = updatedUserData.certificate || "";
+          }
+
+          reset(formResetData);
+
+          // Update image preview with new image URL
+          if (updatedUserData.image) {
+            setImagePreview(updatedUserData.image);
+          }
+
+          // Clear selected image after successful update
+          setSelectedImage(null);
+
+          // Clear file input
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+
+          // Dispatch custom event to notify other components (like header) about profile update
+          window.dispatchEvent(
+            new CustomEvent("profileUpdated", {
+              detail: updatedUserData,
+            })
+          );
+
+          // Show success message
+        } else {
+          toast.error("Failed to update profile data");
         }
-
-        reset(formResetData);
-
-        // Update image preview with new image URL
-        if (updatedUserData.image) {
-          setImagePreview(updatedUserData.image);
-        }
-
-        // Clear selected image after successful update
-        setSelectedImage(null);
-
-        // Clear file input
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-
-        // Dispatch custom event to notify other components (like header) about profile update
-        window.dispatchEvent(
-          new CustomEvent("profileUpdated", {
-            detail: updatedUserData,
-          })
-        );
       } catch (error) {
-        console.error("Error updating user data:", error);
         toast.error("Profile updated but failed to refresh data");
       }
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Failed to update profile");
     },
   });
 
@@ -123,7 +162,7 @@ const PersonalDetails = () => {
       const country = locationParts[0] || "";
       const city = locationParts[1] || "";
 
-      // Populate form with user data
+      // Populate form with user data from localStorage
       const initialFormData = {
         name: userData.name || "",
         phoneNumber: userData.phone || "",
@@ -133,10 +172,23 @@ const PersonalDetails = () => {
       };
 
       // Only include teacher-specific fields if user is a teacher
-      if (userData.role === "teacher" || userData.role === "Teacher") {
-        initialFormData.language = userData.language || "";
-        initialFormData.aboutMe = userData.about_me || "";
-        initialFormData.aboutCourse = userData.about_course || "";
+      if (
+        userData.role === "teacher" ||
+        userData.role === "Teacher" ||
+        isTeacher ||
+        Cookies.get("user_role") === "teacher"
+      ) {
+        // Handle languages from teacher object
+        const teacherLanguages = userData.teacher?.languages || userData.languages || "";
+        const languagesArray = teacherLanguages
+          ? teacherLanguages.split(",").map((lang) => lang.trim())
+          : [];
+        setSelectedLanguages(languagesArray);
+
+        initialFormData.aboutMe = userData.teacher?.about_me || userData.about_me || "";
+        initialFormData.aboutCourse = userData.teacher?.about_course || userData.about_course || "";
+        initialFormData.video_link = userData.teacher?.video_link || userData.video_link || "";
+        initialFormData.certificate = userData.teacher?.certificate || userData.certificate || "";
       }
 
       reset(initialFormData);
@@ -146,7 +198,7 @@ const PersonalDetails = () => {
         setImagePreview(userData.image);
       }
     }
-  }, [userData, isLoading, reset]);
+  }, [userData, isLoading, reset, isTeacher]);
 
   // Handle image selection
   const handleImageSelect = (event) => {
@@ -199,16 +251,20 @@ const PersonalDetails = () => {
   const onSubmit = async (data) => {
     const formData = new FormData();
 
-    // Add form fields
+    // Add basic form fields
     formData.append("name", data.name || "");
     formData.append("phone", data.phoneNumber || "");
     formData.append("email", data.email || "");
 
     // Only add teacher-specific fields if user is a teacher
     if (isTeacher) {
-      formData.append("language", data.language || "");
+      // Convert selected languages array to comma-separated string
+      const languagesString = selectedLanguages.join(", ");
+      formData.append("languages", languagesString);
       formData.append("about_me", data.aboutMe || "");
       formData.append("about_course", data.aboutCourse || "");
+      formData.append("video_link", data.video_link || "");
+      formData.append("certificate", data.certificate || "");
     }
 
     // Handle location properly
@@ -226,8 +282,6 @@ const PersonalDetails = () => {
     // Use FormData for the mutation
     profileMutation.mutate(formData);
   };
-
-  // console.log(selectedImage);
 
   // Show loading state
   if (isLoading) {
@@ -364,25 +418,16 @@ const PersonalDetails = () => {
             </div>
             {isTeacher && (
               <div className="col-span-12 md:col-span-6">
-                <Label htmlFor="language" className="mb-2">
-                  Language
+                <Label htmlFor="languages" className="mb-2">
+                  Languages
                 </Label>
-                <Select
-                  value={watch("language")}
-                  onValueChange={(value) => setValue("language", value)}
+                <MultipleSelector
+                  value={selectedLanguages}
+                  onValueChange={setSelectedLanguages}
+                  options={languageOptions}
+                  placeholder="Select languages..."
                   disabled={profileMutation.isPending}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="english">English</SelectItem>
-                    <SelectItem value="bangla">Bangla</SelectItem>
-                    <SelectItem value="arabic">Arabic</SelectItem>
-                    <SelectItem value="french">French</SelectItem>
-                    <SelectItem value="spanish">Spanish</SelectItem>
-                  </SelectContent>
-                </Select>
+                />
               </div>
             )}
             <div className="col-span-12 lg:col-span-6">
@@ -408,11 +453,33 @@ const PersonalDetails = () => {
             {isTeacher && (
               <>
                 <div className="col-span-12 lg:col-span-6">
+                  <Label htmlFor="video_link" className="mb-2">
+                    Intro Video Link
+                  </Label>
+                  <Input
+                    id="video_link"
+                    {...register("video_link")}
+                    disabled={profileMutation.isPending}
+                  />
+                </div>
+                <div className="col-span-12 lg:col-span-6">
+                  <Label htmlFor="certificate" className="mb-2">
+                    Certificate
+                  </Label>
+                  <Input
+                    id="certificate"
+                    {...register("certificate")}
+                    disabled={profileMutation.isPending}
+                  />
+                </div>
+                <div className="col-span-12 lg:col-span-6">
                   <Label htmlFor="aboutMe" className="mb-2">
                     About Me
                   </Label>
                   <Textarea
                     id="aboutMe"
+                    rows={10}
+                    className="resize-none"
                     {...register("aboutMe")}
                     disabled={profileMutation.isPending}
                   />
@@ -423,6 +490,8 @@ const PersonalDetails = () => {
                   </Label>
                   <Textarea
                     id="aboutCourse"
+                    rows={10}
+                    className="resize-none"
                     {...register("aboutCourse")}
                     disabled={profileMutation.isPending}
                   />
@@ -449,9 +518,26 @@ const PersonalDetails = () => {
                 };
 
                 if (isTeacher) {
-                  resetData.language = userData?.language || "";
-                  resetData.aboutMe = userData?.about_me || "";
-                  resetData.aboutCourse = userData?.about_course || "";
+                  // Reset languages
+                  const teacherLanguages =
+                    userData?.teacher?.languages || userData?.languages || "";
+                  const languagesArray = teacherLanguages
+                    ? teacherLanguages.split(",").map((lang) => lang.trim())
+                    : [];
+                  setSelectedLanguages(languagesArray);
+
+                  resetData.aboutMe =
+                    userData?.teacher?.about_me || userData?.about_me || "";
+                  resetData.aboutCourse =
+                    userData?.teacher?.about_course ||
+                    userData?.about_course ||
+                    "";
+                  resetData.video_link =
+                    userData?.teacher?.video_link || userData?.video_link || "";
+                  resetData.certificate =
+                    userData?.teacher?.certificate ||
+                    userData?.certificate ||
+                    "";
                 }
 
                 reset(resetData);
@@ -459,7 +545,7 @@ const PersonalDetails = () => {
               }}
               disabled={profileMutation.isPending}
             >
-              Cancel
+              Reset
             </Button>
             <Button type="submit" disabled={profileMutation.isPending}>
               {profileMutation.isPending ? "Saving..." : "Save"}

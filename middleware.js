@@ -28,6 +28,7 @@ const ROUTE_PERMISSIONS = {
   '/user-website': 'admin',
   '/students': 'admin',
   '/qa-reports': 'admin',
+  '/contact-us-messages': 'admin',
 
 
 

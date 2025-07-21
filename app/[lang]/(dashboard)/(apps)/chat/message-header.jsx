@@ -16,6 +16,28 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { fixImageUrl, getAvatarInitials } from "@/lib/image-utils";
 import { useAuth } from "@/hooks/use-auth";
 
+// Utility function to extract student and teacher from participants
+const extractStudentAndTeacher = (participants) => {
+  if (!participants || !Array.isArray(participants)) {
+    return { student: null, teacher: null };
+  }
+
+  let student = null;
+  let teacher = null;
+
+  participants.forEach((participant) => {
+    if (participant.user) {
+      if (participant.user.role === "student") {
+        student = participant.user;
+      } else if (participant.user.role === "teacher") {
+        teacher = participant.user;
+      }
+    }
+  });
+
+  return { student, teacher };
+};
+
 const MessageHeader = ({ contact, showInfo, handleShowInfo }) => {
   const isLg = useMediaQuery("(max-width: 1024px)");
   const { user } = useAuth();
@@ -31,23 +53,41 @@ const MessageHeader = ({ contact, showInfo, handleShowInfo }) => {
   let chatId, userName, userAvatar, userAbout, status;
 
   if (userRole === "admin") {
-    // Admin data structure - has both student and teacher info
-    const { id, student, teacher, status: chatStatus } = contact;
+    // Admin data structure - extract from participants array
+    const { id, participants, status: chatStatus } = contact;
+
+    // Extract student and teacher from participants
+    const { student, teacher } = extractStudentAndTeacher(participants);
 
     chatId = id;
-    userName = `${safeToString(
-      student?.name || "Unknown Student"
-    )} ↔ ${safeToString(teacher?.name || "Unknown Teacher")}`;
-    userAvatar = fixImageUrl(student?.image || teacher?.image);
-    userAbout = `Student: ${safeToString(
-      student?.name || "Unknown"
-    )} | Teacher: ${safeToString(teacher?.name || "Unknown")}`;
+    userName =
+      student && teacher
+        ? `${safeToString(student.name)} ↔ ${safeToString(teacher.name)}`
+        : student
+        ? safeToString(student.name)
+        : teacher
+        ? safeToString(teacher.name)
+        : "Unknown Chat";
+
+    // Use teacher image as main avatar, fallback to student image
+    userAvatar = fixImageUrl(teacher?.image || student?.image);
+
+    userAbout =
+      student && teacher
+        ? `Student: ${safeToString(student.name)} | Teacher: ${safeToString(
+            teacher.name
+          )}`
+        : student
+        ? `Student: ${safeToString(student.name)}`
+        : teacher
+        ? `Teacher: ${safeToString(teacher.name)}`
+        : "Chat";
+
     status = chatStatus || "offline";
   } else {
     // Teacher data structure - single user info
     const {
       id,
-      chat_id,
       name,
       fullName,
       role,
@@ -58,76 +98,64 @@ const MessageHeader = ({ contact, showInfo, handleShowInfo }) => {
       bio,
     } = contact;
 
-    chatId = id || chat_id;
+    chatId = id;
     userName = safeToString(name || fullName || role || "Unknown User");
     userAvatar = fixImageUrl(avatar?.src || image || avatar);
-    userAbout = safeToString(about || bio || "No status");
+    userAbout = safeToString(about || bio);
     status = userStatus;
   }
 
-  const isActive = status === "online";
-
   return (
-    <div className="flex items-center p-4 border-b border-default-200">
-      <div className="flex flex-1 gap-3 items-center">
-        {isLg && (
-          <Menu
-            className=" h-5 w-5 cursor-pointer text-default-600"
-            onClick={() => {}} // Mobile menu handler
-          />
-        )}
-        <div className="relative inline-block">
-          <Avatar>
-            <AvatarImage src={userAvatar} alt={userName} />
-            <AvatarFallback className="uppercase">
+    <div className="flex items-center justify-between p-4 border-b border-border">
+      <div className="flex items-center gap-3">
+        <div className="relative">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={userAvatar} />
+            <AvatarFallback className="uppercase text-xs bg-primary/50">
               {getAvatarInitials(userName)}
             </AvatarFallback>
           </Avatar>
           <Badge
-            className=" h-3 w-3  p-0 ring-1 ring-border ring-offset-[1px]   items-center justify-center absolute left-[calc(100%-12px)] top-[calc(100%-12px)]"
-            color={isActive ? "success" : "secondary"}
-          ></Badge>
+            className={cn(
+              "h-2 w-2 p-0 absolute bottom-0 right-0 ring-2 ring-background",
+              {
+                "bg-green-500": status === "online",
+                "bg-gray-400": status !== "online",
+              }
+            )}
+          />
         </div>
-        <div className="hidden lg:block">
-          <div className="text-sm font-medium text-default-900 ">
-            <span className="relative">{userName}</span>
-          </div>
-          <span className="text-xs text-default-500">
-            {isActive ? "Active Now" : "Offline"}
-          </span>
+        <div>
+          <h3 className="text-sm font-medium text-foreground">{userName}</h3>
+          <p className="text-xs text-muted-foreground">{userAbout}</p>
         </div>
       </div>
-      <div className="flex-none space-x-2 rtl:space-x-reverse">
-        {/* Contact Info */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                size="icon"
-                className={cn(
-                  "bg-transparent hover:bg-default-50 rounded-full",
-                  {
-                    "text-primary": !showInfo,
-                  }
-                )}
-                onClick={handleShowInfo}
-              >
-                <span className="text-xl text-primary ">
-                  {showInfo ? (
-                    <Icon icon="material-symbols:info" />
-                  ) : (
-                    <Icon icon="material-symbols:info-outline" />
-                  )}
-                </span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" align="end">
-              <p>Conversation information</p>
-              <TooltipArrow className="fill-primary" />
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+
+      <div className="flex items-center gap-2">
+        {!isLg && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost "
+                  size="sm"
+                  className={`h-8 w-8 p-0 ${
+                    showInfo ? "bg-primary text-white" : "bg-primary/10 text-primary hover:text-white"
+                  }`}
+                  onClick={handleShowInfo}
+                >
+                  <Icon
+                    icon="lucide:info"
+                    className={`h-4 w-4`}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Chat info</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
     </div>
   );

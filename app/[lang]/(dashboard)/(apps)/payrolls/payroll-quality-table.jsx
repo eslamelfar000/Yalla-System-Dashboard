@@ -1,16 +1,16 @@
 "use client";
 import * as React from "react";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 import {
   flexRender,
   getCoreRowModel,
@@ -66,6 +66,21 @@ const columns = [
     ),
   },
   {
+    accessorKey: "date",
+    header: "Date",
+    cell: ({ row }) => (
+      <div className="  font-medium  text-card-foreground/80">
+        <div className="flex space-x-3  rtl:space-x-reverse items-center">
+          <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row?.original?.created_at
+              ? new Date(row?.original?.created_at).toLocaleDateString()
+              : "N/A"}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+  {
     accessorKey: "type",
     header: "Type",
     cell: ({ row }) => (
@@ -78,19 +93,7 @@ const columns = [
       </div>
     ),
   },
-  {
-    accessorKey: "date",
-    header: "Date",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
-          </span>
-        </div>
-      </div>
-    ),
-  },
+
   {
     accessorKey: "Ded-Raise",
     header: "Ded. | Raise",

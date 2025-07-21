@@ -28,7 +28,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-const AdminArchiveTable = () => {
+const AdminArchiveTable = ({ role }) => {
   const [collapsedRows, setCollapsedRows] = useState([]);
   const [selectedTeacher, setSelectedTeacher] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -52,7 +52,7 @@ const AdminArchiveTable = () => {
   const buildQueryParams = useCallback(() => {
     const params = new URLSearchParams();
 
-    if (selectedTeacher) {
+    if (selectedTeacher && role === "admin") {
       params.append("teacher_id", selectedTeacher);
     }
 
@@ -120,14 +120,26 @@ const AdminArchiveTable = () => {
       key: "count",
       label: "Booked",
     },
-    {
-      key: "teacher",
-      label: "Teacher",
-    },
-    {
-      key: "action",
-      label: "Action",
-    },
+    ...(role === "teacher"
+      ? [
+          {
+            key: "date",
+            label: "Date",
+          },
+        ]
+      : []),
+    ...(role === "admin"
+      ? [
+          {
+            key: "teacher",
+            label: "Teacher",
+          },
+          {
+            key: "action",
+            label: "Action",
+          },
+        ]
+      : []),
   ];
 
   const [columnFilters, setColumnFilters] = useState([]);
@@ -221,12 +233,14 @@ const AdminArchiveTable = () => {
               onChange={handleSearchChange}
               className="max-w-sm min-w-[200px] h-10"
             />
-            <TeacherFilter
-              selectedTeacher={selectedTeacher}
-              onTeacherChange={handleTeacherChange}
-              onClearFilter={handleClearTeacherFilter}
-              clearButton={false}
-            />
+            {role === "admin" && (
+              <TeacherFilter
+                selectedTeacher={selectedTeacher}
+                onTeacherChange={handleTeacherChange}
+                onClearFilter={handleClearTeacherFilter}
+                clearButton={false}
+              />
+            )}
           </div>
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -355,12 +369,14 @@ const AdminArchiveTable = () => {
             onChange={handleSearchChange}
             className="max-w-sm min-w-[200px] h-10"
           />
-          <TeacherFilter
-            selectedTeacher={selectedTeacher}
-            onTeacherChange={handleTeacherChange}
-            onClearFilter={handleClearTeacherFilter}
-            clearButton={false}
-          />
+          {role === "admin" && (
+            <TeacherFilter
+              selectedTeacher={selectedTeacher}
+              onTeacherChange={handleTeacherChange}
+              onClearFilter={handleClearTeacherFilter}
+              clearButton={false}
+            />
+          )}
         </div>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -423,7 +439,7 @@ const AdminArchiveTable = () => {
               archiveList.map((item) => (
                 <Fragment key={item.id}>
                   <TableRow
-                    onClick={() => toggleRow(item.id)}
+                    onClick={() => (role === "admin" ? toggleRow(item.id) : "")}
                     className={`cursor-pointer select-none hover:bg-default-100 ${
                       collapsedRows.includes(item.id) ? "bg-default-100" : ""
                     }`}
@@ -444,7 +460,8 @@ const AdminArchiveTable = () => {
                               {item.student?.name || "N/A"}
                             </span>
                             <span className="text-xs mt-1 block font-normal text-muted-foreground">
-                              {item.student?.email || "N/A"}
+                              {(role === "admin" && item.student?.email) ||
+                                ""}
                             </span>
                           </div>
                         </div>
@@ -466,44 +483,60 @@ const AdminArchiveTable = () => {
                         ? item.count + " Sessions"
                         : item.count + " Session"}
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-4">
-                        <div className="flex gap-3 items-center">
-                          <Avatar className="rounded-full">
-                            <AvatarImage
-                              src={item.teacher?.image || item.teacher?.avatar}
-                            />
-                            <AvatarFallback>
-                              {item.teacher?.name?.charAt(0) || "T"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <span className="text-sm block text-card-foreground">
-                              {item.teacher?.name || "N/A"}
-                            </span>
-                            <span className="text-xs mt-1 block font-normal text-muted-foreground">
-                              {item.teacher?.email || "N/A"}
-                            </span>
+                    {role === "teacher" && (
+                      <TableCell>
+                        {item.created_at
+                          ? new Date(item.created_at).toLocaleDateString()
+                          : "N/A"}
+                      </TableCell>
+                    )}
+                    {role === "admin" && (
+                      <>
+                        <TableCell>
+                          <div className="flex items-center gap-4">
+                            <div className="flex gap-3 items-center">
+                              <Avatar className="rounded-full">
+                                <AvatarImage
+                                  src={
+                                    item.teacher?.image || item.teacher?.avatar
+                                  }
+                                />
+                                <AvatarFallback>
+                                  {item.teacher?.name?.charAt(0) || "T"}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <span className="text-sm block text-card-foreground">
+                                  {item.teacher?.name || "N/A"}
+                                </span>
+                                <span className="text-xs mt-1 block font-normal text-muted-foreground">
+                                  {item.teacher?.email || "N/A"}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </TableCell>
+                        </TableCell>
 
-                    <TableCell className="">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        color="secondary"
-                        className="h-7 w-7 border-none rounded-full"
-                      >
-                        <Icon
-                          icon="heroicons:chevron-down"
-                          className={cn("h-5 w-5 transition-all duration-300", {
-                            "rotate-180": collapsedRows.includes(item.id),
-                          })}
-                        />
-                      </Button>
-                    </TableCell>
+                        <TableCell className="">
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            color="secondary"
+                            className="h-7 w-7 border-none rounded-full"
+                          >
+                            <Icon
+                              icon="heroicons:chevron-down"
+                              className={cn(
+                                "h-5 w-5 transition-all duration-300",
+                                {
+                                  "rotate-180": collapsedRows.includes(item.id),
+                                }
+                              )}
+                            />
+                          </Button>
+                        </TableCell>
+                      </>
+                    )}
                   </TableRow>
                   {collapsedRows.includes(item.id) && (
                     <TableRow>

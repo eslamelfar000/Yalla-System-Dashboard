@@ -54,7 +54,7 @@ const ReviewTableStatus = ({ selectedTeacher, selectedMonth, searchQuery }) => {
     }
 
     if (selectedMonth) {
-      params.push(`month_number=${selectedMonth}`);
+      params.push(`month=${selectedMonth}`);
     }
 
     if (params.length > 0) {

@@ -241,9 +241,11 @@ const TeacherSessionSheet = ({
           cleanTime.toLowerCase().includes("am") ||
           cleanTime.toLowerCase().includes("pm")
         ) {
+          // Handle different time formats with AM/PM
+          // Match patterns like: "10:00 am", "10:00:00 am", "2:00 pm", etc.
           const match = cleanTime
             .toLowerCase()
-            .match(/(\d{1,2}):(\d{2})\s*(am|pm)/);
+            .match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(am|pm)/);
           if (match) {
             let [_, hours, minutes, period] = match;
             hours = parseInt(hours);

@@ -172,7 +172,6 @@ const ChatPage = () => {
     };
 
     messageMutation.mutate(newMessage);
-    console.log("Sending message:", newMessage);
   };
 
   const chatHeightRef = useRef(null);
@@ -274,6 +273,7 @@ const ChatPage = () => {
                       onDelete={onDelete}
                       handleReply={handleReply}
                       chatHeightRef={chatHeightRef}
+                      chatInfo={chatInfo}
                     />
                   )}
                 </div>

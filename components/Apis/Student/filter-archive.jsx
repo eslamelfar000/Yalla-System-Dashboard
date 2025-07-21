@@ -5,24 +5,24 @@ import { Icon } from "@iconify/react";
 
 function FilterArchiveComponent({ onApply, onReset, initialFilters = {} }) {
   const types = [
-    { id: 1, name: "Trail Lesson" },
-    { id: 2, name: "Pay After Lesson" },
-    { id: 3, name: "Pay Before Lesson" },
+    { id: 1, name: "Trail Lesson", value: "trail_lesson" },
+    { id: 2, name: "Pay After Lesson", value: "pay_after_lesson" },
+    { id: 3, name: "Pay Before Lesson", value: "pay_before_lesson" },
   ];
 
   const month = [
-    { id: 1, name: "January" },
-    { id: 2, name: "February" },
-    { id: 3, name: "March" },
-    { id: 4, name: "April" },
-    { id: 5, name: "May" },
-    { id: 6, name: "June" },
-    { id: 7, name: "July" },
-    { id: 8, name: "August" },
-    { id: 9, name: "September" },
-    { id: 10, name: "October" },
-    { id: 11, name: "November" },
-    { id: 12, name: "December" },
+    { id: 1, name: "January", value: "01" },
+    { id: 2, name: "February", value: "02" },
+    { id: 3, name: "March", value: "03" },
+    { id: 4, name: "April", value: "04" },
+    { id: 5, name: "May", value: "05" },
+    { id: 6, name: "June", value: "06" },
+    { id: 7, name: "July", value: "07" },
+    { id: 8, name: "August", value: "08" },
+    { id: 9, name: "September", value: "09" },
+    { id: 10, name: "October", value: "10" },
+    { id: 11, name: "November", value: "11" },
+    { id: 12, name: "December", value: "12" },
   ];
 
   const sessionCount = 8;
@@ -44,9 +44,9 @@ function FilterArchiveComponent({ onApply, onReset, initialFilters = {} }) {
     setSelectedMonth(initialFilters.months || []);
   }, [initialFilters]);
 
-  const toggleType = (id) => {
+  const toggleType = (value) => {
     setSelectedTypes((prev) =>
-      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
     );
   };
 
@@ -56,9 +56,9 @@ function FilterArchiveComponent({ onApply, onReset, initialFilters = {} }) {
     );
   };
 
-  const toggleMonth = (num) => {
+  const toggleMonth = (value) => {
     setSelectedMonth((prev) =>
-      prev.includes(num) ? prev.filter((v) => v !== num) : [...prev, num]
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
     );
   };
 
@@ -113,8 +113,8 @@ function FilterArchiveComponent({ onApply, onReset, initialFilters = {} }) {
                 <Checkbox
                   id={`type-${type.id}`}
                   className="size-10"
-                  checked={selectedTypes.includes(type.id)}
-                  onCheckedChange={() => toggleType(type.id)}
+                  checked={selectedTypes.includes(type.value)}
+                  onCheckedChange={() => toggleType(type.value)}
                 />
                 <label
                   htmlFor={`type-${type.id}`}
@@ -171,8 +171,8 @@ function FilterArchiveComponent({ onApply, onReset, initialFilters = {} }) {
                 <Checkbox
                   id={`month-${item.id}`}
                   className="size-10"
-                  checked={selectedMonth.includes(item.id)}
-                  onCheckedChange={() => toggleMonth(item.id)}
+                  checked={selectedMonth.includes(item.value)}
+                  onCheckedChange={() => toggleMonth(item.value)}
                 />
                 <label
                   htmlFor={`month-${item.id}`}

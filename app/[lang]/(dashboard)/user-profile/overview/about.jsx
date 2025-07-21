@@ -5,13 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Icon } from "@iconify/react";
 import { useUserData } from "../profile-layout";
 import { MapPin } from "lucide-react";
+import Cookies from "js-cookie";
 
 const About = ({ course }) => {
   const { userData } = useUserData();
 
   // Check if user is a teacher
   const isTeacher =
-    userData?.role === "teacher" || userData?.role === "Teacher";
+    userData?.role === "teacher" || userData?.role === "Teacher" || Cookies.get("user_role") === "teacher" || userData?.teacher?.role === "teacher";
 
   // Don't show course section for non-teachers
   if (course && !isTeacher) {
@@ -26,12 +27,12 @@ const About = ({ course }) => {
 
     if (course) {
       return (
-        userData.about_course ||
+        userData.teacher?.about_course || userData.about_course ||
         "No course information available. Please update your profile to add information about your courses."
       );
     } else {
       return (
-        userData.about_me ||
+        userData.teacher?.about_me || userData.about_me ||
         "No personal information available. Please update your profile to add information about yourself."
       );
     }
@@ -39,7 +40,7 @@ const About = ({ course }) => {
 
   return (
     <Card>
-      <CardHeader className="flex-row justify-between items-center mb-3 border-none">
+      <CardHeader className="flex-row justify-between items-center mb-1 border-none">
         <CardTitle className="text-lg font-medium text-default-800">
           {course ? "About Course" : "About Me"}
         </CardTitle>
@@ -51,13 +52,13 @@ const About = ({ course }) => {
         </Button> */}
       </CardHeader>
       <CardContent>
-        <div className="text-sm text-default-600 mb-3 whitespace-pre-wrap">
+        <div className="text-sm text-default-600 whitespace-pre-wrap">
           {getAboutContent()}
         </div>
 
         {/* Show user info only for About Me section */}
         {!course && userData && (
-          <div className="mt-6 flex flex-wrap items-center gap-6 2xl:gap-16">
+          <div className="flex flex-wrap items-center gap-6 2xl:gap-16 mt-10">
             {[
               {
                 title: "Name",

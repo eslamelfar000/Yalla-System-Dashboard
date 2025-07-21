@@ -60,8 +60,48 @@ const QualitySessionSelector = ({
   const formatTime = (timeStr) => {
     if (!timeStr) return "";
 
-    // Convert 24-hour to 12-hour format
-    const [hours, minutes] = timeStr.split(":");
+    // First convert to 24-hour format to handle inconsistent API data
+    const convertTo24Hour = (timeStr) => {
+      if (!timeStr) return "00:00";
+
+      const cleanTime = timeStr.toLowerCase().trim();
+
+      // Check if it's already in 24-hour format (no am/pm)
+      if (!cleanTime.includes("am") && !cleanTime.includes("pm")) {
+        // Handle seconds if present (e.g., "10:00:00" -> "10:00")
+        if (cleanTime.includes(":")) {
+          const parts = cleanTime.split(":");
+          if (parts.length >= 2) {
+            return `${parts[0]}:${parts[1]}`;
+          }
+        }
+        return cleanTime;
+      }
+
+      // Handle different time formats with AM/PM
+      const match = cleanTime.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(am|pm)/);
+      if (!match) {
+        console.warn("Could not parse time format:", timeStr);
+        return "00:00";
+      }
+
+      let [_, hours, minutes, period] = match;
+      hours = parseInt(hours);
+
+      if (period === "pm" && hours !== 12) {
+        hours += 12;
+      } else if (period === "am" && hours === 12) {
+        hours = 0;
+      }
+
+      return `${hours.toString().padStart(2, "0")}:${minutes}`;
+    };
+
+    // Convert to 24-hour format first
+    const time24Hour = convertTo24Hour(timeStr);
+
+    // Then convert 24-hour to 12-hour format for display
+    const [hours, minutes] = time24Hour.split(":");
     const hour = parseInt(hours);
     const ampm = hour >= 12 ? "PM" : "AM";
     const displayHour = hour % 12 || 12;

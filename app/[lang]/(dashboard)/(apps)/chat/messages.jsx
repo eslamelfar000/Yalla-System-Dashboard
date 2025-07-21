@@ -66,7 +66,7 @@ const renderTextWithLinks = (text) => {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:underline break-all"
+          className="underline break-all"
           onClick={(e) => {
             e.stopPropagation();
             window.open(url, "_blank");
@@ -95,77 +95,95 @@ const AttachmentRenderer = ({ attachments, userRole }) => {
 
   return (
     <div className="space-y-2 mt-2">
-      {attachments.map((attachment, index) => (
-        <div key={index} className="max-w-xs">
-          {attachment.type === "image" && (
-            <div className="relative group">
-              <Image
-                src={attachment.url || attachment.preview}
-                alt={attachment.name || "Image"}
-                width={200}
-                height={150}
-                className="rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() =>
-                  window.open(attachment.url || attachment.preview, "_blank")
-                }
-              />
-              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      {attachments.map((attachment, index) => {
+        // Safety check for attachment structure
+        if (!attachment) {
+          console.warn("Invalid attachment:", attachment);
+          return null;
+        }
+
+        const attachmentId = attachment.id || index;
+        const attachmentType = attachment.type || attachment.attach_type;
+        const attachmentName =
+          attachment.name || attachment.attach_name || "Unknown file";
+        const attachmentLink = attachment.link || attachment.uploaded_file;
+        const attachmentSize = attachment.size || attachment.attach_size;
+
+        // Handle different size formats
+        let displaySize = "";
+        if (attachmentSize) {
+          if (typeof attachmentSize === "number") {
+            displaySize = formatFileSize(attachmentSize);
+          } else if (typeof attachmentSize === "string") {
+            displaySize = attachmentSize;
+          }
+        }
+
+        return (
+          <div key={attachmentId} className="max-w-xs">
+            {/* Image Attachments */}
+            {attachmentType.includes("image") && attachmentLink && (
+              <div className="relative group">
+                <Image
+                  src={attachmentLink}
+                  alt={attachmentName}
+                  width={200}
+                  height={150}
+                  className="rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity w-full h-full"
+                  onClick={() => window.open(attachmentLink, "_blank")}
+                  onError={(e) => {
+                    console.warn("Failed to load image:", attachmentLink);
+                    e.target.style.display = "none";
+                  }}
+                />
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="h-6 w-6 p-0"
+                    onClick={() => window.open(attachmentLink, "_blank")}
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* File Attachments */}
+            {!attachmentType.includes("image") && (
+              <div className="flex items-center gap-2 p-2 bg-muted rounded-lg border">
+                <Icon
+                  icon="tabler:file-filled"
+                  className="w-5 h-5 text-primary"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    {attachmentName}
+                  </p>
+                  {displaySize && (
+                    <p className="text-xs text-muted-foreground">
+                      {displaySize}
+                    </p>
+                  )}
+                </div>
                 <Button
                   size="sm"
-                  variant="secondary"
+                  variant="ghost"
                   className="h-6 w-6 p-0"
-                  onClick={() =>
-                    window.open(attachment.url || attachment.preview, "_blank")
-                  }
+                  onClick={() => {
+                    if (attachmentLink) {
+                      window.open(attachmentLink, "_blank");
+                    }
+                  }}
+                  disabled={!attachmentLink}
                 >
-                  <ExternalLink className="w-3 h-3" />
+                  <Download className="w-3 h-3" />
                 </Button>
               </div>
-            </div>
-          )}
-
-          {attachment.type === "file" && (
-            <div className="flex items-center gap-2 p-2 bg-muted rounded-lg border">
-              <Icon
-                icon="tabler:file-filled"
-                className="w-5 h-5 text-primary"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {attachment.name}
-                </p>
-                {attachment.size && (
-                  <p className="text-xs text-muted-foreground">
-                    {formatFileSize(attachment.size)}
-                  </p>
-                )}
-              </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-6 w-6 p-0"
-                onClick={() => {
-                  if (attachment.url) {
-                    window.open(attachment.url, "_blank");
-                  } else if (attachment.file) {
-                    // Create download link for file
-                    const url = URL.createObjectURL(attachment.file);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = attachment.name;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                  }
-                }}
-              >
-                <Download className="w-3 h-3" />
-              </Button>
-            </div>
-          )}
-        </div>
-      ))}
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -176,6 +194,7 @@ const Messages = ({
   onDelete,
   handleReply,
   chatHeightRef,
+  chatInfo,
 }) => {
   const { user } = useAuth();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -250,6 +269,7 @@ const Messages = ({
                 handleReply={handleReply}
                 currentUserId={user?.id}
                 userRole={user?.role}
+                chatInfo={chatInfo}
               />
             );
           })}
@@ -269,10 +289,7 @@ const Messages = ({
             <AlertDialogCancel onClick={handleCancelDelete}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={handleConfirmDelete}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -282,37 +299,47 @@ const Messages = ({
   );
 };
 
-const MessageItem = ({ message, onDelete, currentUserId, userRole }) => {
-  // Safety check: ensure message has required properties
-  if (!message || typeof message !== "object") {
-    console.warn("Invalid message in MessageItem:", message);
-    return null;
-  }
-
+const MessageItem = ({
+  message,
+  onDelete,
+  currentUserId,
+  userRole,
+  chatInfo,
+}) => {
   // Handle different message data structures based on user role
-  let senderId, senderName, senderAvatar, messageTime, chatMessage, attachments;
+  let senderId,
+    senderName,
+    senderAvatar,
+    messageTime,
+    chatMessage,
+    attachments,
+    senderRole;
 
   if (userRole === "admin") {
-    // Admin message structure
+    // Admin message structure - user info is not nested in message, need to get from participants
     const {
       id,
       message: msgContent,
-      sender_id,
-      sender_type,
-      sender_name,
-      sender_image,
-      time,
+      user_id,
       created_at,
       updated_at,
       attachments: msgAttachments,
     } = message;
 
-    senderId = sender_id;
-    senderName = safeToString(sender_name || "Unknown");
-    senderAvatar = fixImageUrl(sender_image);
-    messageTime = time || created_at || updated_at;
+    senderId = user_id;
+    messageTime = created_at || updated_at;
     chatMessage = msgContent;
     attachments = msgAttachments;
+
+    // Get user info from participants array in chatInfo
+    let userInfo = null;
+    if (chatInfo && chatInfo.participants) {
+      userInfo = chatInfo.participants.find((p) => p.user_id === user_id)?.user;
+    }
+
+    senderName = safeToString(userInfo?.name || "Unknown");
+    senderAvatar = fixImageUrl(userInfo?.image);
+    senderRole = userInfo?.role; // Get the role (student/teacher)
   } else {
     // Teacher message structure
     const {
@@ -336,10 +363,20 @@ const MessageItem = ({ message, onDelete, currentUserId, userRole }) => {
     messageTime = time || created_at || updated_at;
     chatMessage = msgContent;
     attachments = msgAttachments;
+    senderRole = sender?.role || user?.role;
   }
 
-  // Determine if message is from current user
-  const isOwnMessage = senderId === currentUserId;
+  // For admin view: determine message alignment based on sender role
+  // Student messages on left, Teacher messages on right
+  let isOwnMessage = false;
+
+  if (userRole === "admin") {
+    // In admin view, we want teacher messages on the right, student messages on the left
+    isOwnMessage = senderRole === "teacher";
+  } else {
+    // For teacher view, use the normal logic based on current user ID
+    isOwnMessage = senderId === currentUserId;
+  }
 
   // Get safe message content
   const safeMessageContent = getSafeMessageContent(chatMessage);
@@ -350,7 +387,9 @@ const MessageItem = ({ message, onDelete, currentUserId, userRole }) => {
         <>
           <div className="flex space-x-2 items-end justify-end group w-full rtl:space-x-reverse mb-4">
             <div className="flex flex-col items-end gap-1">
-              <span className="text-xs text-default-500">{senderName}</span>
+              {userRole === "admin" && (
+                <span className="text-xs text-default-500">{senderName}</span>
+              )}
               <div className="flex items-center gap-1">
                 <div className="opacity-0 invisible group-hover:opacity-100 group-hover:visible">
                   {userRole === "teacher" && (
@@ -411,7 +450,9 @@ const MessageItem = ({ message, onDelete, currentUserId, userRole }) => {
             </Avatar>
           </div>
           <div className="flex-1 flex flex-col gap-2">
-            <span className="text-xs text-default-500">{senderName}</span>
+            {userRole === "admin" && (
+              <span className="text-xs text-default-500">{senderName}</span>
+            )}
             <div className="flex items-center gap-1">
               <div className="whitespace-pre-wrap break-all relative z-[1]">
                 <div className="bg-default-200 text-sm py-2 px-3 rounded-2xl flex-1">

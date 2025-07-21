@@ -50,6 +50,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "indigo-ferret-819035.hostingersite.com",
       },
+      {
+        protocol: "https",
+        hostname: "encrypted-tbn0.gstatic.com",
+      },
     ],
   },
 };

@@ -35,7 +35,23 @@ export const getChatInfo = async (chatId, userRole = null) => {
 // Get chat messages with pagination - handles both admin and teacher roles
 export const getChatMessages = async (chatId, page = 1, userRole = null) => {
   try {
-    // Use different endpoints based on user role
+    // For admin, the single chat endpoint already includes messages
+    if (userRole === "admin") {
+      // Get chat info which includes messages
+      const chatResponse = await api.get(`dashboard/chats/${chatId}`);
+      const chatData = chatResponse.data;
+      
+      if (chatData.data && chatData.data.messages) {
+        // Return messages from the chat info response
+        return {
+          data: chatData.data.messages,
+          success: true,
+          message: "Messages fetched successfully"
+        };
+      }
+    }
+    
+    // Fallback to separate messages endpoint for teacher or if messages not in chat response
     const endpoint = userRole === "admin" 
       ? `dashboard/chats/${chatId}/messages?page=${page}`
       : `chat_message?chat_id=${chatId}&page=${page}`;
@@ -105,15 +121,14 @@ export const sendMessage = async (messageData) => {
       formData.append('chat_id', messageData.chat_id);
       formData.append('message', messageData.message || ''); // Send as string
       formData.append('time', messageData.time);
-      formData.append('replayMetadata', JSON.stringify(messageData.replayMetadata || false));
       
       // Add file attachments
       messageData.attachments.forEach((attachment, index) => {
         if (attachment.file) {
-          formData.append(`attachments[${index}][type]`, attachment.type);
-          formData.append(`attachments[${index}][name]`, attachment.name);
-          formData.append(`attachments[${index}][size]`, attachment.size);
-          formData.append(`attachments[${index}][file]`, attachment.file);
+          formData.append(`attach_type`, attachment.type);
+          formData.append(`attach_name`, attachment.name);
+          formData.append(`attach_size`, attachment.size);
+          formData.append(`attachments`, attachment.file);
         }
       });
       
