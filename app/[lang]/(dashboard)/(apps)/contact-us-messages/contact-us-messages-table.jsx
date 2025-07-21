@@ -28,6 +28,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Pagination from "@/components/Shared/Pagination/Pagination";
 import { formatTime } from "@/lib/utils";
 import { useGetData } from "@/hooks/useGetData";
+import { Fragment } from "react";
 
 // Skeleton component for loading state
 const TableSkeleton = () => (
@@ -99,9 +100,9 @@ const columns = [
     cell: ({ row }) => (
       <div className="font-medium text-card-foreground/80">
         <div className="flex space-x-3 rtl:space-x-reverse items-center">
-          <span className="text-sm opacity-70 font-[400] text-card-foreground max-w-xs truncate">
-            {row?.original?.message || "N/A"}
-          </span>
+          <Button className="" size="icon">
+            <Icon icon="tabler:eye" className="w-4 h-4" />
+          </Button>
         </div>
       </div>
     ),
@@ -127,6 +128,7 @@ export function ContactUsMessagesTable() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [collapsedRows, setCollapsedRows] = useState([]);
 
   // Get current page from URL
   const pageFromUrl = searchParams.get("page");
@@ -188,6 +190,12 @@ export function ContactUsMessagesTable() {
     refetch();
   }, [refetch]);
 
+  const handleToggleCollapse = (rowId) => {
+    setCollapsedRows((prev) =>
+      prev.includes(rowId) ? prev.filter((id) => id !== rowId) : [...prev, rowId]
+    );
+  };
+
   // Handler for Pagination component
   const handleSetCurrentPage = useCallback(
     (page) => {
@@ -202,10 +210,10 @@ export function ContactUsMessagesTable() {
     return (
       <Card className="p-6">
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          {/* <div className="flex items-center justify-between">
             <Skeleton className="h-8 w-[200px]" />
             <Skeleton className="h-10 w-[200px]" />
-          </div>
+          </div> */}
           <TableSkeleton />
         </div>
       </Card>
@@ -281,9 +289,16 @@ export function ContactUsMessagesTable() {
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
+                  <Fragment key={row.id}>
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    onClick={() => handleToggleCollapse(row.id)}
+                    className={`cursor-pointer hover:bg-default-100 transition-all duration-300 ${
+                      collapsedRows.includes(row.id)
+                        ? "bg-default-100"
+                        : ""
+                    }`}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
@@ -294,6 +309,17 @@ export function ContactUsMessagesTable() {
                       </TableCell>
                     ))}
                   </TableRow>
+                  {collapsedRows.includes(row.id) && (
+                    <TableRow>
+                      <TableCell colSpan={columns.length} className="p-8">
+                        <div className="title text-lg font-medium text-primary mb-2">Message</div>
+                        <div className="text-sm text-muted-foreground">
+                          {row.original.message}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  </Fragment>
                 ))
               ) : (
                 <TableRow>
