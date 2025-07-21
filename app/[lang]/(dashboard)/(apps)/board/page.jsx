@@ -30,11 +30,11 @@ function page() {
               Board Sessions
             </h3>
           </div>
-          <TeacherFilter
-            selectedTeacher={selectedTeacher}
-            onTeacherChange={handleTeacherChange}
-            onClearFilter={handleClearFilter}
-          />
+            <TeacherFilter
+              selectedTeacher={selectedTeacher}
+              onTeacherChange={handleTeacherChange}
+              onClearFilter={handleClearFilter}
+            />
         </Card>
 
         <div className="cover space-y-5">

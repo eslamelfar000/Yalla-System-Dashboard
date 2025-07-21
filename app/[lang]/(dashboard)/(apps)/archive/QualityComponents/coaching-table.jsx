@@ -29,7 +29,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog.jsx";
+} from "@/components/ui/alert-dialog";
 import LoadingButton from "@/components/Shared/loading-button";
 import Pagination from "@/components/Shared/Pagination/Pagination";
 import { useMemo } from "react";

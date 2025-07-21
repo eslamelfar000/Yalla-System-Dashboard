@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetData } from "@/hooks/useGetData";
-import TeacherFilter from "@/components/Shared/TeacherFilter.jsx";
+import TeacherFilter from "@/components/Shared/TeacherFilter";
 import { SharedSheet } from "@/components/Shared/Drawer/shared-sheet";
 import {
   flexRender,
@@ -460,7 +460,8 @@ const AdminArchiveTable = ({ role }) => {
                               {item.student?.name || "N/A"}
                             </span>
                             <span className="text-xs mt-1 block font-normal text-muted-foreground">
-                              {(role === "admin" && item.student?.email) || ""}
+                              {(role === "admin" && item.student?.email) ||
+                                ""}
                             </span>
                           </div>
                         </div>
