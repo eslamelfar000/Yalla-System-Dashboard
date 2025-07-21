@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetData } from "@/hooks/useGetData";
-import TeacherFilter from "@/components/Shared/TeacherFilter";
+import {TeacherFilter} from "@/components/Shared/TeacherFilter";
 import { SharedSheet } from "@/components/Shared/Drawer/shared-sheet";
 import {
   flexRender,
