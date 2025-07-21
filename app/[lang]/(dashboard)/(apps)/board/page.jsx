@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import BoradTableStatus from "./board-table";
 import ReportsTableStatus from "./reports-table";
 import BoardStepsLineSpacs from "./board-steps";
-import TeacherFilter from "@/components/Shared/TeacherFilter";
+import TeacherFilter from "@/components/Shared/TeacherFilter.jsx";
 import CoachingTableStatus from "../archive/QualityComponents/coaching-table";
 
 function page() {
@@ -30,11 +30,11 @@ function page() {
               Board Sessions
             </h3>
           </div>
-            <TeacherFilter
-              selectedTeacher={selectedTeacher}
-              onTeacherChange={handleTeacherChange}
-              onClearFilter={handleClearFilter}
-            />
+          <TeacherFilter
+            selectedTeacher={selectedTeacher}
+            onTeacherChange={handleTeacherChange}
+            onClearFilter={handleClearFilter}
+          />
         </Card>
 
         <div className="cover space-y-5">

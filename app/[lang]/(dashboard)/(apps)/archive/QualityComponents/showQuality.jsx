@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import ReviewTableStatus from "./review-table";
 import CoachingTableStatus from "./coaching-table";
-import TeacherFilter from "@/components/Shared/TeacherFilter";
+import TeacherFilter from "@/components/Shared/TeacherFilter.jsx";
 import { Icon } from "@iconify/react";
 
 function ShowQuality() {
