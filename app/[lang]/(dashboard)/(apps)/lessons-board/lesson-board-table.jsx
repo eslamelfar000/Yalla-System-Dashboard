@@ -154,7 +154,7 @@ const LessonBoardTable = () => {
 
   // Handle search submit
   const handleSearchSubmit = (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     refetch();
   };
 
@@ -274,28 +274,37 @@ const LessonBoardTable = () => {
                     </TableCell>
 
                     <TableCell>
-                      <Button
-                        onClick={() => toggleRow(item.student.id)}
-                        size="icon"
-                        variant="outline"
-                        color="secondary"
-                        className="h-7 w-7 border-none rounded-full"
-                      >
-                        <Icon
-                          icon="heroicons:chevron-down"
-                          className={cn("h-5 w-5 transition-all duration-300", {
-                            "rotate-180": collapsedRows.includes(
-                              item.student.id
-                            ),
-                          })}
-                        />
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={() => toggleRow(item.student.id)}
+                          size="icon"
+                          variant="outline"
+                          color="secondary"
+                          className="h-7 w-7 border-none rounded-full"
+                        >
+                          <Icon
+                            icon="heroicons:chevron-down"
+                            className={cn(
+                              "h-5 w-5 transition-all duration-300",
+                              {
+                                "rotate-180": collapsedRows.includes(
+                                  item.student.id
+                                ),
+                              }
+                            )}
+                          />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                   {collapsedRows.includes(item.student.id) && (
                     <TableRow>
                       <TableCell colSpan={6} className="">
-                        <LessonsStepsLineSpace lessons={item.lessons} />
+                        <LessonsStepsLineSpace
+                          lessons={item.lessons}
+                          studentId={item.student.id}
+                          handleSearchSubmit={handleSearchSubmit}
+                        />
                       </TableCell>
                     </TableRow>
                   )}

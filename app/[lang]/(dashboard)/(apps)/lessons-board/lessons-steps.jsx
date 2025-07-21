@@ -17,8 +17,9 @@ import toast from "react-hot-toast";
 import { useMutate } from "@/hooks/useMutate";
 import LoadingButton from "@/components/Shared/loading-button";
 import { Button } from "@/components/ui/button";
+import CompleteSessionButton from "./complete-session-button";
 
-const LessonsStepsLineSpace = ({ lessons = [] }) => {
+const LessonsStepsLineSpace = ({ lessons = [], handleSearchSubmit, studentId }) => {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
@@ -37,14 +38,15 @@ const LessonsStepsLineSpace = ({ lessons = [] }) => {
 
   // Mutation for completing lessons
   const completeLessonMutation = useMutate({
-    method: "POST",
-    endpoint: `dashboard/complete-session/${selectedLesson?.id}`,
+    method: "GET",
+    endpoint: `dashboard/change-lession-status/${selectedLesson?.id}`,
     queryKeysToInvalidate: ["lessons-board"], // Invalidate lessons board data
     text: "Lesson completed successfully!",
     onSuccess: (data) => {
       if (data.status) {
         setShowConfirmDialog(false);
         setSelectedLesson(null);
+        handleSearchSubmit();
         // The hook will automatically show success toast and invalidate queries
       }
     },
@@ -214,39 +216,52 @@ const LessonsStepsLineSpace = ({ lessons = [] }) => {
 
   return (
     <div>
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-default-900 mb-2">
-          Lessons Progress
-        </h3>
-        <p className="text-sm text-default-600 mb-3">
-          Manage your lessons based on their scheduled dates and current status.
-        </p>
+      <div className="mb-6 flex justify-between">
+        <div className="cover">
+          <h3 className="text-lg font-semibold text-default-900 mb-2">
+            Lessons Progress
+          </h3>
+          <p className="text-sm text-default-600 mb-3">
+            Manage your lessons based on their scheduled dates and current
+            status.
+          </p>
 
-        {/* Status Summary */}
-        <div className="flex flex-wrap gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-primary rounded-full"></div>
-            <span>Available: {statusCounts.current}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-600 rounded-full"></div>
-            <span>Completed: {statusCounts.done}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-            <span>Future: {statusCounts.future}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-            <span>No Date: {statusCounts["no-date"]}</span>
+          {/* Status Summary */}
+          <div className="flex flex-wrap gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-primary rounded-full"></div>
+              <span>Available: {statusCounts.current}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-600 rounded-full"></div>
+              <span>Completed: {statusCounts.done}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+              <span>Future: {statusCounts.future}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+              <span>No Date: {statusCounts["no-date"]}</span>
+            </div>
           </div>
         </div>
+
+        <CompleteSessionButton
+          studentId={studentId}
+          lessons={lessons}
+          onSuccess={handleSearchSubmit}
+        />
       </div>
 
       <Stepper
         current={statusCounts.done}
         size="md"
-        className="py-3 grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-y-10 gap-x-4"
+        className={`py-3 grid grid-cols-2 lg:grid-cols-${Math.ceil(
+          steps.length / 2
+        )} xl:grid-cols-${
+          steps.length === 8 ? 8 : Math.ceil(steps.length + 1)
+        } gap-y-10 gap-x-4`}
       >
         {steps?.map((lesson, i) => {
           const status = getLessonStatus(lesson);
@@ -256,7 +271,7 @@ const LessonsStepsLineSpace = ({ lessons = [] }) => {
             <Step key={lesson.id}>
               <div
                 className={cn("relative transition-all duration-200", {
-                  "cursor-pointer hover:scale-105": canInteract,
+                  "cursor-pointer hover:scale-104": canInteract,
                   "cursor-not-allowed": !canInteract,
                 })}
                 onClick={() => handleLessonClick(lesson)}

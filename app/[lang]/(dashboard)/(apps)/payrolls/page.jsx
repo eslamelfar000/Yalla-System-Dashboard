@@ -13,9 +13,21 @@ import PayrollsQualityDataTable from "./payroll-quality-table";
 import SummaryTable from "./summary-table";
 import PayrollsTaps from "./index";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import IncomeTeacherDataTable from "../income/Components/income-teacher-table";
+import TeacherFilter from "@/components/Shared/TeacherFilter";
+import IncomeQualityDataTable from "../income/Components/income-quality-table";
 
 function page() {
   const [type, setType] = useState("teachers");
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [selectedQuality, setSelectedQuality] = useState(null);
+
+  const handleTeacherChange = (teacher) => {
+    setSelectedTeacher(teacher);
+  };
+  const handleClearFilter = () => {
+    setSelectedTeacher(null);
+  };
 
   return (
     <ProtectedRoute requiredRoles={["admin"]}>
@@ -30,20 +42,12 @@ function page() {
             </div>
             <div className="flex-none">
               {type === "teachers" ? (
-                <Select>
-                  <SelectTrigger className="w-[250px]">
-                    <SelectValue placeholder="Select Teachers" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="teachers">All Teachers</SelectItem>
-                    <SelectItem value="active-teachers">
-                      Active Teachers
-                    </SelectItem>
-                    <SelectItem value="inactive-teachers">
-                      Inactive Teachers
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <TeacherFilter
+                  selectedTeacher={selectedTeacher}
+                  onTeacherChange={handleTeacherChange}
+                  onClearFilter={handleClearFilter}
+                  payrolls={true}
+                />
               ) : (
                 <Select>
                   <SelectTrigger className="w-[250px]">
@@ -76,11 +80,14 @@ function page() {
 
             {type === "teachers" ? (
               <div className="cover">
-                <PayrollsTeacherDataTable />
+                <IncomeTeacherDataTable
+                  type="admin-payrolls"
+                  selectedTeacher={selectedTeacher}
+                />
               </div>
             ) : (
               <div className="cover">
-                <PayrollsQualityDataTable />
+                <IncomeQualityDataTable type="admin-payrolls" />
               </div>
             )}
 

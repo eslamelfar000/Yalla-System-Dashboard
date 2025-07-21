@@ -15,36 +15,6 @@ function page() {
   const [role, setRole] = useState(userRole);
   return (
     <div className="space-y-6">
-      {/* <ul className="flex items-center space-x-4 mb-4">
-        <li>
-          <Button
-            onClick={() => {
-              setRole("admin");
-            }}
-          >
-            Admin
-          </Button>
-        </li>
-        <li>
-          <Button
-            onClick={() => {
-              setRole("teacher");
-            }}
-          >
-            Teacher
-          </Button>
-        </li>
-        <li>
-          <Button
-            onClick={() => {
-              setRole("quality");
-            }}
-          >
-            Quality
-          </Button>
-        </li>
-      </ul> */}
-
       {role === "admin" ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-4">

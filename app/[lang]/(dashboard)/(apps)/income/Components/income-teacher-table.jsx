@@ -1,16 +1,6 @@
 "use client";
 import * as React from "react";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { useState, useEffect } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -29,24 +19,31 @@ import {
 } from "@/components/ui/table";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { data } from "../../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
+import { useGetData } from "@/hooks/useGetData";
+import { Skeleton } from "@/components/ui/skeleton";
+import { fixImageUrl, getAvatarInitials } from "@/lib/image-utils";
+import Pagination from "@/components/Shared/Pagination/Pagination";
+import SalaryAdjustmentPopover from "./salary-adjustment-popover";
+import { TrendingDown, TrendingUp } from "lucide-react";
 
-const columns = [
+const columns = (type, selectedTeacher, onAddAdjustment) => [
   {
     accessorKey: "student-name",
     header: "Student Name",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <Avatar className=" rounded-full">
-            <AvatarImage src={row?.original?.user.avatar} />
-            <AvatarFallback>AB</AvatarFallback>
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <Avatar className="rounded-full">
+            <AvatarImage src={fixImageUrl(row?.original?.student?.image)} />
+            <AvatarFallback>
+              {getAvatarInitials(row?.original?.student?.name)}
+            </AvatarFallback>
           </Avatar>
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row?.original?.student?.name}
           </span>
         </div>
       </div>
@@ -56,10 +53,10 @@ const columns = [
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.id}
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row?.original?.student?.id}
           </span>
         </div>
       </div>
@@ -69,10 +66,10 @@ const columns = [
     accessorKey: "booked",
     header: "Booked",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row?.original?.student?.sessions_count || 0} Sessions
           </span>
         </div>
       </div>
@@ -82,52 +79,154 @@ const columns = [
     accessorKey: "type",
     header: "Type",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row?.original?.student?.type || "N/A"}
           </span>
         </div>
       </div>
     ),
   },
   {
-    accessorKey: "Ded-Raise",
+    accessorKey: "ded-raise",
     header: "Ded. | Raise",
-    cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
-          </span>
+    cell: ({ row }) => {
+      const payment = row?.original?.payment;
+      if (!payment) {
+        return (
+          <div className="font-medium text-card-foreground/80">
+            <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+              No data provided
+            </span>
+          </div>
+        );
+      }
+
+      const isDeduction = payment.type === "reduction";
+      const isRaise = payment.type === "raise";
+
+      return (
+        <div className="font-medium text-card-foreground/80">
+          <div className="flex space-x-3 rtl:space-x-reverse items-center">
+            <span
+              className={cn("text-sm font-[400] whitespace-nowrap flex items-center gap-1", {
+                "text-red-600": isDeduction,
+                "text-green-600": isRaise,
+                "text-muted-foreground": !isDeduction && !isRaise,
+              })}
+            >
+              {payment.type === "reduction" ? "Deduction" : "Raise"}: $
+              {payment.amount}{" "}
+              <span className="text-xs">
+                {payment.type === "reduction" ? (
+                  <TrendingDown className="w-4 h-4 text-red-600" />
+                ) : (
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                )}
+              </span>
+            </span>
+          </div>
         </div>
-      </div>
-    ),
+      );
+    },
   },
   {
     accessorKey: "reason",
     header: "Reason",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+            {row?.original?.payment?.note || "No reason provided"}
           </span>
         </div>
       </div>
     ),
   },
+  ...(type === "admin-payrolls"
+    ? [
+        {
+          accessorKey: "actions",
+          header: "Actions",
+          cell: ({ row }) => (
+            <div className="flex items-center gap-2">
+              {row?.original?.payment === null ? (
+                <SalaryAdjustmentPopover
+                  teacherId={selectedTeacher}
+                  lessonId={row?.original?.id}
+                  onSuccess={onAddAdjustment}
+                />
+              ) : (
+                <Icon
+                  icon="heroicons:check-circle"
+                  className="w-8 h-8 text-green-500"
+                />
+              )}
+            </div>
+          ),
+        },
+      ]
+    : []),
 ];
 
-export function IncomeTeacherDataTable() {
+// Skeleton component for loading state
+const TableRowSkeleton = () => (
+  <TableRow>
+    <TableCell>
+      <div className="flex items-center space-x-3">
+        <Skeleton className="w-10 h-10 rounded-full" />
+        <Skeleton className="h-4 w-32" />
+      </div>
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-4 w-16" />
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-4 w-24" />
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-4 w-20" />
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-4 w-28" />
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-4 w-32" />
+    </TableCell>
+  </TableRow>
+);
+
+export function IncomeTeacherDataTable({ type, selectedTeacher }) {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const user = JSON.parse(localStorage.getItem("user_data"));
+
+  // Fetch data using custom useGetData hook
+  const {
+    data: data,
+    isLoading,
+    error,
+    refetch,
+  } = useGetData({
+    endpoint: `dashboard/teacher-financial/${
+      selectedTeacher || user?.id
+    }/user-payments?page=${currentPage}`,
+    queryKey: ["teacher-income", selectedTeacher],
+  });
+
+  const incomeData = data?.data?.lessons || [];
+
+  const handleAddAdjustment = () => {
+    refetch();
+  };
 
   const table = useReactTable({
-    data,
-    columns,
+    data: incomeData,
+    columns: columns(type, selectedTeacher, handleAddAdjustment),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -146,7 +245,7 @@ export function IncomeTeacherDataTable() {
 
   return (
     <>
-      <Card title="Simple">
+      <Card title="Teacher Income">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -167,89 +266,74 @@ export function IncomeTeacherDataTable() {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table
-                .getRowModel()
-                .rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-default-100"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-                .slice(0, 4)
-            ) : (
+            {isLoading ? (
+              // Show skeleton loading for 4 rows
+              Array.from({ length: 4 }).map((_, index) => (
+                <TableRowSkeleton key={`skeleton-${index}`} />
+              ))
+            ) : error ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  <div className="flex items-center justify-center text-default-500">
+                    <Icon
+                      icon="heroicons:exclamation-triangle"
+                      className="w-6 h-6 mr-2"
+                    />
+                    Failed to load income data
+                  </div>
                 </TableCell>
               </TableRow>
+            ) : !incomeData || incomeData.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns(type, selectedTeacher).length}
+                  className="h-24 text-center"
+                >
+                  <div className="flex items-center justify-center text-default-500">
+                    <Icon
+                      icon="heroicons:document-text"
+                      className="w-6 h-6 mr-2"
+                    />
+                    {type === "admin-payrolls"
+                      ? selectedTeacher
+                        ? "No income data found"
+                        : "No Teacher Selected"
+                      : "No income data found"}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="hover:bg-default-100"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4 px-4 py-4">
-        <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-
-        <div className="flex gap-2  items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-left"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-
-          {table.getPageOptions().map((page, pageIdx) => (
-            <Button
-              key={`basic-data-table-${pageIdx}`}
-              onClick={() => table.setPageIndex(pageIdx)}
-              variant={`${
-                pageIdx === table.getState().pagination.pageIndex
-                  ? ""
-                  : "outline"
-              }`}
-              className={cn("w-8 h-8")}
-            >
-              {page + 1}
-            </Button>
-          ))}
-
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-right"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-        </div>
-      </div>
+      {/* Pagination */}
+      <Pagination
+        last_page={data?.data?.pagination?.last_page}
+        setCurrentPage={setCurrentPage}
+        current_page={currentPage}
+        studentsPagination={false}
+      />
     </>
   );
 }

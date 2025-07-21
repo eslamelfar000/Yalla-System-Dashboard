@@ -20,6 +20,7 @@ const TeacherFilter = ({
   onClearFilter,
   clearButton = true,
   quality = false,
+  payrolls = false,
 }) => {
   const { user } = useAuth();
 
@@ -86,7 +87,9 @@ const TeacherFilter = ({
               <SelectItem
                 key={teacher.id}
                 value={
-                  quality ? teacher.user_id.toString() : teacher.id.toString()
+                  quality || payrolls
+                    ? teacher.user_id.toString()
+                    : teacher.id.toString()
                 }
               >
                 {teacher.name || teacher.email}
