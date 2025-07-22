@@ -251,72 +251,74 @@ const LessonsStepsLineSpace = ({
             : "lg:grid-cols-4 xl:grid-cols-6"
         } gap-y-10 gap-x-4 `}
       >
-        {steps.sort((a, b) => {
-          const dateA = parseLessonDate(a.date);
-          const dateB = parseLessonDate(b.date);
-          return dateA - dateB;
-        })?.map((lesson, i) => {
-          const status = getLessonStatus(lesson);
-          const canInteract = canInteractWithLesson(lesson);
-
-          return (
-            <Step key={lesson.id}>
-              <div
-                className={cn("relative transition-all duration-200", {
-                  "cursor-pointer hover:scale-104": canInteract,
-                  "cursor-not-allowed": !canInteract,
-                })}
-                onClick={() => handleLessonClick(lesson)}
-                title={getStatusMessage(lesson)}
-              >
-                <StepLabel
-                  className={cn(
-                    "p-2 h-full rounded-md border-2",
-                    getStatusColor(status),
-                    {
-                      "hover:bg-primary/20": canInteract,
-                      "opacity-60": !canInteract && status !== "done",
-                    }
-                  )}
+        {steps
+          .sort((a, b) => {
+            const dateA = parseLessonDate(a.date);
+            const dateB = parseLessonDate(b.date);
+            return dateA - dateB;
+          })
+          ?.map((lesson, i) => {
+            const status = getLessonStatus(lesson);
+            const canInteract = canInteractWithLesson(lesson);
+            // lessons
+            return (
+              <Step key={lesson.id}>
+                <div
+                  className={cn("relative transition-all duration-200", {
+                    "cursor-pointer hover:scale-104": canInteract,
+                    "cursor-not-allowed": !canInteract,
+                  })}
+                  onClick={() => handleLessonClick(lesson)}
+                  title={getStatusMessage(lesson)}
                 >
-                  <div className="flex gap-2 relative">
-                    {status === "locked" ? (
-                      <div className="absolute top-0 right-0 text-gray-500 text-xs">
-                        <Icon
-                          icon="heroicons:lock-closed"
-                          className="w-5 h-5"
-                        />
-                      </div>
-                    ) : status === "done" ? (
-                      <div className="absolute top-0 right-0 text-green-600 text-xs">
-                        <Icon
-                          icon="heroicons:check-circle"
-                          className="w-5 h-5"
-                        />
-                      </div>
-                    ) : (
-                      <div className="absolute top-0 right-0 text-primary text-xs">
-                        <Icon
-                          icon="heroicons:clock-circle"
-                          className="w-5 h-5"
-                        />
-                      </div>
+                  <StepLabel
+                    className={cn(
+                      "p-2 h-full rounded-md border-2",
+                      getStatusColor(status),
+                      {
+                        "hover:bg-primary/20": canInteract,
+                        "opacity-60": !canInteract && status !== "done",
+                      }
                     )}
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium">{lesson.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {lesson.time}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {lesson.date || "No date"}
-                      </p>
+                  >
+                    <div className="flex gap-2 relative">
+                      {status === "locked" ? (
+                        <div className="absolute top-0 right-0 text-gray-500 text-xs">
+                          <Icon
+                            icon="heroicons:lock-closed"
+                            className="w-5 h-5"
+                          />
+                        </div>
+                      ) : status === "done" ? (
+                        <div className="absolute top-0 right-0 text-green-600 text-xs">
+                          <Icon
+                            icon="heroicons:check-circle"
+                            className="w-5 h-5"
+                          />
+                        </div>
+                      ) : (
+                        <div className="absolute top-0 right-0 text-primary text-xs">
+                          <Icon
+                            icon="heroicons:clock-circle"
+                            className="w-5 h-5"
+                          />
+                        </div>
+                      )}
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium">{lesson.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {lesson.time}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {lesson.date || "No date"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </StepLabel>
-              </div>
-            </Step>
-          );
-        })}
+                  </StepLabel>
+                </div>
+              </Step>
+            );
+          })}
       </Stepper>
 
       {/* Confirmation Dialog */}
