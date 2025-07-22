@@ -19,7 +19,11 @@ import LoadingButton from "@/components/Shared/loading-button";
 import { Button } from "@/components/ui/button";
 import CompleteSessionButton from "./complete-session-button";
 
-const LessonsStepsLineSpace = ({ lessons = [], handleSearchSubmit, studentId }) => {
+const LessonsStepsLineSpace = ({
+  lessons = [],
+  handleSearchSubmit,
+  studentId,
+}) => {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
@@ -95,17 +99,12 @@ const LessonsStepsLineSpace = ({ lessons = [], handleSearchSubmit, studentId }) 
 
   // Get lesson status based on date and status
   const getLessonStatus = (lesson) => {
-    const hasDate = lesson.date && lesson.date.trim() !== "";
     const status = lesson.status?.toLowerCase();
     const lessonDate = parseLessonDate(lesson.date);
     const dateReached = isLessonDateReached(lessonDate);
 
-    if (!hasDate) {
-      return "no-date"; // No date set
-    }
-
     if (!dateReached) {
-      return "future"; // Date hasn't arrived yet
+      return "locked"; // Date hasn't arrived yet
     }
 
     // Date has been reached
@@ -125,9 +124,7 @@ const LessonsStepsLineSpace = ({ lessons = [], handleSearchSubmit, studentId }) 
         return "text-primary border-primary bg-primary/10";
       case "done":
         return "text-green-600 border-green-600 bg-green-50 dark:bg-green-900/20";
-      case "future":
-        return "text-orange-500 border-orange-500 bg-orange-50 dark:bg-orange-900/20";
-      case "no-date":
+      case "locked":
         return "text-gray-400 border-gray-300 bg-gray-50 dark:bg-gray-800 dark:text-gray-500";
       default:
         return "text-muted-foreground border-muted-foreground/30";
@@ -170,17 +167,12 @@ const LessonsStepsLineSpace = ({ lessons = [], handleSearchSubmit, studentId }) 
       return;
     }
 
-    if (status === "future") {
+    if (status === "locked") {
       const lessonDate = parseLessonDate(lesson.date);
       const daysUntil = Math.ceil(
         (lessonDate - new Date()) / (1000 * 60 * 60 * 24)
       );
       toast.error(`This lesson is scheduled for ${lesson.date}.`);
-      return;
-    }
-
-    if (status === "no-date") {
-      toast.error("This lesson needs a date to be scheduled first.");
       return;
     }
 
@@ -190,7 +182,7 @@ const LessonsStepsLineSpace = ({ lessons = [], handleSearchSubmit, studentId }) 
       return;
     }
 
-    toast.info("This lesson is not ready yet.");
+    toast.error("This lesson is not ready yet.");
   };
 
   const confirmLessonCompletion = () => {
@@ -204,7 +196,7 @@ const LessonsStepsLineSpace = ({ lessons = [], handleSearchSubmit, studentId }) 
 
   // Count lessons by status
   const getStatusCounts = () => {
-    const counts = { current: 0, done: 0, future: 0, "no-date": 0, pending: 0 };
+    const counts = { current: 0, done: 0, locked: 0, pending: 0 };
     steps.forEach((step) => {
       const status = getLessonStatus(step);
       counts[status]++;
@@ -237,12 +229,8 @@ const LessonsStepsLineSpace = ({ lessons = [], handleSearchSubmit, studentId }) 
               <span>Completed: {statusCounts.done}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-              <span>Future: {statusCounts.future}</span>
-            </div>
-            <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-              <span>No Date: {statusCounts["no-date"]}</span>
+              <span>Locked: {statusCounts.locked}</span>
             </div>
           </div>
         </div>
@@ -257,13 +245,17 @@ const LessonsStepsLineSpace = ({ lessons = [], handleSearchSubmit, studentId }) 
       <Stepper
         current={statusCounts.done}
         size="md"
-        className={`py-3 grid grid-cols-2 lg:grid-cols-${Math.ceil(
-          steps.length / 2
-        )} xl:grid-cols-${
-          steps.length === 8 ? 8 : Math.ceil(steps.length + 1)
-        } gap-y-10 gap-x-4`}
+        className={`py-3 grid grid-cols-2  ${
+          steps.length === 8
+            ? "lg:grid-cols-6 xl:grid-cols-8"
+            : "lg:grid-cols-4 xl:grid-cols-6"
+        } gap-y-10 gap-x-4 `}
       >
-        {steps?.map((lesson, i) => {
+        {steps.sort((a, b) => {
+          const dateA = parseLessonDate(a.date);
+          const dateB = parseLessonDate(b.date);
+          return dateA - dateB;
+        })?.map((lesson, i) => {
           const status = getLessonStatus(lesson);
           const canInteract = canInteractWithLesson(lesson);
 
@@ -287,7 +279,29 @@ const LessonsStepsLineSpace = ({ lessons = [], handleSearchSubmit, studentId }) 
                     }
                   )}
                 >
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 relative">
+                    {status === "locked" ? (
+                      <div className="absolute top-0 right-0 text-gray-500 text-xs">
+                        <Icon
+                          icon="heroicons:lock-closed"
+                          className="w-5 h-5"
+                        />
+                      </div>
+                    ) : status === "done" ? (
+                      <div className="absolute top-0 right-0 text-green-600 text-xs">
+                        <Icon
+                          icon="heroicons:check-circle"
+                          className="w-5 h-5"
+                        />
+                      </div>
+                    ) : (
+                      <div className="absolute top-0 right-0 text-primary text-xs">
+                        <Icon
+                          icon="heroicons:clock-circle"
+                          className="w-5 h-5"
+                        />
+                      </div>
+                    )}
                     <div className="space-y-1">
                       <p className="text-xs font-medium">{lesson.title}</p>
                       <p className="text-xs text-muted-foreground">
