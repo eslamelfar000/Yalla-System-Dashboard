@@ -6,7 +6,7 @@ const ListItem = ({ item, index }) => {
   const { name, email, score, image, color, amount } = item;
   return (
     <>
-      <div className="flex flex-col sm:flex-row flex-wrap gap-7 sm:gap-4 w-full p-2 px-4  hover:bg-default-50 rounded-lg">
+      <div className="flex flex-col justify-between sm:flex-row flex-wrap gap-7 sm:gap-4 w-full p-2 px-4  hover:bg-default-50 rounded-lg">
 
         <div className="flex-none flex flex-wrap items-center gap-3">
           <div className="relative inline-block">
@@ -25,9 +25,9 @@ const ListItem = ({ item, index }) => {
           </div>
         </div>
 
-        <div className="flex-1 flex sm:justify-center items-center">
+        {/* <div className="flex-1 flex sm:justify-center items-center">
           <Badge className="rounded-2xl px-8 h-8 whitespace-nowrap" variant="soft">{amount}</Badge>
-        </div>
+        </div> */}
 
         <div className="flex-none">
           <div className="w-full sm:w-[170px]">
