@@ -1,7 +1,25 @@
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
-  webpack(config) {
+  experimental: {
+    esmExternals: 'loose',
+  },
+  transpilePackages: ['@iconify/react'],
+  webpack(config, { isServer }) {
+    // Add module resolution for better compatibility
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+    };
+
+    // Add explicit module resolution
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname),
+    };
+
     // Grab the existing rule that handles SVG imports
     const fileLoaderRule = config.module.rules.find((rule) =>
       rule.test?.test?.(".svg")
