@@ -113,13 +113,13 @@ const columns = [
     ),
   },
   {
-    accessorKey: "payment_data",
-    header: "Payment Data",
+    accessorKey: "payment_date",
+    header: "Payment Date",
     cell: ({ row }) => (
       <div className="font-medium text-card-foreground/80">
         <div className="flex space-x-3 rtl:space-x-reverse items-center">
           <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.payment_data || "N/A"}
+            {row?.original?.payment_date || "N/A"}
           </span>
         </div>
       </div>

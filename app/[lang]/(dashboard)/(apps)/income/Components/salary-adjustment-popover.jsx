@@ -77,7 +77,7 @@ const SalaryAdjustmentPopover = ({ teacherId, lessonId, onSuccess }) => {
 
   const onSubmit = (values) => {
     const payload = {
-    //   teacher_id: teacherId,
+      //   teacher_id: teacherId,
       schedual_lession_id: lessonId,
       type: values.type,
       amount: values.amount,
@@ -122,12 +122,20 @@ const SalaryAdjustmentPopover = ({ teacherId, lessonId, onSuccess }) => {
                     defaultValue="select type"
                   >
                     <FormControl>
-                      <SelectTrigger >
-                        <SelectValue defaultValue="select type" placeholder="Select Type" />
+                      <SelectTrigger>
+                        <SelectValue
+                          defaultValue="select type"
+                          placeholder="Select Type"
+                        />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="z-[999]" defaultValue="select type">
-                        <SelectItem value="select type" disabled>Select Type</SelectItem>
+                    <SelectContent
+                      className="z-[999]"
+                      defaultValue="select type"
+                    >
+                      <SelectItem value="select type" disabled>
+                        Select Type
+                      </SelectItem>
                       <SelectItem value="reduction">Deduction</SelectItem>
                       <SelectItem value="raise">Raise</SelectItem>
                     </SelectContent>

@@ -82,9 +82,20 @@ const columns = (type, selectedTeacher, onAddAdjustment) => [
       <div className="font-medium text-card-foreground/80">
         <div className="flex space-x-3 rtl:space-x-reverse items-center">
           <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.student?.type || "N/A"}
+            {row?.original?.type || "N/A"}
           </span>
         </div>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "price",
+    header: "Price",
+    cell: ({ row }) => (
+      <div className="font-medium text-card-foreground/80">
+        <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+          {row?.original?.price || "N/A"} $
+        </span>
       </div>
     ),
   },
@@ -110,11 +121,14 @@ const columns = (type, selectedTeacher, onAddAdjustment) => [
         <div className="font-medium text-card-foreground/80">
           <div className="flex space-x-3 rtl:space-x-reverse items-center">
             <span
-              className={cn("text-sm font-[400] whitespace-nowrap flex items-center gap-1", {
-                "text-red-600": isDeduction,
-                "text-green-600": isRaise,
-                "text-muted-foreground": !isDeduction && !isRaise,
-              })}
+              className={cn(
+                "text-sm font-[400] whitespace-nowrap flex items-center gap-1",
+                {
+                  "text-red-600": isDeduction,
+                  "text-green-600": isRaise,
+                  "text-muted-foreground": !isDeduction && !isRaise,
+                }
+              )}
             >
               {payment.type === "reduction" ? "Deduction" : "Raise"}: $
               {payment.amount}{" "}
@@ -171,33 +185,45 @@ const columns = (type, selectedTeacher, onAddAdjustment) => [
 ];
 
 // Skeleton component for loading state
-const TableRowSkeleton = () => (
+const TableRowSkeleton = ({ type }) => (
   <TableRow>
     <TableCell>
       <div className="flex items-center space-x-3">
         <Skeleton className="w-10 h-10 rounded-full" />
-        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-4 w-28" />
       </div>
     </TableCell>
     <TableCell>
       <Skeleton className="h-4 w-16" />
     </TableCell>
     <TableCell>
-      <Skeleton className="h-4 w-24" />
-    </TableCell>
-    <TableCell>
       <Skeleton className="h-4 w-20" />
     </TableCell>
     <TableCell>
-      <Skeleton className="h-4 w-28" />
+      <Skeleton className="h-4 w-24" />
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-4 w-24" />
     </TableCell>
     <TableCell>
       <Skeleton className="h-4 w-32" />
     </TableCell>
+    <TableCell>
+      <Skeleton className="h-4 w-24" />
+    </TableCell>
+    {type === "admin-payrolls" && (
+      <TableCell>
+        <Skeleton className="h-4 w-24" />
+      </TableCell>
+    )}
   </TableRow>
 );
 
-export function IncomeTeacherDataTable({ type, selectedTeacher }) {
+export function IncomeTeacherDataTable({
+  type,
+  selectedTeacher,
+  selectedMonth,
+}) {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
@@ -213,9 +239,11 @@ export function IncomeTeacherDataTable({ type, selectedTeacher }) {
     refetch,
   } = useGetData({
     endpoint: `dashboard/teacher-financial/${
-      selectedTeacher || user?.id
-    }/user-payments?page=${currentPage}`,
-    queryKey: ["teacher-income", selectedTeacher],
+      selectedTeacher || user?.id || user?.user_id
+    }/user-payments?page=${currentPage}${
+      selectedMonth !== "" ? `&month=2025-${selectedMonth}` : ""
+    }`,
+    queryKey: ["teacher-income", selectedTeacher, currentPage, selectedMonth],
   });
 
   const incomeData = data?.data?.lessons || [];
@@ -269,12 +297,12 @@ export function IncomeTeacherDataTable({ type, selectedTeacher }) {
             {isLoading ? (
               // Show skeleton loading for 4 rows
               Array.from({ length: 4 }).map((_, index) => (
-                <TableRowSkeleton key={`skeleton-${index}`} />
+                <TableRowSkeleton key={`skeleton-${index}`} type={type} />
               ))
             ) : error ? (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={columns(type, selectedTeacher).length}
                   className="h-24 text-center"
                 >
                   <div className="flex items-center justify-center text-default-500">

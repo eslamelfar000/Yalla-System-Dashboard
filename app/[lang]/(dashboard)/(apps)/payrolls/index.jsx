@@ -31,7 +31,7 @@ const PayrollsTaps = ({ setType }) => {
       color: "primary",
     },
     {
-      value: "qulaity-assurance",
+      value: "quality-assurance",
       text: "Quality Assurance",
       total: "536",
       color: "warning",

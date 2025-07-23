@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Banknote, CircleDollarSignIcon, Currency, DollarSign, FlagIcon, TrendingUp } from "lucide-react";
 import { Fragment } from "react";
 
-const PayrollReportsCard = () => {
+const PayrollReportsCard = ({ selectedTeacher, selectedQuality }) => {
   const reports = [
     {
       id: 1,

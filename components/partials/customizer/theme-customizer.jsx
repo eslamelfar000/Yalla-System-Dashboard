@@ -25,6 +25,7 @@ import RadiusInit from "./radius";
 import { Settings } from "@/components/svg";
 import Link from "next/link";
 import { useThemeStore } from "@/store";
+import CurrencyChange from "./currency-change";
 
 const ThemeCustomize = ({
   trigger = (
@@ -36,6 +37,8 @@ const ThemeCustomize = ({
   ),
 }) => {
   const { isRtl } = useThemeStore();
+  const user = JSON.parse(localStorage.getItem("user_data"));
+  const role = user?.role;
 
   return (
     <Sheet>
@@ -61,6 +64,7 @@ const ThemeCustomize = ({
             {/* <RadiusInit /> */}
             {/* <HeaderStyle /> */}
             {/* <FooterStyle /> */}
+            {role === "admin" && <CurrencyChange />}
           </div>
         </ScrollArea>
         {/* <SheetFooter className="py-4 gap-3 lg:flex justify-between hidden  ">
