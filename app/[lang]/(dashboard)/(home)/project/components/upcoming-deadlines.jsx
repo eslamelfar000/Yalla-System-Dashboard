@@ -18,81 +18,30 @@ import avatar2 from "@/public/images/avatar/avatar-2.jpg";
 import avatar3 from "@/public/images/avatar/avatar-3.jpg";
 import avatar4 from "@/public/images/avatar/avatar-4.jpg";
 import avatar5 from "@/public/images/avatar/avatar-5.jpg";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const columns = [
   {
-    key: "teacher name",
-    label: "Teacher Name",
+    key: "teacher",
+    label: "Teacher",
   },
   {
-    key: "reviewed",
-    label: "Reviewed",
+    key: "coaching_sessions",
+    label: "Coaching Sessions",
   },
   {
-    key: "pending",
-    label: "Pending",
-  },
-  {
-    key: "workload",
-    label: "workload",
+    key: "sent_reports",
+    label: "Sent Reports",
   },
 ];
 
-const upcomingDeadlineData = [
-  {
-    id: 1,
-    name: "Mark Dsuza",
-    task: "Admin dashboard template",
-    deadline: "21 Jan 2024",
-    workload: "50",
-    avatar: avatar1,
-  },
-  {
-    id: 2,
-    name: "Mark Dsuza",
-    task: "Admin dashboard template",
-    deadline: "21 Jan 2024",
-    workload: "40",
-    avatar: avatar1,
-  },
-  {
-    id: 3,
-    name: "Mark Dsuza",
-    task: "Admin dashboard template",
-    deadline: "21 Jan 2024",
-    workload: "70",
-    avatar: avatar2,
-  },
-  {
-    id: 4,
-    name: "Mark Dsuza",
-    task: "Admin dashboard template",
-    deadline: "21 Jan 2024",
-    workload: "80",
-    avatar: avatar3,
-  },
-  {
-    id: 5,
-    name: "Mark Dsuza",
-    task: "Admin dashboard template",
-    deadline: "21 Jan 2024",
-    workload: "60",
-    avatar: avatar4,
-  },
-  {
-    id: 6,
-    name: "Mark Dsuza",
-    task: "Admin dashboard template",
-    deadline: "21 Jan 2024",
-    workload: "90",
-    avatar: avatar5,
-  },
-];
-const UpcomingDeadline = () => {
+const UpcomingDeadline = ({ data, isLoading, error }) => {
+  const teachersActivities = data?.teachers;
+
   return (
     <Card>
       <CardHeader className="flex-row justify-between items-center mb-0">
-        <CardTitle>Upcoming Deadlines</CardTitle>
+        <CardTitle>Teachers Activities</CardTitle>
         {/* <Button type="button" color="secondary" >
           View all
         </Button> */}
@@ -112,28 +61,50 @@ const UpcomingDeadline = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {upcomingDeadlineData.map((item) => (
-              <TableRow key={item.id} className="hover:bg-default-100">
-                <TableCell className="flex items-center gap-2 py-2">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={item?.avatar.src} alt="" />
-                    <AvatarFallback>CD</AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm font-medium text-defualt-600 whitespace-nowrap">
-                    {item.name}
-                  </span>
-                </TableCell>
-                <TableCell className="text-sm font-medium text-default-600 overflow-hidden text-ellipsis whitespace-nowrap max-w-[181px] py-2">
-                  {item.task}
-                </TableCell>
-                <TableCell className="text-sm font-medium text-destructive whitespace-nowrap py-2">
-                  {item.deadline}
-                </TableCell>
-                <TableCell className="min-w-[120px] text-sm font-medium text-default-600 last:text-end py-2">
-                  <Progress value={item.workload} size="lg" showValue />
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, index) => (
+              <TableRow>
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <TableCell
+                    key={index}
+                    className="text-center"
+                  >
+                    <Skeleton className="w-full h-6" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+            ) : teachersActivities?.length > 0 ? (
+              teachersActivities?.map((item) => (
+                <TableRow key={item.id} className="hover:bg-default-100">
+                  <TableCell className="flex items-center gap-2 py-2">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={item?.image} alt="" />
+                      <AvatarFallback>{item?.name?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium text-defualt-600 whitespace-nowrap">
+                      {item.name}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-sm font-medium text-default-600 overflow-hidden text-ellipsis whitespace-nowrap max-w-[181px] py-2">
+                    {item.booked_coaching_sessions > 1
+                      ? item.booked_coaching_sessions + " Sessions"
+                      : item.booked_coaching_sessions + " Session"}
+                  </TableCell>
+                  <TableCell className="text-sm font-medium text-success whitespace-nowrap py-2">
+                    {item.sent_reports > 1
+                      ? item.sent_reports + " Reports"
+                      : item.sent_reports + " Report"}
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  <p className="text-sm font-medium text-default-600 h-10 flex items-center justify-center">No data found</p>
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </CardContent>

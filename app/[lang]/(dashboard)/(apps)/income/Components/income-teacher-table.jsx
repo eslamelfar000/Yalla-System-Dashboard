@@ -241,7 +241,7 @@ export function IncomeTeacherDataTable({
     endpoint: `dashboard/teacher-financial/${
       selectedTeacher || user?.id || user?.user_id
     }/user-payments?page=${currentPage}${
-      selectedMonth !== "" ? `&month=2025-${selectedMonth}` : ""
+      selectedMonth !== "" ? `&month=${selectedMonth}` : ""
     }`,
     queryKey: ["teacher-income", selectedTeacher, currentPage, selectedMonth],
   });

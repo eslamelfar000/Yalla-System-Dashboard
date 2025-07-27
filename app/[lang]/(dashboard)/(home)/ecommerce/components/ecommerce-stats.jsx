@@ -1,39 +1,40 @@
 "use client"
 
 import { CupBar, NoteIcon, CheckShape, Spam } from "@/components/svg";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
 
-const EcommerceStats = () => {
-  const data = [
+const EcommerceStats = ({ data, isLoading, error }) => {
+  const adminCardData = [
     {
-      text: "Students",
-      total: "42,750.98",
+      text: "Total Students",
+      total: data?.students || 0,
       color: "primary",
-      icon: <CupBar className="w-3.5 h-3.5" />
+      icon: <CupBar className="w-3.5 h-3.5" />,
     },
     {
-      text: "Schedules",
-      total: "536,23,3",
+      text: "Total Teachers",
+      total: data?.teachers || 0,
       color: "warning",
-      icon: <NoteIcon className="w-3.5 h-3.5" />
+      icon: <NoteIcon className="w-3.5 h-3.5" />,
     },
     {
-      text: "Teachers",
-      total: "234,1",
+      text: "Total Lessons",
+      total: data?.lessons || 0,
       color: "success",
-      icon: <CheckShape className="w-3.5 h-3.5" />
+      icon: <CheckShape className="w-3.5 h-3.5" />,
     },
     {
-      text: "Quality",
-      total: "332,34",
+      text: "Upcoming Sessions",
+      total: data?.upcoming_sessions || 0,
       color: "destructive",
-      icon: <Spam className="w-3.5 h-3.5" />
+      icon: <Spam className="w-3.5 h-3.5" />,
     },
   ];
   return (
     <>
-      {data.map((item, index) => (
+      {adminCardData.map((item, index) => (
         <div
           key={`reports-state-${index}`}
           className={cn(
@@ -71,7 +72,7 @@ const EcommerceStats = () => {
             {item.text}
           </span>
           <div className="flex items-center gap-1">
-            <span className="text-lg font-semibold text-default-900  dark:text-primary-foreground">{item.total}</span>
+            <span className="text-lg font-semibold text-default-900  dark:text-primary-foreground">{isLoading ? <Skeleton className="w-10 h-6" /> : item.total}</span>
             <Icon icon="heroicons:arrow-trending-up" className={`w-5 h-5 text-${item.color} dark:text-primary-foreground`} />
           </div>
         </div>

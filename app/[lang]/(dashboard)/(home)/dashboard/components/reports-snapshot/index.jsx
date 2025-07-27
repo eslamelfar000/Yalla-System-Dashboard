@@ -9,63 +9,76 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import DashboardSelect from "@/components/dasboard-select";
 import { cn } from "@/lib/utils";
 
-const allUsersSeries = [
-  {
-    data: [90, 70, 85, 60, 80, 70, 90, 75, 60, 80],
-  },
-];
-const conversationSeries = [
-  {
-    data: [80, 70, 65, 40, 40, 100, 100, 75, 60, 80],
-  },
-];
-const eventCountSeries = [
-  {
-    data: [20, 70, 65, 60, 40, 60, 90, 75, 60, 40],
-  },
-];
-const newUserSeries = [
-  {
-    data: [20, 70, 65, 40, 100, 60, 100, 75, 60, 80],
-  },
-];
-const ReportsSnapshot = () => {
+const ReportsSnapshot = ({ data, isLoading, error }) => {
+  // Process monthly graph data
+  const processMonthlyData = (monthlyData) => {
+    if (!monthlyData) return { students: [], schedules: [] };
+
+    const months = Array.from({ length: 12 }, (_, i) => i + 1); // 1-12 months
+
+    const studentsData = months.map(
+      (month) => monthlyData.students?.[month] || 0
+    );
+
+    const schedulesData = months.map(
+      (month) => monthlyData.schedules?.[month] || 0
+    );
+
+    return {
+      students: studentsData,
+      schedules: schedulesData,
+    };
+  };
+
+  const processedData = processMonthlyData(
+    data?.monthly_graph || data?.monthly_data
+  );
+
+  const allUsersSeries = [
+    {
+      name: "Students",
+      data: processedData.students,
+    },
+  ];
+
+  const eventCountSeries = [
+    {
+      name: "Schedules",
+      data: processedData.schedules,
+    },
+  ];
   const { theme: config, setTheme: setConfig } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
-  const primary = `hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].primary
-    })`;
-  const warning = `hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].warning
-    })`;
-  const success = `hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].success
-    })`;
-  const info = `hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].info
-    })`;
+  const primary = `hsl(${
+    theme?.cssVars[mode === "dark" ? "dark" : "light"].primary
+  })`;
+  const warning = `hsl(${
+    theme?.cssVars[mode === "dark" ? "dark" : "light"].warning
+  })`;
+  // Calculate totals from the data
+  const totalStudents = processedData.students.reduce(
+    (sum, val) => sum + val,
+    0
+  );
+  const totalSchedules = processedData.schedules.reduce(
+    (sum, val) => sum + val,
+    0
+  );
+
   const tabsTrigger = [
     {
       value: "total students",
       text: "Total students",
-      total: "10,234",
+      total: isLoading ? "..." : totalStudents.toString(),
       color: "primary",
     },
     {
       value: "total schedules",
       text: "Total schedules",
-      total: "536",
+      total: isLoading ? "..." : totalSchedules.toString(),
       color: "warning",
     },
-    // {
-    //   value: "conversation",
-    //   text: "conversations",
-    //   total: "21",
-    //   color: "success",
-    // },
-    // {
-    //   value: "newuser",
-    //   text: "New User",
-    //   total: "3321",
-    //   color: "info",
-    // },
   ];
   const tabsContentData = [
     {
@@ -78,17 +91,76 @@ const ReportsSnapshot = () => {
       series: eventCountSeries,
       color: warning,
     },
-    // {
-    //   value: "conversation",
-    //   series: conversationSeries,
-    //   color: success,
-    // },
-    // {
-    //   value: "newuser",
-    //   series: newUserSeries,
-    //   color: info,
-    // },
   ];
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <Card className="h-full flex flex-col justify-between">
+        <CardHeader className="border-none pb-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex-1">
+              <div className="text-xl font-semibold text-default-900 whitespace-nowrap">
+                Reports Snapshot
+              </div>
+              <span className="text-xs text-default-600">
+                Demographic properties of your customer
+              </span>
+            </div>
+            <div className="flex-none">
+              <DashboardSelect />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-1 md:p-5">
+          <div className="flex items-center justify-center h-[300px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+              <p className="text-sm text-muted-foreground">
+                Loading chart data...
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <Card className="h-full flex flex-col justify-between">
+        <CardHeader className="border-none pb-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex-1">
+              <div className="text-xl font-semibold text-default-900 whitespace-nowrap">
+                Reports Snapshot
+              </div>
+              <span className="text-xs text-default-600">
+                Demographic properties of your customer
+              </span>
+            </div>
+            {/* <div className="flex-none">
+              <DashboardSelect />
+            </div> */}
+          </div>
+        </CardHeader>
+        <CardContent className="p-1 md:p-5">
+          <div className="flex items-center justify-center h-[300px]">
+            <div className="text-center">
+              <p className="text-sm text-destructive mb-2">
+                Error loading data
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {error.message || "Unknown error"}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="h-full flex flex-col justify-between">
       <CardHeader className="border-none pb-0">
@@ -101,9 +173,9 @@ const ReportsSnapshot = () => {
               Demographic properties of your customer
             </span>
           </div>
-          <div className="flex-none">
+          {/* <div className="flex-none">
             <DashboardSelect />
-          </div>
+          </div> */}
         </div>
       </CardHeader>
       <CardContent className="p-1 md:p-5">

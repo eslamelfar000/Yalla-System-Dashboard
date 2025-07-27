@@ -37,18 +37,21 @@ function ShowQuality() {
 
     for (let month = 1; month <= 12; month++) {
       const date = new Date(currentYear, month - 1, 1); // month - 1 because getMonth() is 0-based
-      const monthNumber = month; // 1-12 format
+      const monthNumber = month.toString().padStart(2, "0"); // 01-12 format
       const monthLabel = date.toLocaleDateString("en-US", {
         month: "long",
       });
-      months.push({ value: monthNumber.toString(), label: monthLabel });
+      months.push({ value: monthNumber, label: monthLabel });
     }
     return months;
   }, []);
 
   return (
     <div>
-      <div className="flex-1 flex justify-between">
+      <div className="flex-1 flex justify-between border-b border-default-200 pb-4 mb-4">
+        <h3 className="text-3xl font-medium text-default-900 mb-2 opacity-60">
+          Archive
+        </h3>
         <div className="flex items-center flex-wrap gap-2 mb-5">
           <TeacherFilter
             selectedTeacher={selectedTeacher}
@@ -84,23 +87,16 @@ function ShowQuality() {
             </Button>
           )}
         </div>
-        <Button>Download</Button>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-16">
         <div>
-          <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
-            Review
-          </h3>
           <ReviewTableStatus
             selectedTeacher={selectedTeacher}
             selectedMonth={selectedMonth}
           />
         </div>
         <div>
-          <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
-            Coaching
-          </h3>
           <CoachingTableStatus
             action={"archive"}
             selectedTeacher={selectedTeacher}

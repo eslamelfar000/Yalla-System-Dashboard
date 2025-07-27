@@ -251,7 +251,7 @@ export function IncomeQualityDataTable({ type, selectedQuality, selectedMonth })
     endpoint: `dashboard/quailty-financial/${
       selectedQuality || user?.user_id || user?.id
     }/user-payments?page=${currentPage}${
-      selectedMonth !== "" ? `&month=2025-${selectedMonth}` : ""
+      selectedMonth !== "" ? `&month=${selectedMonth}` : ""
     }`,
     queryKey: [
       "quality-income",

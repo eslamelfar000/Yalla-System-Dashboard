@@ -20,31 +20,65 @@ const IncomeReportsCard = ({
 }) => {
   const user = JSON.parse(localStorage.getItem("user_data"));
 
-  const { data, isLoading, error } = useGetData({
-    endpoint:
-      type === "quality-assurance" || role === "quality"
-        ? `dashboard/quailty-financial/${
-            selectedQuality || user.id || user.user_id
-          }/summary${
-            selectedMonth !== "" ? `?month=2025-${selectedMonth}` : ""
-          }`
-        : `dashboard/teacher-financial/${
-            selectedTeacher || user.user_id || user.id
-          }/summary${
-            selectedMonth !== "" ? `?month=2025-${selectedMonth}` : ""
-          }`,
-    enabled: type === "quality-assurance" ? selectedQuality : selectedTeacher,
-    enabledKey: "incomeReports",
-    queryKey: [
-      "incomeReports",
-      selectedTeacher,
-      selectedQuality,
-      role,
-      selectedMonth,
-    ],
+  // API call for quality data - only when type is quality-assurance or role is quality
+  const {
+    data: qualityData,
+    isLoading: qualityLoading,
+    error: qualityError,
+    isError: qualityIsError,
+  } = useGetData({
+    endpoint: `dashboard/quailty-financial/${
+      selectedQuality || user.id || user.user_id
+    }/summary${selectedMonth !== "" ? `?month=${selectedMonth}` : ""}`,
+    enabled:
+      selectedQuality !== null &&
+      (type === "quality-assurance" || role === "quality"),
+    enabledKey: "qualityIncomeReports",
+    queryKey: ["qualityIncomeReports", selectedQuality, role, selectedMonth],
   });
 
-  const summaryData = data?.data;
+  // API call for teacher data - only when type is teachers
+  const {
+    data: teacherData,
+    isLoading: teacherLoading,
+    error: teacherError,
+    isError: teacherIsError,
+  } = useGetData({
+    endpoint: `dashboard/teacher-financial/${
+      selectedTeacher || user.user_id || user.id
+    }/summary${selectedMonth !== "" ? `?month=${selectedMonth}` : ""}`,
+    enabled: selectedTeacher !== null && type === "teachers",
+    enabledKey: "teacherIncomeReports",
+    queryKey: ["teacherIncomeReports", selectedTeacher, role, selectedMonth],
+  });
+
+  // Determine which data to use based on type
+  const getActiveData = () => {
+    if (type === "quality-assurance" || role === "quality") {
+      return {
+        data: qualityData?.data,
+        isLoading: qualityLoading,
+        error: qualityError,
+        isError: qualityIsError,
+      };
+    } else if (type === "teachers" || role === "teacher") {
+      return {
+        data: teacherData?.data,
+        isLoading: teacherLoading,
+        error: teacherError,
+        isError: teacherIsError,
+      };
+    }
+    // Default fallback - should not reach here in normal usage
+    return {
+      data: null,
+      isLoading: false,
+      error: null,
+      isError: false,
+    };
+  };
+
+  const { data: summaryData, isLoading, error, isError } = getActiveData();
 
   const reports = [
     {
@@ -176,6 +210,17 @@ const IncomeReportsCard = ({
       ],
     },
   ];
+
+  // Check if we should show data based on type and selections
+  const shouldShowData = () => {
+    if (type === "quality-assurance" || role === "quality") {
+      return selectedQuality !== null;
+    } else if (type === "teachers") {
+      return selectedTeacher !== null;
+    }
+    return false;
+  };
+
   return (
     <Fragment>
       {reports.map((item) => (
@@ -227,7 +272,17 @@ const IncomeReportsCard = ({
             <div
               className={`text-3xl font-semibold text-${item.color} mt-1 flex items-center justify-center`}
             >
-              {isLoading ? <Skeleton className="w-10 h-6" /> : item.count || 0}
+              {isLoading ? (
+                <Skeleton className="w-10 h-6" />
+              ) : error ? (
+                <span className="text-2xl">N/A</span>
+              ) : shouldShowData() ? (
+                item.count || 0
+              ) : role === "admin" ? (
+                <span className="text-2xl">0</span>
+              ) : (
+                item.count || 0
+              )}
               <span className="text-2xl ml-1">{item.currency}</span>
             </div>
             <Separator className="my-2 w-full" />

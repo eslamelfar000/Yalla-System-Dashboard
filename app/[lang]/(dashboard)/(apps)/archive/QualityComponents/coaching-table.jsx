@@ -10,7 +10,7 @@ import {
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import LoadingButton from "@/components/Shared/loading-button";
 import Pagination from "@/components/Shared/Pagination/Pagination";
-import { useMemo } from "react";
+import DownloadButton from "@/components/Shared/DownloadButton";
 import { usePathname } from "next/navigation";
 
 const CoachingTableStatus = ({ selectedTeacher, action, selectedMonth }) => {
@@ -83,6 +83,24 @@ const CoachingTableStatus = ({ selectedTeacher, action, selectedMonth }) => {
   });
 
   const dataList = data?.data?.sessions || [];
+
+  // Prepare data for export
+  const prepareExportData = useCallback(() => {
+    return dataList.map((item) => ({
+      "Teacher Name": item.teacher?.name || "N/A",
+      "Teacher Email": item.teacher?.email || "N/A",
+      "Session ID": item.id || "N/A",
+      Date:
+        item.date || item.created_at
+          ? new Date(item.date || item.created_at).toLocaleDateString()
+          : "N/A",
+      Purpose: item.purpose || "N/A",
+      Status: item.status || "N/A",
+      "Created Date": item.created_at
+        ? new Date(item.created_at).toLocaleDateString()
+        : "N/A",
+    }));
+  }, [dataList]);
 
   // Mutation for completing coaching/reports
   const completeMutation = useMutate({
@@ -180,6 +198,18 @@ const CoachingTableStatus = ({ selectedTeacher, action, selectedMonth }) => {
 
   return (
     <>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
+          Coaching
+        </h3>
+        <DownloadButton
+          data={dataList}
+          prepareExportData={prepareExportData}
+          fileName="coaching-sessions"
+          disabled={isLoading}
+        />
+      </div>
+
       <Card>
         <Table>
           <TableHeader>

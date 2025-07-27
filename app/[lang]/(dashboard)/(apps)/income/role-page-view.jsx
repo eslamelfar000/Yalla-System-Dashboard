@@ -20,19 +20,27 @@ function RolePageView({ role }) {
   // Generate all 12 months
   const months = React.useMemo(() => {
     const months = [];
-    const currentYear = new Date().getFullYear();
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
 
-    for (let month = 1; month <= 12; month++) {
-      const date = new Date(currentYear, month - 1, 1); // month - 1 because getMonth() is 0-based
-      const monthNumber = month.toString().padStart(2, "0"); // 01-12 format
+    // Get last 12 months including current month
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(currentYear, currentMonth - i, 1);
+      const monthNumber = (date.getMonth() + 1).toString().padStart(2, "0");
       const monthLabel = date.toLocaleDateString("en-US", {
         month: "long",
-        year: "numeric",
+        year: "numeric"
       });
-      months.push({ value: monthNumber, label: monthLabel });
+      months.push({
+        value: `${date.getFullYear()}-${monthNumber}`,
+        label: monthLabel
+      });
     }
+
     return months;
   }, []);
+  
   return (
     <div>
       <div className="space-y-6">

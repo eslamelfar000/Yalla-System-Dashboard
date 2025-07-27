@@ -16,6 +16,22 @@ const ReportsChart = ({ series, chartColor, height = 300 }) => {
 
   const theme = themes.find((theme) => theme.name === config);
 
+  // Month labels for x-axis
+  const monthLabels = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
   const options = {
     chart: {
       toolbar: {
@@ -49,9 +65,12 @@ const ReportsChart = ({ series, chartColor, height = 300 }) => {
     yaxis: getYAxisConfig(
       `hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].chartLabel})`
     ),
-    xaxis: getXAxisConfig(
-      `hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].chartLabel})`
-    ),
+    xaxis: {
+      ...getXAxisConfig(
+        `hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].chartLabel})`
+      ),
+      categories: monthLabels,
+    },
     padding: {
       top: 0,
       right: 0,

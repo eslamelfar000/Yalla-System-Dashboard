@@ -50,6 +50,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import LoadingButton from "@/components/Shared/loading-button";
+import Pagination from "@/components/Shared/Pagination/Pagination";
 
 const columns = [
   {
@@ -60,14 +61,14 @@ const columns = [
         <div className="flex space-x-3 rtl:space-x-reverse items-center">
           <Avatar className="rounded-full">
             <AvatarImage
-              src={row?.original?.user?.image || row?.original?.user?.avatar}
+              src={row?.original?.user_image || row?.original?.user_image}
             />
             <AvatarFallback>
-              {row?.original?.user?.name?.charAt(0) || "U"}
+              {row?.original?.user_name?.charAt(0) || "U"}
             </AvatarFallback>
           </Avatar>
           <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.user?.name || "N/A"}
+            {row?.original?.user_name || "N/A"}
           </span>
         </div>
       </div>
@@ -80,7 +81,9 @@ const columns = [
       <div className="font-medium text-card-foreground/80">
         <div className="flex space-x-3 rtl:space-x-reverse items-center">
           <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.booked || "N/A"}
+            {row?.original?.reservation_lessions_count > 1
+              ? `${row?.original?.reservation_lessions_count} lessons`
+              : `${row?.original?.reservation_lessions_count} lesson`}
           </span>
         </div>
       </div>
@@ -93,7 +96,7 @@ const columns = [
       <div className="font-medium text-card-foreground/80">
         <div className="flex space-x-3 rtl:space-x-reverse items-center">
           <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.teacher?.name || "N/A"}
+            {row?.original?.teacher_name?.name || "N/A"}
           </span>
         </div>
       </div>
@@ -106,7 +109,7 @@ const columns = [
       <div className="font-medium text-card-foreground/80">
         <div className="flex space-x-3 rtl:space-x-reverse items-center">
           <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {row?.original?.should_pay || "N/A"}
+            {row?.original?.reservation_price || "N/A"} $
           </span>
         </div>
       </div>
@@ -130,34 +133,49 @@ const columns = [
     header: "Action",
     cell: ({ row }) => (
       <div className="font-medium text-card-foreground/80">
-        <div className="flex space-x-3 rtl:space-x-reverse items-center">
-          <Button
-            size="icon"
-            variant="outline"
-            className="h-7 w-7"
-            color="success"
-            title="Accept"
-            onClick={() =>
-              row.original.onAcceptClick &&
-              row.original.onAcceptClick(row.original)
-            }
+        {row?.original?.status === "accepted" ? (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="w-8 h-8 text-green-500"
           >
-            <Icon icon="heroicons:check" className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="outline"
-            className="h-7 w-7"
-            color="destructive"
-            title="Delete"
-            onClick={() =>
-              row.original.onDeleteClick &&
-              row.original.onDeleteClick(row.original)
-            }
-          >
-            <Icon icon="heroicons:trash" className="h-4 w-4" />
-          </Button>
-        </div>
+            <path
+              fillRule="evenodd"
+              d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+              clipRule="evenodd"
+            />
+          </svg>
+        ) : (
+          <div className="flex space-x-3 rtl:space-x-reverse items-center">
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-7 w-7"
+              color="success"
+              title="Accept"
+              onClick={() =>
+                row.original.onAcceptClick &&
+                row.original.onAcceptClick(row.original)
+              }
+            >
+              <Icon icon="heroicons:check" className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-7 w-7"
+              color="destructive"
+              title="Reject"
+              onClick={() =>
+                row.original.onDeleteClick &&
+                row.original.onDeleteClick(row.original)
+              }
+            >
+              <Icon icon="heroicons:x-mark" className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
     ),
   },
@@ -172,7 +190,7 @@ export function PayAfterDataTable() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showAcceptDialog, setShowAcceptDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
+  const [currentPage, setCurrentPage] = useState(1);
   // Get pay-after requests data
   const {
     data: requestsData,
@@ -181,19 +199,19 @@ export function PayAfterDataTable() {
     refetch,
   } = useGetData({
     endpoint: searchQuery
-      ? `dashboard/requests?type=pay_after&search=${encodeURIComponent(
+      ? `dashboard/requests?type=pay_after&name=${encodeURIComponent(
           searchQuery
         )}`
       : "dashboard/requests?type=pay_after",
     queryKey: ["pay-after-requests", searchQuery],
   });
 
-  const requests = requestsData?.data || [];
+  const requests = requestsData?.data?.items || [];
 
   // Accept request mutation
   const acceptRequestMutation = useMutate({
-    method: "POST",
-    endpoint: `dashboard/accept-pay-after-request/${selectedRequest?.id}`,
+    method: "GET",
+    endpoint: `dashboard/requests/accept/${selectedRequest?.id}`,
     queryKeysToInvalidate: [["pay-after-requests"]],
     text: "Pay-after request accepted successfully!",
     onSuccess: () => {
@@ -205,10 +223,10 @@ export function PayAfterDataTable() {
 
   // Delete request mutation
   const deleteRequestMutation = useMutate({
-    method: "DELETE",
-    endpoint: `dashboard/delete-pay-after-request/${selectedRequest?.id}`,
+    method: "GET",
+    endpoint: `dashboard/requests/reject/${selectedRequest?.id}`,
     queryKeysToInvalidate: [["pay-after-requests"]],
-    text: "Pay-after request deleted successfully!",
+    text: "Pay-after request rejected successfully!",
     onSuccess: () => {
       setShowDeleteDialog(false);
       setSelectedRequest(null);
@@ -265,6 +283,7 @@ export function PayAfterDataTable() {
 
   const handlePageChange = useCallback(
     (pageIdx) => {
+      setCurrentPage(pageIdx);
       table.setPageIndex(pageIdx);
     },
     [table]
@@ -425,55 +444,13 @@ export function PayAfterDataTable() {
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4 px-4 py-4">
-        <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-
-        <div className="flex gap-2 items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handlePreviousPage}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-left"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-
-          {table.getPageOptions().map((page, pageIdx) => (
-            <Button
-              key={`pay-after-table-${pageIdx}`}
-              onClick={() => handlePageChange(pageIdx)}
-              variant={`${
-                pageIdx === table.getState().pagination.pageIndex
-                  ? ""
-                  : "outline"
-              }`}
-              className={cn("w-8 h-8")}
-            >
-              {page + 1}
-            </Button>
-          ))}
-
-          <Button
-            onClick={handleNextPage}
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-right"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-        </div>
-      </div>
+      {/* pagination */}
+      <Pagination
+        last_page={requestsData?.data?.pagination?.last_page}
+        setCurrentPage={handlePageChange}
+        current_page={currentPage}
+        studentsPagination={false}
+      />
 
       {/* Accept Confirmation Dialog */}
       <AlertDialog open={showAcceptDialog} onOpenChange={setShowAcceptDialog}>
@@ -488,18 +465,21 @@ export function PayAfterDataTable() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <strong>User:</strong>{" "}
-                    {selectedRequest?.user?.name || "N/A"}
+                    {selectedRequest?.user_name || "N/A"}
                   </div>
                   <div>
                     <strong>Teacher:</strong>{" "}
-                    {selectedRequest?.teacher?.name || "N/A"}
+                    {selectedRequest?.teacher_name?.name || "N/A"}
                   </div>
                   <div>
-                    <strong>Booked:</strong> {selectedRequest?.booked || "N/A"}
+                    <strong>Booked:</strong>{" "}
+                    {selectedRequest?.reservation_lessions_count > 1
+                      ? `${selectedRequest?.reservation_lessions_count} lessons`
+                      : `${selectedRequest?.reservation_lessions_count} lesson`}
                   </div>
                   <div>
                     <strong>Should Pay:</strong>{" "}
-                    {selectedRequest?.should_pay || "N/A"}
+                    {selectedRequest?.reservation_price || "N/A"} $
                   </div>
                   <div>
                     <strong>Request ID:</strong> {selectedRequest?.id || "N/A"}
@@ -530,31 +510,33 @@ export function PayAfterDataTable() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Reject Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Pay-After Request</AlertDialogTitle>
+            <AlertDialogTitle>Reject Pay-After Request</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this pay-after request?
+              Are you sure you want to reject this pay-after request?
               <br />
               <br />
               <div className="bg-red-50 p-4 rounded-lg border">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <strong>User:</strong>{" "}
-                    {selectedRequest?.user?.name || "N/A"}
+                    <strong>User:</strong> {selectedRequest?.user_name || "N/A"}
                   </div>
                   <div>
                     <strong>Teacher:</strong>{" "}
-                    {selectedRequest?.teacher?.name || "N/A"}
+                    {selectedRequest?.teacher_name?.name || "N/A"}
                   </div>
                   <div>
-                    <strong>Booked:</strong> {selectedRequest?.booked || "N/A"}
+                    <strong>Booked:</strong>{" "}
+                    {selectedRequest?.reservation_lessions_count > 1
+                      ? `${selectedRequest?.reservation_lessions_count} lessons`
+                      : `${selectedRequest?.reservation_lessions_count} lesson`}
                   </div>
                   <div>
                     <strong>Should Pay:</strong>{" "}
-                    {selectedRequest?.should_pay || "N/A"}
+                    {selectedRequest?.reservation_price || "N/A"} $
                   </div>
                   <div>
                     <strong>Request ID:</strong> {selectedRequest?.id || "N/A"}
@@ -566,8 +548,7 @@ export function PayAfterDataTable() {
               </div>
               <br />
               <span className="text-red-600 font-medium">
-                ⚠️ This action cannot be undone. The request will be permanently
-                deleted.
+                ⚠️ This action cannot be undone. The request will be rejected.
               </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -580,7 +561,7 @@ export function PayAfterDataTable() {
               onClick={handleDeleteRequest}
               variant="destructive"
             >
-              Delete Request
+              Reject Request
             </LoadingButton>
           </AlertDialogFooter>
         </AlertDialogContent>

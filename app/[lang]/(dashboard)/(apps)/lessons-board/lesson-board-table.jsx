@@ -59,7 +59,7 @@ const LessonBoardTable = () => {
     endpoint: `dashboard/lessons-board${
       searchTerm ? `?student_name=${encodeURIComponent(searchTerm)}` : ""
     }`,
-    queryKey: ["lessons-board", searchTerm],
+    queryKey: ["lessons-board", searchTerm, currentPage],
   });
 
   const lessonsData = data?.data?.students || [];

@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import LoadingButton from "@/components/Shared/loading-button";
 import Pagination from "@/components/Shared/Pagination/Pagination";
+import DownloadButton from "@/components/Shared/DownloadButton";
 
 const ReviewTableStatus = ({ selectedTeacher, selectedMonth, searchQuery }) => {
   const [selectedReport, setSelectedReport] = useState(null);
@@ -76,6 +77,26 @@ const ReviewTableStatus = ({ selectedTeacher, selectedMonth, searchQuery }) => {
   });
 
   const reportsList = reportsData?.data?.reports || [];
+
+  // Prepare data for export
+  const prepareExportData = useCallback(() => {
+    return reportsList.map((report) => ({
+      "Student Name": report?.lesson?.student?.name || "N/A",
+      "Student Email": report?.lesson?.student?.email || "N/A",
+      "Student Phone": report?.lesson?.student?.phone || "N/A",
+      "Report ID": report.id || "N/A",
+      Date: report?.lesson?.created_at
+        ? new Date(report.lesson.created_at).toLocaleDateString()
+        : "N/A",
+      Target: `${report.target || 0}%`,
+      "Admin Report URL": report.admin_report || "N/A",
+      "Teacher Report URL": report.teacher_report || "N/A",
+      Status: report.status || "N/A",
+      "Created Date": report.created_at
+        ? new Date(report.created_at).toLocaleDateString()
+        : "N/A",
+    }));
+  }, [reportsList]);
 
   // Mutation for updating report status to "done"
   const updateReportStatusMutation = useMutate({
@@ -197,6 +218,18 @@ const ReviewTableStatus = ({ selectedTeacher, selectedMonth, searchQuery }) => {
 
   return (
     <>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
+          Review
+        </h3>
+        <DownloadButton
+          data={reportsList}
+          prepareExportData={prepareExportData}
+          fileName="quality-reports"
+          disabled={isLoading}
+        />
+      </div>
+
       <Card>
         <Table>
           <TableHeader>

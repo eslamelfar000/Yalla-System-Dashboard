@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useGetData } from "@/hooks/useGetData";
 import TeacherFilter from "@/components/Shared/TeacherFilter";
 import { SharedSheet } from "@/components/Shared/Drawer/shared-sheet";
+import DownloadButton from "@/components/Shared/DownloadButton";
 import {
   flexRender,
   getCoreRowModel,
@@ -27,6 +28,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import Pagination from "@/components/Shared/Pagination/Pagination";
 
 const AdminArchiveTable = ({ role }) => {
   const [collapsedRows, setCollapsedRows] = useState([]);
@@ -37,8 +39,9 @@ const AdminArchiveTable = ({ role }) => {
     types: [],
     sessions: [],
     months: [],
+    year: "",
   });
-
+  const [currentPage, setCurrentPage] = useState(1);
   // ........
 
   // Debounce search query to prevent too many API calls
@@ -59,7 +62,7 @@ const AdminArchiveTable = ({ role }) => {
     }
 
     if (debouncedSearchQuery) {
-      params.append("search", debouncedSearchQuery);
+      params.append("name", debouncedSearchQuery);
     }
 
     if (filters.types.length > 0) {
@@ -67,11 +70,12 @@ const AdminArchiveTable = ({ role }) => {
     }
 
     if (filters.sessions.length > 0) {
-      params.append("sessions", filters.sessions.join(","));
+      params.append("count", filters.sessions.join(","));
     }
 
-    if (filters.months.length > 0) {
-      params.append("months", filters.months.join(","));
+    if (filters.year && filters.months.length > 0) {
+      const formattedMonths = filters.months.map(month => `${filters.year}-${month}`).join(",");
+      params.append("months", formattedMonths);
     }
 
     return params.toString();
@@ -85,7 +89,7 @@ const AdminArchiveTable = ({ role }) => {
     refetch: refetchArchive,
   } = useGetData({
     endpoint: `dashboard/complete-session-archive${
-      buildQueryParams() ? `?${buildQueryParams()}` : ""
+      buildQueryParams() ? `?${buildQueryParams()}&page=${currentPage}` : ""
     }`,
     queryKey: [
       "complete-session-archive",
@@ -95,7 +99,7 @@ const AdminArchiveTable = ({ role }) => {
     ],
   });
 
-  const archiveList = archiveData?.data || [];
+  const archiveList = archiveData?.data?.data || [];
 
   const toggleRow = (id) => {
     if (collapsedRows.includes(id)) {
@@ -104,6 +108,26 @@ const AdminArchiveTable = ({ role }) => {
       setCollapsedRows([...collapsedRows, id]);
     }
   };
+
+  // Prepare data for export
+  const prepareExportData = useCallback(() => {
+    return archiveList.map((item) => ({
+      "Student Name": item.student?.name || "N/A",
+      "Student Email": item.student?.email || "N/A",
+      "Student Phone": item.student?.phone || "N/A",
+      "Student ID": item.student?.id || "N/A",
+      "Teacher Name": item.teacher?.name || "N/A",
+      "Teacher Email": item.teacher?.email || "N/A",
+      Type: item.type || "N/A",
+      "Sessions Count": item.count || 0,
+      Price: item.price || "N/A",
+      "Payment Type": item.payment_type || "N/A",
+      "Created Date": item.created_at
+        ? new Date(item.created_at).toLocaleDateString()
+        : "N/A",
+      "Request ID": item.id || "N/A",
+    }));
+  }, [archiveList]);
 
   const columns = [
     {
@@ -187,6 +211,7 @@ const AdminArchiveTable = ({ role }) => {
       types: [],
       sessions: [],
       months: [],
+      year: "",
     });
   }, []);
 
@@ -197,26 +222,9 @@ const AdminArchiveTable = ({ role }) => {
       types: [],
       sessions: [],
       months: [],
+      year: "",
     });
   }, []);
-
-  const handleDownload = useCallback(() => {
-    // Build download URL with current filters
-    const downloadParams = buildQueryParams();
-    const downloadUrl = `/api/dashboard/complete-session-archive/download${
-      downloadParams ? `?${downloadParams}` : ""
-    }`;
-
-    // Create a temporary link to trigger download
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = `archive-data-${
-      new Date().toISOString().split("T")[0]
-    }.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }, [buildQueryParams]);
 
   const handleRetry = useCallback(() => {
     refetchArchive();
@@ -266,15 +274,12 @@ const AdminArchiveTable = ({ role }) => {
                 </Button>
               )}
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDownload}
-              className="h-10"
-            >
-              <Icon icon="heroicons:arrow-down-tray" className="w-4 h-4 mr-1" />
-              Download
-            </Button>
+            <DownloadButton
+              data={[]}
+              prepareExportData={() => []}
+              fileName="archive-data"
+              disabled={true}
+            />
           </div>
         </div>
 
@@ -402,15 +407,12 @@ const AdminArchiveTable = ({ role }) => {
               </Button>
             )}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDownload}
-            className="h-10"
-          >
-            <Icon icon="heroicons:arrow-down-tray" className="w-4 h-4 mr-1" />
-            Download
-          </Button>
+          <DownloadButton
+            data={archiveList}
+            prepareExportData={prepareExportData}
+            fileName="archive-data"
+            disabled={archiveLoading}
+          />
         </div>
       </div>
 
@@ -473,7 +475,13 @@ const AdminArchiveTable = ({ role }) => {
                     <TableCell>
                       <Badge
                         variant="soft"
-                        color="success"
+                        color={
+                          item.type === "trail"
+                            ? "success"
+                            : item.type === "payafter"
+                            ? "warning"
+                            : "default"
+                        }
                         className="capitalize rounded-md"
                       >
                         {item.type || "N/A"}
@@ -590,55 +598,13 @@ const AdminArchiveTable = ({ role }) => {
         </Table>
       </Card>
 
-      <div className="flex items-center flex-wrap gap-4 px-4 py-4">
-        <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-
-        <div className="flex gap-2 items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-left"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-
-          {table.getPageOptions().map((page, pageIdx) => (
-            <Button
-              key={`archive-table-${pageIdx}`}
-              onClick={() => table.setPageIndex(pageIdx)}
-              variant={`${
-                pageIdx === table.getState().pagination.pageIndex
-                  ? ""
-                  : "outline"
-              }`}
-              className={cn("w-8 h-8")}
-            >
-              {page + 1}
-            </Button>
-          ))}
-
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-          >
-            <Icon
-              icon="heroicons:chevron-right"
-              className="w-5 h-5 rtl:rotate-180"
-            />
-          </Button>
-        </div>
-      </div>
+      {/* pagination */}
+      <Pagination
+        last_page={archiveData?.data?.pagination?.last_page}
+        setCurrentPage={setCurrentPage}
+        current_page={currentPage}
+        studentsPagination={false}
+      />
     </>
   );
 };

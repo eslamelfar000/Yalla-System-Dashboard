@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, ChevronDown, MoreHorizontal, TrendingDown, TrendingUp } from "lucide-react";
 import {
   flexRender,
   getCoreRowModel,
@@ -34,83 +34,99 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { data } from "../../(tables)/data-table/data";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { useGetData } from "@/hooks/useGetData";
+import DownloadButton from "@/components/Shared/DownloadButton";
+import { useCallback } from "react";
+import Pagination from "@/components/Shared/Pagination/Pagination";
 
 const columns = [
   {
-    accessorKey: "teacher-name",
+    accessorKey: "teacher_name",
     header: "Teacher Name",
     cell: ({ row }) => (
-      <div className="  font-medium  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <Avatar className=" rounded-full">
-            <AvatarImage src={row?.original?.user.avatar} />
-            <AvatarFallback>AB</AvatarFallback>
+      <div className="font-medium text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <Avatar className="rounded-full">
+            <AvatarFallback>
+              {row?.original?.teacher_name?.charAt(0) || "T"}
+            </AvatarFallback>
           </Avatar>
-          <span className=" text-sm   text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+          <span className="text-sm text-card-foreground whitespace-nowrap">
+            {row?.original?.teacher_name || "N/A"}
           </span>
         </div>
       </div>
     ),
   },
   {
-    accessorKey: "salary",
+    accessorKey: "gross_total",
     header: "Salary",
     cell: ({ row }) => (
-      <div className="  font-sm opacity-70  text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm   text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+      <div className="font-sm opacity-70 text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm text-card-foreground whitespace-nowrap">
+            ${row?.original?.gross_total || 0}
           </span>
         </div>
       </div>
     ),
   },
   {
-    accessorKey: "deduction",
+    accessorKey: "total_reduction",
     header: "Deduction",
     cell: ({ row }) => (
-      <div className="  font-sm opacity-70   text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm   text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+      <div className="font-sm opacity-70 text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm text-card-foreground whitespace-nowrap">
+            <Badge
+              variant="soft"
+              color={"destructive"}
+              className="capitalize flex items-center gap-1"
+            >
+              $ {row?.original?.total_reduction || 0}{" "}
+              <TrendingDown className="w-4 h-4 text-red-600" />
+            </Badge>
           </span>
         </div>
       </div>
     ),
   },
   {
-    accessorKey: "raise",
+    accessorKey: "total_raise",
     header: "Raise",
     cell: ({ row }) => (
-      <div className="  font-sm opacity-70   text-card-foreground/80">
-        <div className="flex space-x-3  rtl:space-x-reverse items-center">
-          <span className=" text-sm   text-card-foreground whitespace-nowrap">
-            {row?.original?.user.name}
+      <div className="font-sm opacity-70 text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm text-card-foreground whitespace-nowrap">
+            <Badge
+              variant="soft"
+              color={"success"}
+              className="capitalize flex items-center gap-1"
+            >
+              $ {row?.original?.total_raise || 0}{" "}
+              <TrendingUp className="w-4 h-4 text-green-600" />
+            </Badge>
           </span>
         </div>
       </div>
     ),
   },
   {
-    accessorKey: "status",
+    accessorKey: "debt",
     header: "Debt",
     cell: ({ row }) => (
-      <Badge
-        variant="soft"
-        color={
-          (row.getValue("status") === "failed" && "destructive") ||
-          (row.getValue("status") === "success" && "success") ||
-          (row.getValue("status") === "processing" && "info")
-        }
-        className=" capitalize"
-      >
-        {row.getValue("status")}
-      </Badge>
+      <div className="font-sm opacity-70 text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm text-card-foreground whitespace-nowrap">
+            ${row?.original?.debt || 0}
+          </span>
+        </div>
+      </div>
     ),
   },
 ];
@@ -120,9 +136,43 @@ export function SalariesDataTable() {
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  const buildQueryParams = () => {
+    const params = [];
+    if (searchQuery) {
+      params.push(`name=${searchQuery}`);
+    }
+    return params.join("&");
+  };
+
+  const {
+    data: incomeData,
+    isLoading,
+    isError,
+  } = useGetData({
+    endpoint: `dashboard/get-all-teachers?page=${currentPage}&${buildQueryParams()}`,
+    queryKey: ["income", currentPage, searchQuery],
+  });
+
+  const teachers = incomeData?.data?.teachers || [];
+
+  // Prepare data for export
+  const prepareExportData = useCallback(() => {
+    return teachers.map((teacher) => ({
+      "Teacher Name": teacher.teacher_name || "N/A",
+      "Teacher ID": teacher.teacher_id || "N/A",
+      "Salary (Gross Total)": `$${teacher.gross_total || 0}`,
+      Deduction: `$${teacher.total_reduction || 0}`,
+      Raise: `$${teacher.total_raise || 0}`,
+      Debt: `$${teacher.debt || 0}`,
+      "Final Amount": `$${teacher.final_amount || 0}`,
+    }));
+  }, [teachers]);
 
   const table = useReactTable({
-    data,
+    data: teachers,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -140,20 +190,37 @@ export function SalariesDataTable() {
     },
   });
 
+  // Loading skeleton component
+  const LoadingSkeleton = () => (
+    <TableRow>
+      {columns.map((_, index) => (
+        <TableCell key={index}>
+          <div className="flex items-center space-x-3">
+            <Skeleton className="h-4 w-full" />
+          </div>
+        </TableCell>
+      ))}
+    </TableRow>
+  );
+
   return (
     <>
       <Card className="">
         <CardHeader>
           <div className="flex items-center justify-between gap-2">
             <CardTitle>Salary</CardTitle>
-            <div className="w-auto">
+            <div className="flex items-center gap-2">
               <Input
-                placeholder="Filter emails..."
-                value={table.getColumn("email")?.getFilterValue() || ""}
-                onChange={(event) =>
-                  table.getColumn("email")?.setFilterValue(event.target.value)
-                }
+                placeholder="Filter teacher name..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
                 className="max-w-sm min-w-[300px] h-10"
+              />
+              <DownloadButton
+                data={teachers}
+                prepareExportData={prepareExportData}
+                fileName="salary-data"
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -179,7 +246,12 @@ export function SalariesDataTable() {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows?.length ? (
+              {isLoading ? (
+                // Show loading skeletons
+                Array.from({ length: 3 }).map((_, index) => (
+                  <LoadingSkeleton key={index} />
+                ))
+              ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
@@ -202,64 +274,22 @@ export function SalariesDataTable() {
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No results.
+                    {isError ? "Error loading data" : "No results found."}
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </div>
-
-        <div className="flex items-center flex-wrap gap-4 px-4 py-4">
-          <div className="flex-1 text-sm text-muted-foreground whitespace-nowrap">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
-          </div>
-
-          <div className="flex gap-2  items-center">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              className="h-8 w-8"
-            >
-              <Icon
-                icon="heroicons:chevron-left"
-                className="w-5 h-5 rtl:rotate-180"
-              />
-            </Button>
-
-            {table.getPageOptions().map((page, pageIdx) => (
-              <Button
-                key={`basic-data-table-${pageIdx}`}
-                onClick={() => table.setPageIndex(pageIdx)}
-                variant={`${
-                  pageIdx === table.getState().pagination.pageIndex
-                    ? ""
-                    : "outline"
-                }`}
-                className={cn("w-8 h-8")}
-              >
-                {page + 1}
-              </Button>
-            ))}
-
-            <Button
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-            >
-              <Icon
-                icon="heroicons:chevron-right"
-                className="w-5 h-5 rtl:rotate-180"
-              />
-            </Button>
-          </div>
-        </div>
       </Card>
+
+      {/* pagination */}
+      <Pagination
+        last_page={incomeData?.data?.pagination?.last_page}
+        setCurrentPage={setCurrentPage}
+        current_page={currentPage}
+        studentsPagination={false}
+      />
     </>
   );
 }

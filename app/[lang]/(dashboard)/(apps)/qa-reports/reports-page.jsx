@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import line from "@/public/images/line.png";
@@ -9,15 +9,25 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Icon } from "@iconify/react";
-
-const monthTargets = [
-  { week: 1, target: 80.45 },
-  { week: 2, target: 70.25 },
-  { week: 3, target: 90.75 },
-  { week: 4, target: 85.50 },
-];
+import { useGetData } from "@/hooks/useGetData";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function ReportsPage() {
+  const { data, isLoading, error } = useGetData({
+    endpoint: "dashboard/weekly-target-breakdown",
+    enabledKey: ["qa-reports"],
+  });
+
+  const monthTargets = data || [];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="w-full h-20" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card title="simple">
@@ -35,32 +45,41 @@ function ReportsPage() {
                 </div>
 
                 <div className="percent">
-                  <span className="text-xl font-bold">92.5%</span>
+                  <span className="text-xl font-bold">
+                    {monthTargets && monthTargets.length > 0
+                      ? (
+                          monthTargets
+                            .slice(0, 4)
+                            .reduce((acc, curr) => acc + (curr.target || 0), 0) / 4
+                        ).toFixed(2)
+                      : 0
+                    }%
+                  </span>
                 </div>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="py-5 mx-20">
+            <AccordionContent className="py-5 px-10">
               <div className="flex flex-col-reverse">
                 {monthTargets.map((target, index) => (
                   <ul
                     key={index}
                     className="flex justify-between items-start mt-10 last:mt-0 "
                   >
-                    <li className="flex-1">
+                    <li className="flex-1 w-[10%]">
                       <span className="text-sm text-gray-400 flex gap-1">
-                        week <span>{target.week}</span>
+                        {target.week}
                       </span>
                     </li>
-                    <li className="w-full flex-2 mx-3">
+                    <li className="w-full flex-2 mx-3 w-[80%] mx-10">
                       <Progress
-                        value={target.target}
+                        value={target.percentage}
                         color="primary"
                         isStripe
                         isAnimate
-                        className="h-5 rounded-sm z-10"
+                        className="h-5 rounded-sm z-10 w-full"
                       />
                     </li>
-                    <li className="flex-1">
+                    <li className="flex-1 w-[10%] flex justify-end">
                       <span className="text-sm text-gray-400">
                         {target.target}%
                       </span>
@@ -73,12 +92,12 @@ function ReportsPage() {
         </Accordion>
       </Card>
 
-      <div className="flex-1 mt-10">
+      {/* <div className="flex-1 mt-10">
         <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
           October
         </h3>
-      </div>
-        <div className="hours-target">
+      </div> */}
+      {/* <div className="hours-target">
           <Card className="w-full p-8 rounded-md">
             <div className="cover">
               <div className="head mb-8">
@@ -108,7 +127,7 @@ function ReportsPage() {
               </ul>
             </div>
           </Card>
-        </div>
+        </div> */}
     </div>
   );
 }

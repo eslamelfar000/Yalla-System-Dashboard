@@ -111,28 +111,28 @@ const columns = [
       </div>
     ),
   },
-  {
-    accessorKey: "Teacher report",
-    header: "Teacher Report",
-    cell: ({ row }) => (
-      <div className="font-medium">
-        <div className="flex space-x-3 rtl:space-x-reverse items-center">
-          <span className="text-sm opacity-70 font-[400] whitespace-nowrap">
-            <Link
-              href={row?.original?.teacher_report || ""}
-              target="_blank"
-              className=""
-            >
-              <button className="text-primary flex items-center text-[12px] border px-4 py-1 border-solid border-primary rounded-full">
-                <span className="text-sm font-bold">Check</span>
-                <ArrowBigRightDash className="inline-block ml-1 w-6 h-6" />
-              </button>
-            </Link>{" "}
-          </span>
-        </div>
-      </div>
-    ),
-  },
+  // {
+  //   accessorKey: "Teacher report",
+  //   header: "Teacher Report",
+  //   cell: ({ row }) => (
+  //     <div className="font-medium">
+  //       <div className="flex space-x-3 rtl:space-x-reverse items-center">
+  //         <span className="text-sm opacity-70 font-[400] whitespace-nowrap">
+  //           <Link
+  //             href={row?.original?.teacher_report || ""}
+  //             target="_blank"
+  //             className=""
+  //           >
+  //             <button className="text-primary flex items-center text-[12px] border px-4 py-1 border-solid border-primary rounded-full">
+  //               <span className="text-sm font-bold">Check</span>
+  //               <ArrowBigRightDash className="inline-block ml-1 w-6 h-6" />
+  //             </button>
+  //           </Link>{" "}
+  //         </span>
+  //       </div>
+  //     </div>
+  //   ),
+  // },
 ];
 
 // Custom loading skeleton for QA reports table
@@ -161,9 +161,9 @@ const TargetDataTableSkeleton = () => {
             <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
               Admin Report
             </TableHead>
-            <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
+            {/* <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
               Teacher Report
-            </TableHead>
+            </TableHead> */}
             <TableHead className="font-semibold text-default-800 bg-default-50 dark:bg-default-100">
               Action
             </TableHead>
@@ -188,14 +188,14 @@ const TargetDataTableSkeleton = () => {
                 <Skeleton className="h-4 w-16" />
               </TableCell>
               <TableCell>
-                <Skeleton className="h-8 w-20 rounded-full" />
+                <Skeleton className="h-4 w-16 rounded-full" />
               </TableCell>
               <TableCell>
-                <Skeleton className="h-8 w-20 rounded-full" />
+                <Skeleton className="h-4 w-16 rounded-full" />
               </TableCell>
-              <TableCell>
+              {/* <TableCell>
                 <Skeleton className="h-6 w-6 rounded-full" />
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           ))}
         </TableBody>
