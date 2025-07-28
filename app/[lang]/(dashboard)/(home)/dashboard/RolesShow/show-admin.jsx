@@ -11,8 +11,9 @@ import NotesTable from "../components/notes-table";
 import { SharedSheet } from "@/components/Shared/Drawer/shared-sheet";
 import { useGetData } from "@/hooks/useGetData";
 import { usePathname } from "next/navigation";
+import { useMutate } from "@/hooks/useMutate";
 
-const ShowAdmin = ({ role }) => { 
+const ShowAdmin = ({ role }) => {
   const pathname = usePathname();
   const { data, isLoading, error } = useGetData({
     endpoint: "dashboard/home-admin",
@@ -20,6 +21,17 @@ const ShowAdmin = ({ role }) => {
   });
 
   const AdminData = data;
+
+  const {
+    mutate: addExpense,
+    isPending: isAddingExpense,
+    isSuccess: isAddedExpense,
+  } = useMutate({
+    method: "POST",
+    endpoint: "dashboard/add-expense",
+    queryKeysToInvalidate: ["expenses"],
+    text: "Expense added successfully!",
+  });
 
   return (
     <div className="space-y-6">
@@ -30,14 +42,22 @@ const ShowAdmin = ({ role }) => {
       <Card>
         <CardContent className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-            <EcommerceStats data={AdminData} isLoading={isLoading} error={error} />
+            <EcommerceStats
+              data={AdminData}
+              isLoading={isLoading}
+              error={error}
+            />
           </div>
         </CardContent>
       </Card>
 
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-8">
-          <ReportsSnapshot data={AdminData} isLoading={isLoading} error={error} />
+          <ReportsSnapshot
+            data={AdminData}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
         <div className="col-span-4">
           <Card className="h-full">
@@ -72,7 +92,11 @@ const ShowAdmin = ({ role }) => {
               </div>
             </CardHeader>
             <CardContent className="px-0">
-              <RevinueChart data={AdminData} isLoading={isLoading} error={error} />
+              <RevinueChart
+                data={AdminData}
+                isLoading={isLoading}
+                error={error}
+              />
             </CardContent>
           </Card>
         </div>
@@ -92,7 +116,9 @@ const ShowAdmin = ({ role }) => {
               </div>
               <SharedSheet
                 type="add-expense"
-                onSuccess={() => window.location.reload()}
+                addExpense={addExpense}
+                isAddingExpense={isAddingExpense}
+                isAddedExpense={isAddedExpense}
               />
             </div>
             <CardContent className="h-[510px] overflow-y-auto">

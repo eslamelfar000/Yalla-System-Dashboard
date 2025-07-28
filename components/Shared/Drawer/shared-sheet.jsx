@@ -31,6 +31,9 @@ export function SharedSheet({
   onSuccess,
   onReset,
   initialFilters,
+  addExpense,
+  isAddingExpense,
+  isAddedExpense,
 }) {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -145,7 +148,7 @@ export function SharedSheet({
             ) : type === "add-quality" ? (
               <AddQualityComponent onSuccess={handleSuccess} />
             ) : type === "add-expense" ? (
-              <AddExpenseComponent onSuccess={handleSuccess} />
+              <AddExpenseComponent addExpense={addExpense} isAddingExpense={isAddingExpense} isAddedExpense={isAddedExpense} />
             ) : type === "edit-teacher" ? (
               <EditTeacherComponent
                 user={user}

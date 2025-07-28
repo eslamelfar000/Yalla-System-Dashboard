@@ -49,7 +49,7 @@ export function SharedAlertDialog({ type, info, onConfirm, isDeleting }) {
           "delete-quality",
           "delete-paybox-request",
           "delete-after-pay-request",
-          "",
+          "delete-expense",
         ].includes(type) ? (
           <Button
             size="icon"

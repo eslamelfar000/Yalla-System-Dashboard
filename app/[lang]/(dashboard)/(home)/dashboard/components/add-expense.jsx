@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -25,7 +25,11 @@ const schema = z.object({
     .max(500, "Reason must be less than 500 characters"),
 });
 
-const AddExpenseComponent = ({ onSuccess }) => {
+const AddExpenseComponent = ({
+  addExpense,
+  isAddingExpense,
+  isAddedExpense,
+}) => {
   const {
     register,
     handleSubmit,
@@ -36,31 +40,19 @@ const AddExpenseComponent = ({ onSuccess }) => {
     mode: "all",
   });
 
-  const expenseMutation = useMutate({
-    method: "POST",
-    endpoint: "dashboard/expenses",
-    text: "Expense added successfully!",
-    onSuccess: (data) => {
-      if (data.status) {
-        reset();
-        if (onSuccess) onSuccess(data);
-      } else {
-        toast.error(data.msg || "Failed to add expense");
-      }
-    },
-    onError: (error) => {
-      toast.error(error?.response?.data?.msg || "Failed to add expense");
-    },
-  });
+  useEffect(() => {
+    if (isAddedExpense) {
+      reset();
+    }
+  }, [isAddedExpense]);
 
   const onSubmit = (data) => {
     const formattedData = {
       amount: parseFloat(data.money),
-      reason: data.reason,
-      date: new Date().toISOString(),
+      note: data.reason,
     };
 
-    expenseMutation.mutate(formattedData);
+    addExpense(formattedData);
   };
 
   return (
@@ -99,7 +91,7 @@ const AddExpenseComponent = ({ onSuccess }) => {
               min="0"
               placeholder="0.00"
               className="pl-8"
-              disabled={expenseMutation.isPending}
+              disabled={isAddingExpense}
             />
           </div>
           {errors.money && (
@@ -122,7 +114,7 @@ const AddExpenseComponent = ({ onSuccess }) => {
             {...register("reason")}
             placeholder="Enter the reason for this expense..."
             rows={4}
-            disabled={expenseMutation.isPending}
+            disabled={isAddingExpense}
             className="resize-none"
           />
           {errors.reason && (
@@ -148,7 +140,7 @@ const AddExpenseComponent = ({ onSuccess }) => {
             variant="outline"
             className="flex-1"
             onClick={() => reset()}
-            disabled={expenseMutation.isPending}
+            disabled={isAddingExpense}
           >
             <Icon icon="heroicons:arrow-path" className="w-4 h-4 mr-2" />
             Reset
@@ -156,9 +148,9 @@ const AddExpenseComponent = ({ onSuccess }) => {
           <Button
             type="submit"
             className="flex-1 bg-red-600 hover:bg-red-700"
-            disabled={expenseMutation.isPending}
+            disabled={isAddingExpense}
           >
-            {expenseMutation.isPending ? (
+            {isAddingExpense ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Adding...
