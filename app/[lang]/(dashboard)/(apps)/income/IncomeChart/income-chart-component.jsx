@@ -14,15 +14,15 @@ const IncomeChartComponent = ({ height = 360 }) => {
 
   const series = [
     {
-      name: "Completed Task",
+      name: "Total Income",
       data: [45, 52, 38, 24, 33, 40],
     },
     {
-      name: "Inprogress",
+      name: "Total Outcome",
       data: [35, 41, 62, 42, 13, 35],
     },
     {
-      name: "Overdue",
+      name: "Total Revenue",
       data: [87, 57, 74, 99, 75, 50],
     },
   ];

@@ -200,6 +200,8 @@ const Messages = ({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState(null);
 
+  console.log(messages);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (chatHeightRef?.current) {

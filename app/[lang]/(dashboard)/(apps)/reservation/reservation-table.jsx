@@ -168,13 +168,13 @@ export function ReservationDataTable() {
     isLoading: reservationsLoading,
     error: reservationsError,
   } = useGetData({
-    endpoint: `dashboard/reservations?type[0]=paybefore&type[1]=trail${
+    endpoint: `dashboard/reservations?type[0]=paybefore&type[1]=trail&page=${currentPage}${
       debouncedSearchValue ? `&search=${debouncedSearchValue}` : ""
     }`,
-    queryKey: ["reservations", "trail", debouncedSearchValue],
+    queryKey: ["reservations", "trail", debouncedSearchValue, currentPage],
   });
 
-  const reservations = reservationsData?.data || [];
+  const reservations = reservationsData?.data?.items || [];
 
   const table = useReactTable({
     data: reservations,
@@ -278,7 +278,7 @@ export function ReservationDataTable() {
 
       {/* Pagination */}
       <Pagination
-        last_page={reservationsData?.data?.pagination?.last_page}
+        last_page={reservationsData?.data?.last_page}
         setCurrentPage={setCurrentPage}
         current_page={currentPage}
         studentsPagination={false}

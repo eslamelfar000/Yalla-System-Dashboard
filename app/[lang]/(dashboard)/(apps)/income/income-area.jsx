@@ -17,7 +17,7 @@ const IncomeArea = () => {
     },
     {
       id: 2,
-      name: "Deduction",
+      name: "Income",
       count: "11,236",
       rate: "202",
       isUp: false,
@@ -26,7 +26,7 @@ const IncomeArea = () => {
     },
     {
       id: 3,
-      name: "Raise",
+      name: "Salaries",
       count: "46s",
       rate: "22",
       isUp: true,
@@ -35,7 +35,7 @@ const IncomeArea = () => {
     },
     {
       id: 4,
-      name: "Total Outcome",
+      name: "Expenses",
       count: "46s",
       rate: "30",
       isUp: false,
@@ -53,7 +53,7 @@ const IncomeArea = () => {
     },
     {
       id: 4,
-      name: "Total Outcome",
+      name: "Deduction",
       count: "46s",
       rate: "30",
       isUp: false,

@@ -205,13 +205,13 @@ export function ReserveAfterDataTable() {
     isLoading: payAfterLoading,
     error: payAfterError,
   } = useGetData({
-    endpoint: `dashboard/reservations?type[0]=payafter${
+    endpoint: `dashboard/reservations?type[0]=payafter&page=${currentPage}${
       debouncedSearchValue ? `&search=${debouncedSearchValue}` : ""
     }`,
-    queryKey: ["reservations", "payafter", debouncedSearchValue],
+    queryKey: ["reservations", "payafter", debouncedSearchValue, currentPage],
   });
 
-  const payAfterReservations = payAfterData?.data || [];
+  const payAfterReservations = payAfterData?.data?.items || [];
 
   const table = useReactTable({
     data: payAfterReservations,
@@ -315,7 +315,7 @@ export function ReserveAfterDataTable() {
 
       {/* Pagination */}
       <Pagination
-        last_page={payAfterData?.data?.pagination?.last_page}
+        last_page={payAfterData?.data?.last_page}
         setCurrentPage={setCurrentPage}
         current_page={currentPage}
         studentsPagination={false}
