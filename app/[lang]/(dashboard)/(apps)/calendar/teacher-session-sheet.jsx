@@ -173,15 +173,20 @@ const TeacherSessionSheet = ({
       let clickedHour = clickedDate.getHours();
       let clickedMinute = clickedDate.getMinutes();
 
-      // Ensure hour is within reasonable bounds (9 AM to 9 PM)
-      clickedHour = Math.max(9, Math.min(21, clickedHour));
+      // Use the actual clicked time instead of forcing bounds
+      // Only ensure it's within reasonable bounds (0 AM to 11 PM)
+      clickedHour = Math.max(0, Math.min(23, clickedHour));
 
-      // Set start time to clicked hour (hours only, no minutes)
+      // Set start time to clicked hour and minutes
       const startHour = clickedHour;
       const endHour = startHour + 1; // End time is next hour
 
-      const startTimeStr = `${String(startHour).padStart(2, "0")}:00`;
-      const endTimeStr = `${String(endHour).padStart(2, "0")}:00`;
+      const startTimeStr = `${String(startHour).padStart(2, "0")}:${String(
+        clickedMinute
+      ).padStart(2, "0")}`;
+      const endTimeStr = `${String(endHour).padStart(2, "0")}:${String(
+        clickedMinute
+      ).padStart(2, "0")}`;
 
       // Set times immediately
       setStartTime(startTimeStr);
@@ -196,14 +201,20 @@ const TeacherSessionSheet = ({
           startTimeRef.current.dispatchEvent(
             new Event("input", { bubbles: true })
           );
+          startTimeRef.current.dispatchEvent(
+            new Event("change", { bubbles: true })
+          );
         }
         if (endTimeRef.current) {
           endTimeRef.current.value = endTimeStr;
           endTimeRef.current.dispatchEvent(
             new Event("input", { bubbles: true })
           );
+          endTimeRef.current.dispatchEvent(
+            new Event("change", { bubbles: true })
+          );
         }
-      }, 50);
+      }, 100);
 
       console.log("Selected date set:", dateStr);
       console.log("Dynamic times set based on clicked slot:", {
@@ -302,24 +313,41 @@ const TeacherSessionSheet = ({
   // Update refs when state changes
   useEffect(() => {
     if (startTimeRef.current && startTime) {
+      console.log("Setting start time ref to:", startTime);
       startTimeRef.current.value = startTime;
+      // Force the input to recognize the change
+      startTimeRef.current.dispatchEvent(new Event("input", { bubbles: true }));
+      startTimeRef.current.dispatchEvent(
+        new Event("change", { bubbles: true })
+      );
     }
     if (endTimeRef.current && endTime) {
+      console.log("Setting end time ref to:", endTime);
       endTimeRef.current.value = endTime;
+      // Force the input to recognize the change
+      endTimeRef.current.dispatchEvent(new Event("input", { bubbles: true }));
+      endTimeRef.current.dispatchEvent(new Event("change", { bubbles: true }));
     }
   }, [startTime, endTime]);
 
-  // Force update inputs when sheet opens with selectedDate
+  // Force update inputs when sheet opened with selectedDate
   useEffect(() => {
     if (open && selectedDate && !session) {
       const clickedDate = new Date(selectedDate.date);
-      const clickedHour = Math.max(9, Math.min(21, clickedDate.getHours()));
-      const startTimeStr = `${String(clickedHour).padStart(2, "0")}:00`;
-      const endTimeStr = `${String(clickedHour + 1).padStart(2, "0")}:00`;
+      const clickedHour = Math.max(0, Math.min(23, clickedDate.getHours()));
+      const clickedMinute = clickedDate.getMinutes();
+      const startTimeStr = `${String(clickedHour).padStart(2, "0")}:${String(
+        clickedMinute
+      ).padStart(2, "0")}`;
+      const endTimeStr = `${String(clickedHour + 1).padStart(2, "0")}:${String(
+        clickedMinute
+      ).padStart(2, "0")}`;
 
       console.log("Sheet opened - forcing time update:", {
         startTimeStr,
         endTimeStr,
+        clickedHour,
+        clickedMinute,
       });
 
       // Force update after a short delay to ensure DOM is ready
@@ -331,41 +359,23 @@ const TeacherSessionSheet = ({
 
         if (startTimeRef.current) {
           startTimeRef.current.value = startTimeStr;
+          startTimeRef.current.dispatchEvent(
+            new Event("input", { bubbles: true })
+          );
+          startTimeRef.current.dispatchEvent(
+            new Event("change", { bubbles: true })
+          );
         }
         if (endTimeRef.current) {
           endTimeRef.current.value = endTimeStr;
+          endTimeRef.current.dispatchEvent(
+            new Event("input", { bubbles: true })
+          );
+          endTimeRef.current.dispatchEvent(
+            new Event("change", { bubbles: true })
+          );
         }
-      }, 100);
-    }
-  }, [open, selectedDate, session, setValue]);
-
-  // Force update inputs when sheet opens with selectedDate
-  useEffect(() => {
-    if (open && selectedDate && !session) {
-      const clickedDate = new Date(selectedDate.date);
-      const clickedHour = Math.max(9, Math.min(21, clickedDate.getHours()));
-      const startTimeStr = `${String(clickedHour).padStart(2, "0")}:00`;
-      const endTimeStr = `${String(clickedHour + 1).padStart(2, "0")}:00`;
-
-      console.log("Sheet opened - forcing time update:", {
-        startTimeStr,
-        endTimeStr,
-      });
-
-      // Force update after a short delay to ensure DOM is ready
-      setTimeout(() => {
-        setStartTime(startTimeStr);
-        setEndTime(endTimeStr);
-        setValue("start_time", startTimeStr + ":00");
-        setValue("end_time", endTimeStr + ":00");
-
-        if (startTimeRef.current) {
-          startTimeRef.current.value = startTimeStr;
-        }
-        if (endTimeRef.current) {
-          endTimeRef.current.value = endTimeStr;
-        }
-      }, 100);
+      }, 150);
     }
   }, [open, selectedDate, session, setValue]);
 
@@ -664,7 +674,7 @@ const TeacherSessionSheet = ({
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <Label htmlFor="start_time" className="mb-1.5">
-                                Start Time
+                                Start Time (24h)
                               </Label>
                               <Input
                                 id="start_time"
@@ -675,6 +685,10 @@ const TeacherSessionSheet = ({
                                 onChange={(e) => {
                                   if (bookingLoading) return;
                                   const newStartTime = e.target.value;
+                                  console.log(
+                                    "Start time changed to:",
+                                    newStartTime
+                                  );
                                   setStartTime(newStartTime);
                                   setValue("start_time", newStartTime + ":00");
 
@@ -701,8 +715,13 @@ const TeacherSessionSheet = ({
                                   }
                                 }}
                                 disabled={isReadOnly || bookingLoading}
-                                placeholder="Select start time"
+                                placeholder="HH:MM (24h)"
+                                min="00:00"
+                                max="23:59"
                               />
+                              <div className="text-xs text-gray-500 mt-1">
+                                Current value: {startTime}
+                              </div>
                               {errors.start_time && (
                                 <div className="text-destructive text-sm mt-1">
                                   {errors.start_time.message}
@@ -712,7 +731,7 @@ const TeacherSessionSheet = ({
 
                             <div>
                               <Label htmlFor="end_time" className="mb-1.5">
-                                End Time
+                                End Time (24h)
                               </Label>
                               <Input
                                 id="end_time"
@@ -723,13 +742,21 @@ const TeacherSessionSheet = ({
                                 onChange={(e) => {
                                   if (bookingLoading) return;
                                   const newEndTime = e.target.value;
+                                  console.log(
+                                    "End time changed to:",
+                                    newEndTime
+                                  );
                                   setEndTime(newEndTime);
                                   setValue("end_time", newEndTime + ":00");
                                 }}
                                 disabled={isReadOnly || bookingLoading}
                                 min={startTime} // Set minimum time to start time
-                                placeholder="Select end time"
+                                max="23:59"
+                                placeholder="HH:MM (24h)"
                               />
+                              <div className="text-xs text-gray-500 mt-1">
+                                Current value: {endTime}
+                              </div>
                               {errors.end_time && (
                                 <div className="text-destructive text-sm mt-1">
                                   {errors.end_time.message}

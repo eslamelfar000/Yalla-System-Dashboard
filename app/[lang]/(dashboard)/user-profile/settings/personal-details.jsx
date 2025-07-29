@@ -140,12 +140,8 @@ const PersonalDetails = () => {
           );
 
           // Show success message
-        } else {
-          toast.error("Failed to update profile data");
         }
-      } catch (error) {
-        toast.error("Profile updated but failed to refresh data");
-      }
+      } catch (error) {}
     },
     onError: (error) => {
       toast.error(error?.message || "Failed to update profile");
@@ -179,16 +175,21 @@ const PersonalDetails = () => {
         Cookies.get("user_role") === "teacher"
       ) {
         // Handle languages from teacher object
-        const teacherLanguages = userData.teacher?.languages || userData.languages || "";
+        const teacherLanguages =
+          userData.teacher?.languages || userData.languages || "";
         const languagesArray = teacherLanguages
           ? teacherLanguages.split(",").map((lang) => lang.trim())
           : [];
         setSelectedLanguages(languagesArray);
 
-        initialFormData.aboutMe = userData.teacher?.about_me || userData.about_me || "";
-        initialFormData.aboutCourse = userData.teacher?.about_course || userData.about_course || "";
-        initialFormData.video_link = userData.teacher?.video_link || userData.video_link || "";
-        initialFormData.certificate = userData.teacher?.certificate || userData.certificate || "";
+        initialFormData.aboutMe =
+          userData.teacher?.about_me || userData.about_me || "";
+        initialFormData.aboutCourse =
+          userData.teacher?.about_course || userData.about_course || "";
+        initialFormData.video_link =
+          userData.teacher?.video_link || userData.video_link || "";
+        initialFormData.certificate =
+          userData.teacher?.certificate || userData.certificate || "";
       }
 
       reset(initialFormData);
@@ -246,6 +247,8 @@ const PersonalDetails = () => {
       fileInputRef.current.value = "";
     }
   };
+
+  console.log(selectedImage);
 
   // Handle form submission
   const onSubmit = async (data) => {
