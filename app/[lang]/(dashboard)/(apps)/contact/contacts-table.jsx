@@ -97,7 +97,7 @@ const columns = [
       <div className="  font-medium  text-card-foreground/80">
         <div className="flex space-x-3  rtl:space-x-reverse items-center">
           <span className=" text-sm opacity-70 font-[400]  text-card-foreground whitespace-nowrap">
-            {row?.original?.teacher?.name || "N/A"}
+            {row?.original?.assiend_teacher?.name || "N/A"}
           </span>
         </div>
       </div>

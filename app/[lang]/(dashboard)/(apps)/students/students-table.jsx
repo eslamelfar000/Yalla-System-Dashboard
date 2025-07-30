@@ -107,13 +107,13 @@ const columns = [
             <div className="head text-gray-600">
               <h2 className="text-sm">
                 {row?.original?.sessions_count_done || 0} /{" "}
-                {row?.original?.sessions || 0}
+                {row?.original?.sessions_count || 0}
               </h2>
             </div>
             <Progress
               value={
-                (row?.original?.sessions_count_current /
-                  row?.original?.sessions) *
+                (row?.original?.sessions_count_done /
+                  row?.original?.sessions_count) *
                   100 || 0
               }
               // showValue={true}

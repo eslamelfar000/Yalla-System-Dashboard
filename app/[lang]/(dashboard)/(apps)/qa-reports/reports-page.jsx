@@ -20,6 +20,8 @@ function ReportsPage() {
 
   const monthTargets = data || [];
 
+  console.log(data);
+
   if (isLoading) {
     return (
       <div className="space-y-6">

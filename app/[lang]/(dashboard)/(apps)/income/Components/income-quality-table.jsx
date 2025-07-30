@@ -220,12 +220,6 @@ const TableRowSkeleton = ({ type }) => (
     <TableCell>
       <Skeleton className="h-4 w-24" />
     </TableCell>
-    <TableCell>
-      <Skeleton className="h-4 w-24" />
-    </TableCell>
-    <TableCell>
-      <Skeleton className="h-4 w-24" />
-    </TableCell>
     {type === "admin-payrolls" && (
       <TableCell>
         <Skeleton className="h-4 w-24" />
@@ -234,7 +228,11 @@ const TableRowSkeleton = ({ type }) => (
   </TableRow>
 );
 
-export function IncomeQualityDataTable({ type, selectedQuality, selectedMonth }) {
+export function IncomeQualityDataTable({
+  type,
+  selectedQuality,
+  selectedMonth,
+}) {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
@@ -317,7 +315,7 @@ export function IncomeQualityDataTable({ type, selectedQuality, selectedMonth })
             ) : error ? (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={columns(type, selectedQuality).length}
                   className="h-24 text-center"
                 >
                   <div className="flex items-center justify-center text-default-500">
