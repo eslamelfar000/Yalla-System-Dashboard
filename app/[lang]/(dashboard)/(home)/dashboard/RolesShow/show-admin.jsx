@@ -12,12 +12,14 @@ import { SharedSheet } from "@/components/Shared/Drawer/shared-sheet";
 import { useGetData } from "@/hooks/useGetData";
 import { usePathname } from "next/navigation";
 import { useMutate } from "@/hooks/useMutate";
+import { useState } from "react";
 
 const ShowAdmin = ({ role }) => {
   const pathname = usePathname();
+  const [selectedYear, setSelectedYear] = useState("2025");
   const { data, isLoading, error } = useGetData({
     endpoint: "dashboard/home-admin",
-    enabledKey: ["admin", pathname],
+    enabledKey: ["home-admin", "dashboard", pathname],
   });
 
   const AdminData = data;
@@ -52,14 +54,14 @@ const ShowAdmin = ({ role }) => {
       </Card>
 
       <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-8">
+        <div className="col-span-12">
           <ReportsSnapshot
             data={AdminData}
             isLoading={isLoading}
             error={error}
           />
         </div>
-        <div className="col-span-4">
+        {/* <div className="col-span-4">
           <Card className="h-full">
             <CardHeader className="border-none p-6 pt-5 mb-20">
               <CardTitle className="text-lg font-semibold text-default-900 p-0">
@@ -70,7 +72,7 @@ const ShowAdmin = ({ role }) => {
               <UserStats data={AdminData} isLoading={isLoading} error={error} />
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
 
       <div className="grid grid-cols-12 gap-6">
@@ -84,19 +86,18 @@ const ShowAdmin = ({ role }) => {
             <CardHeader className="border-none pb-0 mb-0">
               <div className="flex flex-wrap items-center gap-3">
                 <CardTitle className="flex-1 whitespace-nowrap">
-                  Average Revenue
+                  Reservations Types
                 </CardTitle>
                 <div className="flex-none">
-                  <DashboardSelect />
+                  <DashboardSelect
+                    selectedYear={selectedYear}
+                    setSelectedYear={setSelectedYear}
+                  />
                 </div>
               </div>
             </CardHeader>
             <CardContent className="px-0">
-              <RevinueChart
-                data={AdminData}
-                isLoading={isLoading}
-                error={error}
-              />
+              <RevinueChart selectedYear={selectedYear} />
             </CardContent>
           </Card>
         </div>
@@ -104,7 +105,11 @@ const ShowAdmin = ({ role }) => {
 
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-6">
-          <TopContributer />
+          <TopContributer
+            data={AdminData}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
         <div className="col-span-6">
           <Card title="Simple" className="h-full rounded-lg overflow-hidden">

@@ -22,6 +22,20 @@ const getSafeLastMessage = (lastMessage) => {
   return safeToString(lastMessage);
 };
 
+// Utility function to get message status (seen/unseen)
+const getMessageStatus = (lastMessage, isOwnMessage = false) => {
+  if (!lastMessage || !isOwnMessage) return null;
+
+  // Check if message has read_at field
+  if (lastMessage.read_at) {
+    return "seen"; // Double checkmark for seen
+  } else if (lastMessage.created_at) {
+    return "sent"; // Single checkmark for sent
+  }
+
+  return null; // No status
+};
+
 // Utility function to extract student and teacher from participants
 const extractStudentAndTeacher = (participants) => {
   if (!participants || !Array.isArray(participants)) {
@@ -72,6 +86,7 @@ const ContactList = ({
   isLoading = false,
 }) => {
   const { user } = useAuth();
+  const currentUserId = user?.id;
   const userRole = user?.role || null;
 
   // Show skeleton if loading
@@ -93,7 +108,9 @@ const ContactList = ({
     lastMsg,
     unreadCount,
     lastDate,
-    status;
+    status,
+    lastMessageForStatus,
+    lastMessageFromCurrentUser;
 
   if (userRole === "admin") {
     // Admin data structure - extract from participants array
@@ -138,6 +155,10 @@ const ContactList = ({
     unreadCount = unread_messages_count || 0;
     lastDate = last_message?.created_at || updated_at || created_at;
     status = "offline"; // Default status for admin view
+
+    // Store last message for status checking
+    lastMessageForStatus = last_message;
+    lastMessageFromCurrentUser = last_message?.user_id === currentUserId;
   } else {
     // Teacher data structure - single user info
     const {
@@ -159,6 +180,7 @@ const ContactList = ({
       updated_at,
       created_at,
       date,
+      unread_messages_count,
     } = contact;
 
     chatId = id || chat_id;
@@ -166,10 +188,22 @@ const ContactList = ({
     userAvatar = fixImageUrl(avatar?.src || image || avatar);
     userAbout = safeToString(about || bio);
     lastMsg = getSafeLastMessage(last_message || lastMessage);
-    unreadCount = unread_count || unreadmessage || unseenMsgs || 0;
+    unreadCount = unread_messages_count || unreadmessage || unseenMsgs || 0;
     lastDate = updated_at || created_at || date;
     status = userStatus;
+
+    // Store last message for status checking
+    lastMessageForStatus = last_message || lastMessage;
+    lastMessageFromCurrentUser =
+      (last_message || lastMessage)?.sender_id === currentUserId ||
+      (last_message || lastMessage)?.user_id === currentUserId;
   }
+
+  // Get message status for display
+  const messageStatus = getMessageStatus(
+    lastMessageForStatus,
+    lastMessageFromCurrentUser
+  );
 
   return (
     <div
@@ -188,7 +222,7 @@ const ContactList = ({
             {getAvatarInitials(userName)}
           </AvatarFallback>
         </Avatar>
-        <Badge
+        {/* <Badge
           className={cn(
             "h-2 w-2 p-0 absolute bottom-0 right-0 ring-2 ring-background",
             {
@@ -196,12 +230,17 @@ const ContactList = ({
               "bg-gray-400": status !== "online",
             }
           )}
-        />
+        /> */}
       </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground truncate">
+          <span
+            className={cn("text-sm font-medium truncate", {
+              "text-foreground font-semibold": unreadCount > 0,
+              "text-foreground": unreadCount === 0,
+            })}
+          >
             {userName}
           </span>
           {lastDate && (
@@ -211,9 +250,22 @@ const ContactList = ({
           )}
         </div>
         <div className="flex items-center justify-between mt-1">
-          <span className="text-xs text-muted-foreground truncate">
-            {lastMsg || userAbout || "No messages yet"}
-          </span>
+          <div className="flex items-center gap-1 flex-1 min-w-0 justify-between">
+            <span
+              className={cn("text-xs truncate", {
+                "text-foreground font-bold": unreadCount > 0,
+                "text-muted-foreground": unreadCount === 0,
+              })}
+            >
+              {lastMsg || userAbout || "No messages yet"}
+            </span>
+            {/* Message status indicator (checkmarks) */}
+            {messageStatus && (
+              <span className="text-xs text-muted-foreground flex-shrink-0">
+                {messageStatus === "seen" ? "✓✓" : "✓"}
+              </span>
+            )}
+          </div>
           {unreadCount > 0 && (
             <Badge
               variant="destructive"

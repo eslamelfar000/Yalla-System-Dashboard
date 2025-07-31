@@ -5,25 +5,84 @@ import { useThemeStore } from "@/store";
 import { useTheme } from "next-themes";
 import { themes } from "@/config/thems";
 import { getGridConfig, getYAxisConfig } from "@/lib/appex-chart-options";
+import { useGetData } from "@/hooks/useGetData";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 
-const RevinueChart = ({ height = 350 }) => {
+const RevinueChart = ({ height = 350, selectedYear }) => {
   const { theme: config, setTheme: setConfig, isRtl } = useThemeStore();
   const { theme: mode } = useTheme();
+  const pathname = usePathname();
+
+
+  const {
+    data: reservationsData,
+    isLoading: reservationsLoading,
+    error: reservationsError,
+  } = useGetData({
+    endpoint: `dashboard/reservations-admin-home?year=${selectedYear}`,
+    enabledKey: ["reservations-admin-home", "chart", selectedYear, pathname],
+  });
 
   const theme = themes.find((theme) => theme.name === config);
 
+  // Extract data from the API response
+  const monthlyChartData = reservationsData?.monthly_chart_data || {};
+  const monthlyReservations = reservationsData?.monthly_reservations || {};
+
+  // Create arrays for all 12 months
+  const months = Array.from({ length: 12 }, (_, i) => i + 1);
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  // Extract data for each type - using monthly_reservations.types for totals
+  const trialTotal = monthlyReservations?.types?.trial || 0;
+  const payBeforeTotal = monthlyReservations?.types?.pay_before || 0;
+  const payAfterTotal = monthlyReservations?.types?.pay_after || 0;
+
+  // For monthly data, we'll distribute the totals across months
+  // This is a simplified approach - ideally the API should provide monthly breakdown
+  const currentMonth = monthlyReservations?.month || 1;
+
+  // Create monthly data arrays
+  const trialData = months.map((month) =>
+    month === currentMonth ? trialTotal : 0
+  );
+  const payBeforeData = months.map((month) =>
+    month === currentMonth ? payBeforeTotal : 0
+  );
+  const payAfterData = months.map((month) =>
+    month === currentMonth ? payAfterTotal : 0
+  );
+
+
+  // Calculate grand total
+  const grandTotal = trialTotal + payBeforeTotal + payAfterTotal;
+
   const series = [
     {
-      name: "Net Profit",
-      data: [44, 55, 41, 37, 22, 43, 21, 40, 30, 50, 60, 50],
+      name: "Trial",
+      data: trialData,
     },
     {
-      name: "Orders",
-      data: [53, 32, 33, 52, 13, 43, 32, 40, 50, 20, 40, 50],
+      name: "Pay Before",
+      data: payBeforeData,
     },
     {
-      name: "Return",
-      data: [40, 47, 51, 39, 35, 51, 60, 40, 60, 30, 20, 60],
+      name: "Pay After",
+      data: payAfterData,
     },
   ];
   const options = {
@@ -44,9 +103,10 @@ const RevinueChart = ({ height = 350 }) => {
             offsetX: 0,
             style: {
               colors: [
-                `hsl(${theme?.cssVars[
-                  mode === "dark" || mode === "system" ? "dark" : "light"
-                ].chartLabel
+                `hsl(${
+                  theme?.cssVars[
+                    mode === "dark" || mode === "system" ? "dark" : "light"
+                  ].chartLabel
                 })`,
               ],
               fontSize: "13px",
@@ -63,9 +123,10 @@ const RevinueChart = ({ height = 350 }) => {
       show: false,
       width: 1,
       colors: [
-        `hsl(${theme?.cssVars[
-          mode === "dark" || mode === "system" ? "dark" : "light"
-        ].chartLabel
+        `hsl(${
+          theme?.cssVars[
+            mode === "dark" || mode === "system" ? "dark" : "light"
+          ].chartLabel
         })`,
       ],
     },
@@ -84,20 +145,7 @@ const RevinueChart = ({ height = 350 }) => {
       `hsl(${theme?.cssVars[mode === "dark" ? "dark" : "light"].chartLabel})`
     ),
     xaxis: {
-      categories: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "July",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ],
+      categories: monthNames,
       axisBorder: {
         show: false,
       },
@@ -106,10 +154,11 @@ const RevinueChart = ({ height = 350 }) => {
       },
       labels: {
         style: {
-          colors: `hsl(${theme?.cssVars[
-            mode === "dark" || mode === "system" ? "dark" : "light"
-          ].chartLabel
-            })`,
+          colors: `hsl(${
+            theme?.cssVars[
+              mode === "dark" || mode === "system" ? "dark" : "light"
+            ].chartLabel
+          })`,
           fontSize: "12px",
         },
       },
@@ -121,10 +170,11 @@ const RevinueChart = ({ height = 350 }) => {
       fontSize: "12px",
       fontWeight: 500,
       labels: {
-        colors: `hsl(${theme?.cssVars[
-          mode === "dark" || mode === "system" ? "dark" : "light"
-        ].chartLabel
-          })`,
+        colors: `hsl(${
+          theme?.cssVars[
+            mode === "dark" || mode === "system" ? "dark" : "light"
+          ].chartLabel
+        })`,
       },
       itemMargin: {
         horizontal: 10,
@@ -134,18 +184,62 @@ const RevinueChart = ({ height = 350 }) => {
         width: 10,
         height: 10,
         radius: 10,
-        offsetX: isRtl ? 5 : -5
-      }
-    }
+        offsetX: isRtl ? 5 : -5,
+      },
+    },
   };
+  // Show loading state
+  if (reservationsLoading) {
+    return (
+      <div className="flex items-center justify-center h-[350px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+
+
+  // Show error state
+  if (reservationsError) {
+    return (
+      <div className="flex items-center justify-center h-[350px] text-red-500">
+        Error loading chart data
+      </div>
+    );
+  }
+
   return (
+    <div className="space-y-4">
+ 
+      {/* Summary Stats */}
+      <div className="grid grid-cols-4 gap-4 p-4 bg-muted/20 rounded-lg mt-4">
+        <div className="text-center">
+          <div className="text-2xl font-bold text-primary">{trialTotal}</div>
+          <div className="text-sm text-muted-foreground">Trial</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-info">{payBeforeTotal}</div>
+          <div className="text-sm text-muted-foreground">Pay Before</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-warning">{payAfterTotal}</div>
+          <div className="text-sm text-muted-foreground">Pay After</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-foreground">{grandTotal}</div>
+          <div className="text-sm text-muted-foreground">Total</div>
+        </div>
+      </div>
+
+      {/* Chart */}
       <Chart
         options={options}
         series={series}
         type="bar"
-        height={height}
+        height={300}
         width={"100%"}
       />
+    </div>
   );
 };
 

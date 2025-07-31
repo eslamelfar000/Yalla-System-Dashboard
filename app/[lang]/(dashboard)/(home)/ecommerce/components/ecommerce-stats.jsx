@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { CupBar, NoteIcon, CheckShape, Spam } from "@/components/svg";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -51,20 +51,31 @@ const EcommerceStats = ({ data, isLoading, error }) => {
             className={cn(
               "h-[95px] w-[95px] rounded-full bg-primary/40 absolute -top-8 -right-8 ring-[20px] ring-primary/30",
               {
-                "bg-primary/50  ring-primary/20 dark:bg-primary dark:ring-primary/40": item.color === "primary",
-                "bg-orange-200 ring-orange-100 dark:bg-orange-300 dark:ring-orange-400": item.color === "warning",
-                "bg-green-200 ring-green-100 dark:bg-green-300 dark:ring-green-400": item.color === "success",
-                "bg-red-200 ring-red-100 dark:bg-red-300 dark:ring-red-400": item.color === "destructive",
+                "bg-primary/50  ring-primary/20 dark:bg-primary dark:ring-primary/40":
+                  item.color === "primary",
+                "bg-orange-200 ring-orange-100 dark:bg-orange-300 dark:ring-orange-400":
+                  item.color === "warning",
+                "bg-green-200 ring-green-100 dark:bg-green-300 dark:ring-green-400":
+                  item.color === "success",
+                "bg-red-200 ring-red-100 dark:bg-red-300 dark:ring-red-400":
+                  item.color === "destructive",
               }
             )}
           ></span>
-          <div className={`w-8 h-8 grid place-content-center rounded-full border border-dashed border-${item.color} dark:border-primary-foreground/60`}>
-            <span className={cn(`h-6 w-6 rounded-full grid place-content-center  bg-${item.color}`, {
-              "dark:bg-[#EFF3FF]/30": item.color === "primary",
-              "dark:bg-[#FFF7ED]/30": item.color === "warning",
-              "dark:bg-[#ECFDF4]/30": item.color === "success",
-              "dark:bg-[#FEF2F2]/30": item.color === "destructive"
-            })}>
+          <div
+            className={`w-8 h-8 grid place-content-center rounded-full border border-dashed border-${item.color} dark:border-primary-foreground/60`}
+          >
+            <span
+              className={cn(
+                `h-6 w-6 rounded-full grid place-content-center  bg-${item.color}`,
+                {
+                  "dark:bg-[#EFF3FF]/30": item.color === "primary",
+                  "dark:bg-[#FFF7ED]/30": item.color === "warning",
+                  "dark:bg-[#ECFDF4]/30": item.color === "success",
+                  "dark:bg-[#FEF2F2]/30": item.color === "destructive",
+                }
+              )}
+            >
               {item.icon}
             </span>
           </div>
@@ -72,8 +83,20 @@ const EcommerceStats = ({ data, isLoading, error }) => {
             {item.text}
           </span>
           <div className="flex items-center gap-1">
-            <span className="text-lg font-semibold text-default-900  dark:text-primary-foreground">{isLoading ? <Skeleton className="w-10 h-6" /> : item.total}</span>
-            <Icon icon="heroicons:arrow-trending-up" className={`w-5 h-5 text-${item.color} dark:text-primary-foreground`} />
+            <span className="text-lg font-semibold text-default-900  dark:text-primary-foreground">
+              {isLoading ? <Skeleton className="w-10 h-6" /> : item.total}
+            </span>
+            {item?.total > 0 ? (
+              <Icon
+                icon="heroicons:arrow-trending-up"
+                className={`w-5 h-5 text-${item.color} dark:text-primary-foreground`}
+              />
+            ) : (
+              <Icon
+                icon="heroicons:arrow-trending-down"
+                className={`w-5 h-5 text-${item.color} dark:text-primary-foreground`}
+              />
+            )}
           </div>
         </div>
       ))}

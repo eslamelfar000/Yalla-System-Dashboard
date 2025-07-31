@@ -11,9 +11,13 @@ const UserStats = ({ height = 350, data, isLoading, error }) => {
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
   const series = [
-    data?.reservation_types?.trial || data?.student_types?.trial || 0,
-    data?.reservation_types?.paybefore || data?.student_types?.pay_before || 0,
-    data?.reservation_types?.payafter || data?.student_types?.pay_after || 0,
+    data?.reservation_types?.trial || data?.reservations?.types?.trial || 0,
+    data?.reservation_types?.paybefore ||
+      data?.reservations?.type?.pay_before ||
+      0,
+    data?.reservation_types?.payafter ||
+      data?.reservations?.type?.pay_after ||
+      0,
   ];
 
   const options = {

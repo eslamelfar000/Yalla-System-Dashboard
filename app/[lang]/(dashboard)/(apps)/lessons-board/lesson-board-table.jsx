@@ -302,7 +302,8 @@ const LessonBoardTable = () => {
                       <TableCell colSpan={6} className="">
                         <LessonsStepsLineSpace
                           lessons={item.lessons}
-                          studentId={item.student.id}
+                          reservationId={item.reservation_id}
+                          sessionStatus={item.reservation_status}
                           handleSearchSubmit={handleSearchSubmit}
                         />
                       </TableCell>

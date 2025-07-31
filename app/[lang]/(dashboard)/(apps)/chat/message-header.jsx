@@ -38,7 +38,12 @@ const extractStudentAndTeacher = (participants) => {
   return { student, teacher };
 };
 
-const MessageHeader = ({ contact, showInfo, handleShowInfo }) => {
+const MessageHeader = ({
+  contact,
+  showInfo,
+  handleShowInfo,
+  isPolling = false,
+}) => {
   const isLg = useMediaQuery("(max-width: 1024px)");
   const { user } = useAuth();
   const userRole = user?.role || null;
@@ -115,7 +120,7 @@ const MessageHeader = ({ contact, showInfo, handleShowInfo }) => {
               {getAvatarInitials(userName)}
             </AvatarFallback>
           </Avatar>
-          <Badge
+          {/* <Badge
             className={cn(
               "h-2 w-2 p-0 absolute bottom-0 right-0 ring-2 ring-background",
               {
@@ -123,10 +128,18 @@ const MessageHeader = ({ contact, showInfo, handleShowInfo }) => {
                 "bg-gray-400": status !== "online",
               }
             )}
-          />
+          /> */}
         </div>
         <div>
-          <h3 className="text-sm font-medium text-foreground">{userName}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium text-foreground">{userName}</h3>
+            {isPolling && (
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-xs text-muted-foreground">Live</span>
+              </div>
+            )}
+          </div>
           <p className="text-xs text-muted-foreground">{userAbout}</p>
         </div>
       </div>
@@ -140,14 +153,13 @@ const MessageHeader = ({ contact, showInfo, handleShowInfo }) => {
                   variant="ghost "
                   size="sm"
                   className={`h-8 w-8 p-0 ${
-                    showInfo ? "bg-primary text-white" : "bg-primary/10 text-primary hover:text-white"
+                    showInfo
+                      ? "bg-primary text-white"
+                      : "bg-primary/10 text-primary hover:text-white"
                   }`}
                   onClick={handleShowInfo}
                 >
-                  <Icon
-                    icon="lucide:info"
-                    className={`h-4 w-4`}
-                  />
+                  <Icon icon="lucide:info" className={`h-4 w-4`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>

@@ -3,14 +3,15 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
 import { Cup, Eye, Increase, Session } from "@/components/svg";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const ReportsArea = () => {
+const ReportsArea = ({ data, isLoading, error }) => {
   const reports = [
     {
       id: 1,
       name: "New Reservations",
-      count: "6,132",
-      rate: "150",
+      count: data?.daily_reservations || 0,
+      rate: data?.daily_reservations_rate || 0,
       isUp: true,
       icon: <Session className="h-4 w-4" />,
       color: "primary",
@@ -18,8 +19,8 @@ const ReportsArea = () => {
     {
       id: 2,
       name: "New Requests",
-      count: "11,236",
-      rate: "202",
+      count: data?.daily_requests || 0,
+      rate: data?.daily_requests_rate || 0,
       isUp: false,
       icon: <Eye className="h-4 w-4" />,
       color: "info",
@@ -27,8 +28,8 @@ const ReportsArea = () => {
     {
       id: 3,
       name: "Completed Sessions",
-      count: "46s",
-      rate: "22",
+      count: data?.daily_completed_sessions || 0,
+      rate: data?.daily_completed_sessions_rate || 0,
       isUp: true,
       icon: <Increase className="h-4 w-4" />,
       color: "warning",
@@ -36,8 +37,8 @@ const ReportsArea = () => {
     {
       id: 4,
       name: "Quality Reports",
-      count: "46s",
-      rate: "30",
+      count: data?.daily_quality_reports || 0,
+      rate: data?.daily_quality_reports_rate || 0,
       isUp: false,
       icon: <Cup className="h-4 w-4" />,
       color: "destructive",
@@ -72,10 +73,23 @@ const ReportsArea = () => {
             </span>
           </CardHeader>
           <CardContent className="pb-4 px-4 h-full flex flex-col justify-end">
-            <div className="text-2xl font-semibold text-default-900 mb-2.5">
-              {item.count}
+            <div className="text-2xl font-semibold text-default-900 mb-2.5 flex items-center gap-2">
+              <span>
+                {isLoading ? <Skeleton className="w-10 h-6" /> : item.count}
+              </span>
+              {item.count > 0 ? (
+                <Icon
+                  icon="heroicons:arrow-trending-up-16-solid"
+                  className="text-success text-xl"
+                />
+              ) : (
+                <Icon
+                  icon="heroicons:arrow-trending-down-16-solid"
+                  className="text-destructive text-xl"
+                />
+              )}
             </div>
-            <div className="flex items-center font-semibold gap-1">
+            {/* <div className="flex items-center font-semibold gap-1">
               {item.isUp ? (
                 <>
                   <span className="text-success">{item.rate}%</span>
@@ -93,7 +107,7 @@ const ReportsArea = () => {
                   />
                 </>
               )}
-            </div>
+            </div> */}
             {/* <div className="mt-1 text-xs text-default-600">vs Previous 30 Days</div> */}
           </CardContent>
         </Card>

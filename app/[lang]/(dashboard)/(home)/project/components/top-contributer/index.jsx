@@ -5,11 +5,15 @@ import { data } from "./data";
 import ListItem from "./list-item";
 import DetailsCard from "./details-card";
 
-const TopContributer = () => {
+const TopContributer = ({ data, isLoading, error }) => {
+
+  const topTeachers = data?.top_teachers;
+
+
   return (
     <Card className="h-full">
       <CardHeader className="flex-row justify-between items-center gap-4 mb-0 border-none p-6">
-        <CardTitle>Top Contributer</CardTitle>
+        <CardTitle>Top Teacher</CardTitle>
         {/* <DashboardDropdown /> */}
       </CardHeader>
       <CardContent className="pt-0 ">
@@ -17,13 +21,13 @@ const TopContributer = () => {
         <div className="pt-16">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-6">
             {
-              data.slice(0, 3).map((item, index) => <DetailsCard key={item.id} item={item} index={index + 1} />)
+              topTeachers?.slice(0, 3).map((item, index) => <DetailsCard key={item.id} item={item} index={index + 1} />)
             }
 
           </div>
           <div className="mt-8 ">
-            {data.slice(3).map((item, index) =>
-              <ListItem key={`customer-${item.id}`} item={item} index={index + 3} />
+            {topTeachers?.slice(3).map((item, index) =>
+              <ListItem key={item.id} item={item} index={index + 3} />
             )}
           </div>
         </div>

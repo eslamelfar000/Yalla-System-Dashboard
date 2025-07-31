@@ -200,8 +200,6 @@ const Messages = ({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState(null);
 
-  console.log(messages);
-
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (chatHeightRef?.current) {
@@ -315,7 +313,8 @@ const MessageItem = ({
     messageTime,
     chatMessage,
     attachments,
-    senderRole;
+    senderRole,
+    readStatus;
 
   if (userRole === "admin") {
     // Admin message structure - user info is not nested in message, need to get from participants
@@ -326,12 +325,14 @@ const MessageItem = ({
       created_at,
       updated_at,
       attachments: msgAttachments,
+      read_at,
     } = message;
 
     senderId = user_id;
     messageTime = created_at || updated_at;
     chatMessage = msgContent;
     attachments = msgAttachments;
+    readStatus = read_at;
 
     // Get user info from participants array in chatInfo
     let userInfo = null;
@@ -355,6 +356,7 @@ const MessageItem = ({
       sender,
       user,
       attachments: msgAttachments,
+      read_at,
     } = message;
 
     senderId = sender_id || user_id;
@@ -366,6 +368,7 @@ const MessageItem = ({
     chatMessage = msgContent;
     attachments = msgAttachments;
     senderRole = sender?.role || user?.role;
+    readStatus = read_at;
   }
 
   // For admin view: determine message alignment based on sender role
@@ -427,9 +430,17 @@ const MessageItem = ({
                   />
                 </div>
               </div>
-              <span className="text-xs text-end text-default-500">
-                {formatTime(messageTime)}
-              </span>
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-end text-default-500">
+                  {formatTime(messageTime)}
+                </span>
+                {/* Read status indicator for own messages */}
+                {isOwnMessage && (
+                  <span className="text-xs text-default-400">
+                    {readStatus ? "✓✓" : "✓"}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="flex-none self-end -translate-y-5">
               <Avatar className="h-10 w-10">

@@ -64,6 +64,22 @@ export const getChatMessages = async (chatId, page = 1, userRole = null) => {
   }
 };
 
+// Mark messages as read in a chat
+export const markMessagesAsRead = async (chatId, userRole = null) => {
+  try {
+    // Use different endpoints based on user role
+    const endpoint = userRole === "admin" 
+      ? `dashboard/chats/${chatId}/mark-read`
+      : `chat/${chatId}/mark-read`;
+    
+    const response = await api.post(endpoint);
+    return response.data;
+  } catch (error) {
+    console.error("Error marking messages as read:", error);
+    return { success: false, message: "Failed to mark messages as read" };
+  }
+};
+
 // Create new chat
 export const createChat = async (chatData) => {
   try {
@@ -165,22 +181,4 @@ export const getUserProfile = async () => {
     console.error("Error fetching user profile:", error);
     return { data: {}, success: false, message: "Failed to fetch profile" };
   }
-};
-
-// Legacy functions for backward compatibility
-export const getContacts = async (userRole = null) => {
-  return getAllChats(1, userRole);
-};
-
-export const getMessages = async (chatId, userRole = null) => {
-  if (!chatId) return { data: [], contact: {} };
-  return getChatMessages(chatId, 1, userRole);
-};
-
-export const deleteMessage = async (obj) => {
-  return deleteChatMessage(obj.messageId || obj.index);
-};
-
-export const getProfile = async () => {
-  return getUserProfile();
 };

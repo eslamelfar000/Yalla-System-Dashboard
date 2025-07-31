@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 const ListItem = ({ item, index }) => {
-  const { name, email, score, image, color, amount } = item;
+  const { name, email, target, image, color, reservations_count } = item;
   return (
     <>
       <div className="flex flex-col justify-between sm:flex-row flex-wrap gap-7 sm:gap-4 w-full p-2 px-4  hover:bg-default-50 rounded-lg">
@@ -11,7 +11,7 @@ const ListItem = ({ item, index }) => {
         <div className="flex-none flex flex-wrap items-center gap-3">
           <div className="relative inline-block">
             <Avatar>
-              <AvatarImage src={image.src} />
+              <AvatarImage src={image} />
               <AvatarFallback>{name}</AvatarFallback>
             </Avatar>
             <Badge
@@ -33,9 +33,9 @@ const ListItem = ({ item, index }) => {
           <div className="w-full sm:w-[170px]">
             <div className="flex  justify-between items-center gap-2 mb-1">
               <span className="text-xs font-medium text-default-800">Score</span>
-              <span className="text-xs font-medium text-default-800">{score}%</span>
+              <span className="text-xs font-medium text-default-800">{target}%</span>
             </div>
-            <Progress value={score} size="sm" color={color} />
+            <Progress value={target} size="sm" color={color} />
           </div>
         </div>
       </div>

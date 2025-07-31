@@ -22,7 +22,8 @@ import CompleteSessionButton from "./complete-session-button";
 const LessonsStepsLineSpace = ({
   lessons = [],
   handleSearchSubmit,
-  studentId,
+  reservationId,
+  sessionStatus,
 }) => {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -236,8 +237,9 @@ const LessonsStepsLineSpace = ({
         </div>
 
         <CompleteSessionButton
-          studentId={studentId}
+          reservationId={reservationId}
           lessons={lessons}
+          sessionStatus={sessionStatus}
           onSuccess={handleSearchSubmit}
         />
       </div>

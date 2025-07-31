@@ -35,7 +35,10 @@ const AvatarGroup = React.forwardRef(
           <>
             {custom ? (
               <div className=" inline-block">
-                <span className="ltr:ml-5 rtl:mr-5 inline-block"> +{avatars.length - max} more</span>
+                <span className="ltr:ml-5 rtl:mr-5 inline-block">
+                  {" "}
+                  +{avatars.length - max} more
+                </span>
               </div>
             ) : (
               <Avatar
@@ -60,7 +63,10 @@ AvatarGroup.displayName = "AvatarGroup";
 const AvatarImage = React.forwardRef(({ className, ...props }, ref) => (
   <AvatarPrimitive.Image
     ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
+    className={cn(
+      "aspect-square h-full w-full object-cover object-top",
+      className
+    )}
     {...props}
   />
 ));

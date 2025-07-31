@@ -41,6 +41,7 @@ const MessageFooter = ({
   setReply,
   replayData,
   setReplyData,
+  isSending = false,
 }) => {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState([]);
@@ -261,7 +262,8 @@ const MessageFooter = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-10 w-10 rounded-full hover:bg-default-50"
+                disabled={isSending}
+                className="h-10 w-10 rounded-full hover:bg-default-50 disabled:opacity-50"
               >
                 <Paperclip className="w-5 h-5 text-primary" />
               </Button>
@@ -314,13 +316,18 @@ const MessageFooter = ({
               <textarea
                 value={message}
                 onChange={handleChange}
+                disabled={isSending}
                 placeholder={
-                  attachments.length > 0
+                  isSending
+                    ? "Sending message..."
+                    : attachments.length > 0
                     ? "Add a message to send with your file..."
                     : "Type your message... (you can include links naturally)"
                 }
                 className={`bg-background border outline-none focus:border-primary rounded-xl break-words pl-8 md:pl-3 px-3 flex-1 h-10 pt-2 p-1 pr-8 no-scrollbar ${
-                  attachments.length > 0 && !message.trim()
+                  isSending
+                    ? "border-muted-foreground/50 opacity-50"
+                    : attachments.length > 0 && !message.trim()
                     ? "border-orange-300 focus:border-orange-500"
                     : "border-default-200"
                 }`}
@@ -340,7 +347,11 @@ const MessageFooter = ({
 
               <Popover>
                 <PopoverTrigger asChild>
-                  <span className="absolute ltr:right-12 rtl:left-12 bottom-1.5 h-7 w-7 rounded-full cursor-pointer">
+                  <span
+                    className={`absolute ltr:right-12 rtl:left-12 bottom-1.5 h-7 w-7 rounded-full cursor-pointer ${
+                      isSending ? "opacity-50" : ""
+                    }`}
+                  >
                     <Annoyed className="w-6 h-6 text-primary" />
                   </span>
                 </PopoverTrigger>
@@ -359,11 +370,17 @@ const MessageFooter = ({
               <Button
                 type="submit"
                 disabled={
-                  !message.trim() || (attachments.length > 0 && !message.trim())
+                  isSending ||
+                  !message.trim() ||
+                  (attachments.length > 0 && !message.trim())
                 }
                 className="rounded-full bg-default-200 hover:bg-default-300 h-[42px] w-[42px] p-0 self-end disabled:opacity-50"
               >
-                <SendHorizontal className="w-5 h-8 text-primary rtl:rotate-180" />
+                {isSending ? (
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <SendHorizontal className="w-5 h-8 text-primary rtl:rotate-180" />
+                )}
               </Button>
             </div>
           </form>

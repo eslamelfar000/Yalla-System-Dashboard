@@ -7,8 +7,6 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
-
 import ContactList from "./contact-list";
 import { useState } from "react";
 import Blank from "./blank";
@@ -23,25 +21,20 @@ import {
   getUserProfile,
   sendMessage,
   deleteChatMessage,
+  markMessagesAsRead,
 } from "./chat-config";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import MyProfileHeader from "./my-profile-header";
-import EmptyMessage from "./empty-message";
 import Loader from "./loader";
 import { isObjectNotEmpty } from "@/lib/utils";
 import ContactInfo from "./contact-info";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 
 const ChatPage = () => {
   const { user } = useAuth();
   const [selectedChatId, setSelectedChatId] = useState(null);
-  const [showContactSidebar, setShowContactSidebar] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [messagePage, setMessagePage] = useState(1);
 
   const queryClient = useQueryClient();
 
@@ -58,55 +51,53 @@ const ChatPage = () => {
   const [replay, setReply] = useState(false);
   const [replayData, setReplyData] = useState({});
 
-  // Get all chats
-  const {
-    isLoading: chatsLoading,
-    isError: chatsError,
-    data: chatsData,
-    error: chatsErrorData,
-    refetch: refetchChats,
-  } = useQuery({
-    queryKey: ["chats", currentPage, userRole],
-    queryFn: () => getAllChats(currentPage, userRole),
+  // ===== REAL-TIME POLLING CONFIGURATION =====
+  // All queries are configured with 5-second polling intervals
+  // This creates a real-time-like experience without WebSocket complexity
+
+  // Get all chats with 5-second polling
+  // This ensures the chat list stays updated with new messages and unread counts
+  const { isLoading: chatsLoading, data: chatsData } = useQuery({
+    queryKey: ["chats", userRole],
+    queryFn: () => {
+      console.log("🔄 Polling chats...");
+      return getAllChats(1, userRole);
+    },
     keepPreviousData: true,
+    refetchInterval: 5000, // Poll every 5 seconds
+    refetchIntervalInBackground: true, // Continue polling even when tab is not active
   });
 
-  // Get chat messages
-  const {
-    isLoading: messageLoading,
-    isError: messageIsError,
-    data: messagesData,
-    error: messageError,
-    refetch: refetchMessages,
-  } = useQuery({
-    queryKey: ["messages", selectedChatId, messagePage, userRole],
-    queryFn: () => getMessagesCallback(selectedChatId, messagePage),
+  // Get chat messages with 5-second polling when chat is open
+  // Only polls when a chat is selected to avoid unnecessary API calls
+  const { isLoading: messageLoading, data: messagesData } = useQuery({
+    queryKey: ["messages", selectedChatId, userRole],
+    queryFn: () => {
+      console.log("🔄 Polling messages for chat:", selectedChatId);
+      return getMessagesCallback(selectedChatId, 1);
+    },
     enabled: !!selectedChatId,
     keepPreviousData: true,
+    refetchInterval: selectedChatId ? 5000 : false, // Only poll when chat is open
+    refetchIntervalInBackground: true,
   });
 
-  // Get chat info
-  const {
-    isLoading: chatInfoLoading,
-    isError: chatInfoError,
-    data: chatInfoData,
-    error: chatInfoErrorData,
-    refetch: refetchChatInfo,
-  } = useQuery({
+  // Get chat info with 5-second polling when chat is open
+  // Updates chat information like participant status, etc.
+  const { isLoading: chatInfoLoading, data: chatInfoData } = useQuery({
     queryKey: ["chatInfo", selectedChatId, userRole],
-    queryFn: () => getChatInfo(selectedChatId, userRole),
+    queryFn: () => {
+      console.log("🔄 Polling chat info for chat:", selectedChatId);
+      return getChatInfo(selectedChatId, userRole);
+    },
     enabled: !!selectedChatId,
     keepPreviousData: true,
+    refetchInterval: selectedChatId ? 5000 : false, // Only poll when chat is open
+    refetchIntervalInBackground: true,
   });
 
-  // Get user profile
-  const {
-    isLoading: profileLoading,
-    isError: profileIsError,
-    data: profileData,
-    error: profileError,
-    refetch: refetchProfile,
-  } = useQuery({
+  // Get user profile (no polling needed for profile)
+  const { isLoading: profileLoading, data: profileData } = useQuery({
     queryKey: ["profile"],
     queryFn: () => getUserProfile(),
     keepPreviousData: true,
@@ -133,12 +124,31 @@ const ChatPage = () => {
 
   const openChat = (chatId) => {
     setSelectedChatId(chatId);
-    setMessagePage(1); // Reset to first page when opening new chat
     setReply(false);
-    if (showContactSidebar) {
-      setShowContactSidebar(false);
-    }
+
+    // Mark messages as read when opening a chat
+    markMessagesAsReadCallback(chatId);
   };
+
+  // ===== READ/UNREAD MESSAGE HANDLING =====
+  // Messages are considered unread if read_at is null
+  // This function marks all messages in a chat as read
+  const markMessagesAsReadCallback = useCallback(
+    async (chatId) => {
+      if (!chatId || !userRole) return;
+
+      try {
+        // Call the API to mark messages as read
+        await markMessagesAsRead(chatId, userRole);
+        // Refresh the data after marking as read
+        queryClient.invalidateQueries(["messages", chatId]);
+        queryClient.invalidateQueries(["chats"]);
+      } catch (error) {
+        console.error("Error marking messages as read:", error);
+      }
+    },
+    [queryClient, userRole]
+  );
 
   const handleShowInfo = () => {
     setShowInfo(!showInfo);
@@ -186,8 +196,6 @@ const ChatPage = () => {
     setReplyData(newObj);
   };
 
-  const isMobile = useMediaQuery("(max-width: 768px)");
-
   const chats = chatsData?.data || [];
   const messages = messagesData?.data || [];
   const chatInfo = chatInfoData?.data || {};
@@ -202,6 +210,20 @@ const ChatPage = () => {
       });
     }
   }, [messages, handleSendMessage, chatsData]);
+
+  // ===== AUTO-MARK AS READ =====
+  // Automatically mark messages as read when:
+  // 1. User opens a chat (handled in openChat function)
+  // 2. New messages arrive while chat is open
+  useEffect(() => {
+    if (selectedChatId && messages.length > 0) {
+      // Check if there are unread messages (messages without read_at)
+      const hasUnreadMessages = messages.some((message) => !message.read_at);
+      if (hasUnreadMessages) {
+        markMessagesAsReadCallback(selectedChatId);
+      }
+    }
+  }, [selectedChatId, messages, markMessagesAsReadCallback]);
 
   return (
     <div className="h-[calc(100vh-250px)] flex flex-col lg:flex-row gap-5 overflow-hidden">
@@ -258,6 +280,7 @@ const ChatPage = () => {
                   contact={chatInfo}
                   handleShowInfo={handleShowInfo}
                   showInfo={showInfo}
+                  isPolling={!!selectedChatId}
                 />
 
                 {/* Messages Area */}
@@ -286,6 +309,7 @@ const ChatPage = () => {
                     setReply={setReply}
                     replayData={replayData}
                     setReplyData={setReplyData}
+                    isSending={messageMutation.isPending}
                   />
                 )}
               </>

@@ -17,32 +17,28 @@ import {
 } from "@/components/ui/alert-dialog";
 import toast from "react-hot-toast";
 
-const CompleteSessionButton = ({ studentId, lessons, onSuccess }) => {
+const CompleteSessionButton = ({ reservationId, lessons, onSuccess, sessionStatus }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
 
-  // Check if all lessons are completed
-  const allLessonsCompleted = lessons?.every(
-    (lesson) => lesson.status === "done"
-  );
 
   // Check if any lessons are available for completion
-  const hasAvailableLessons = lessons?.some((lesson) => {
-    const hasDate = lesson.day && lesson.day.trim() !== "";
-    const status = lesson.status?.toLowerCase();
-    const lessonDate = new Date(lesson.day);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    lessonDate.setHours(0, 0, 0, 0);
-    const dateReached = lessonDate <= today;
+  // const hasAvailableLessons = lessons?.some((lesson) => {
+  //   const hasDate = lesson.day && lesson.day.trim() !== "";
+  //   const status = lesson.status?.toLowerCase();
+  //   const lessonDate = new Date(lesson.day);
+  //   const today = new Date();
+  //   today.setHours(0, 0, 0, 0);
+  //   lessonDate.setHours(0, 0, 0, 0);
+  //   const dateReached = lessonDate <= today;
 
-    return hasDate && dateReached && status === "current";
-  });
+  //   return hasDate && dateReached && status === "current";
+  // });
 
   // Mutation for completing session
   const completeSessionMutation = useMutate({
     method: "POST",
-    endpoint: `dashboard/complete-session/${studentId}`,
+    endpoint: `dashboard/complete-session/${reservationId}`,
     queryKeysToInvalidate: ["lessons-board"],
     text: "Session completed successfully!",
     onSuccess: (data) => {
@@ -50,7 +46,6 @@ const CompleteSessionButton = ({ studentId, lessons, onSuccess }) => {
         setShowConfirmDialog(false);
         setIsCompleting(false);
         onSuccess?.();
-        toast.success("Session completed successfully!");
       }
     },
     onError: (error) => {
@@ -60,25 +55,12 @@ const CompleteSessionButton = ({ studentId, lessons, onSuccess }) => {
   });
 
   const handleCompleteSession = () => {
-    if (allLessonsCompleted) {
-      toast.info("All lessons are already completed!");
-      return;
-    }
-
-    if (!hasAvailableLessons) {
-      toast.error("No lessons are available for completion at this time.");
-      return;
-    }
-
     setShowConfirmDialog(true);
   };
 
   const confirmSessionCompletion = () => {
     setIsCompleting(true);
-    completeSessionMutation.mutate({
-      student_id: studentId,
-      completed_at: new Date().toISOString(),
-    });
+    completeSessionMutation.mutate();
   };
 
   return (
@@ -88,25 +70,36 @@ const CompleteSessionButton = ({ studentId, lessons, onSuccess }) => {
           onClick={handleCompleteSession}
           size="lg"
           variant="outline"
-          disabled={allLessonsCompleted || !hasAvailableLessons}
+          disabled={
+            // Button is enabled only if all lessons are done and session status is pending
+            !(
+              lessons?.length > 0 &&
+              lessons.every((l) => l.status === "done") &&
+              sessionStatus === "pending"
+            )
+          }
           className={cn("h-10 px-4 text-sm font-medium", {
-            "bg-green-50 text-green-700 border-green-200 hover:bg-green-100":
-              allLessonsCompleted,
-            "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20":
-              hasAvailableLessons && !allLessonsCompleted,
-            "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed":
-              !hasAvailableLessons && !allLessonsCompleted,
+            "bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-700":
+              sessionStatus === "done",
+            "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 hover:text-primary":
+              sessionStatus === "pending" &&
+              lessons?.length > 0 &&
+              lessons.every((l) => l.status === "done"),
+            "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed hover:text-gray-400":
+              sessionStatus === "pending" &&
+              lessons?.length > 0 &&
+              !lessons.every((l) => l.status === "done"),
           })}
         >
           <Icon
             icon={
-              allLessonsCompleted
+              sessionStatus === "done"
                 ? "heroicons:check-circle"
                 : "heroicons:play-circle"
             }
             className="w-6 h-6 mr-2"
           />
-          {allLessonsCompleted ? "Session Completed" : "Complete Session"}
+          {sessionStatus === "done" ? "Session Completed" : "Complete Session"}
         </Button>
       </div>
 
@@ -125,9 +118,9 @@ const CompleteSessionButton = ({ studentId, lessons, onSuccess }) => {
               <div className="bg-muted/50 p-4 rounded-lg space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">
-                    Student ID:
+                    Reservation ID:
                   </span>
-                  <span className="text-sm font-semibold">{studentId}</span>
+                  <span className="text-sm font-semibold">{reservationId}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">
