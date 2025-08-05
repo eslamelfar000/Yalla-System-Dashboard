@@ -139,9 +139,7 @@ const NotesTable = () => {
             {columns.map((column, index) => (
               <TableHead
                 key={column.key}
-                className={`${
-                  index === columns.length - 1 ? "text-right" : ""
-                }`}
+                // className={`last:text-right`}
               >
                 {column.label}
               </TableHead>
@@ -170,8 +168,8 @@ const NotesTable = () => {
                     {item.note}
                   </div>
                 </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-2">
+                <TableCell className="">
+                  <div className="flex items-center gap-2">
                     <Button
                       size="icon"
                       variant="outline"

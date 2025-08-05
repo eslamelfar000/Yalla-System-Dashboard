@@ -136,13 +136,13 @@ const columns = [
     accessorKey: "payment_type",
     header: "Method",
     cell: ({ row }) => {
-      if (!row?.original?.payment_type)
-        return <Skeleton className="h-4 w-16" />;
+      // if (!row?.original?.payment_type)
+      //   return <Skeleton className="h-4 w-16" />;
 
       return (
         <div className="font-medium text-card-foreground/80">
           <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap capitalize">
-            {row.original.payment_type}
+            {row.original.payment_type || "No Method"}
           </span>
         </div>
       );

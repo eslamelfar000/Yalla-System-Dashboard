@@ -82,9 +82,9 @@ const columns = [
       <div className="text-card-foreground/80">
         <div className="flex space-x-3 rtl:space-x-reverse items-center">
           <span className="text-sm text-gray-600">
-            {row?.original?.count > 1
-              ? row?.original?.count + " sessions"
-              : row?.original?.count + " session"}
+            {row?.original?.student?.sessions_count > 1
+              ? row?.original?.student?.sessions_count + " sessions"
+              : row?.original?.student?.sessions_count + " session"}
           </span>
         </div>
       </div>
@@ -104,8 +104,8 @@ const columns = [
     ),
   },
   {
-    accessorKey: "payed",
-    header: "Payed",
+    accessorKey: "method",
+    header: "Method",
     cell: ({ row }) => (
       <div className="text-card-foreground/80">
         <div className="flex space-x-3 rtl:space-x-reverse items-center">
@@ -117,7 +117,7 @@ const columns = [
                 : "bg-gray-100 text-gray-800"
             )}
           >
-            {row?.original?.payment_type}
+            {row?.original?.payment_type || "N/A"}
           </Badge>
         </div>
       </div>
@@ -194,7 +194,7 @@ export function SessionsDataTable() {
 
   // Build endpoint with search and teacher filter
   const buildEndpoint = useMemo(() => {
-    let endpoint = "dashboard/complete-sessions";
+    let endpoint = `dashboard/complete-sessions?page=${currentPage}`;
     const params = [];
 
     if (selectedTeacher) {
@@ -210,7 +210,7 @@ export function SessionsDataTable() {
     }
 
     return endpoint;
-  }, [selectedTeacher, debouncedSearchValue]);
+  }, [selectedTeacher, debouncedSearchValue, currentPage]);
 
   // Get complete sessions data with search and teacher filter
   const {
@@ -220,7 +220,12 @@ export function SessionsDataTable() {
     refetch: refetchSessions,
   } = useGetData({
     endpoint: buildEndpoint,
-    queryKey: ["complete-sessions", selectedTeacher, debouncedSearchValue],
+    queryKey: [
+      "complete-sessions",
+      selectedTeacher,
+      debouncedSearchValue,
+      currentPage,
+    ],
   });
 
   const sessions = sessionsData?.data?.sessions || [];
@@ -477,9 +482,9 @@ export function SessionsDataTable() {
               <br />
               <strong>Booked:</strong>{" "}
               <span className="capitalize">
-                {selectedSession?.count > 1
-                  ? selectedSession?.count + " sessions"
-                  : selectedSession?.count + " session"}
+                {selectedSession?.student?.sessions_count > 1
+                  ? selectedSession?.student?.sessions_count + " sessions"
+                  : selectedSession?.student?.sessions_count + " session"}
               </span>
               <br />
               <br />

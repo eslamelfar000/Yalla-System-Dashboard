@@ -57,6 +57,11 @@ const TeacherCalendarView = ({ sessions = [] }) => {
     let [_, hours, minutes, period] = match;
     hours = parseInt(hours);
 
+    // Handle hours 13+ as 24-hour format regardless of period
+    if (hours >= 12 && period === "am") {
+      return `${hours.toString().padStart(2, "0")}:${minutes}`;
+    }
+
     // Convert to 24-hour format
     if (period === "pm" && hours !== 12) {
       hours += 12;
@@ -436,7 +441,7 @@ const TeacherCalendarView = ({ sessions = [] }) => {
             viewDidMount={() => {
               const slots = document.querySelectorAll(".fc .fc-timegrid-slot");
               slots.forEach((slot) => {
-                slot.style.height = "3.5em";
+                slot.style.height = "3.4em";
               });
             }}
             slotLabelFormat={{ hour: "2-digit", minute: "2-digit" }}
@@ -457,6 +462,8 @@ const TeacherCalendarView = ({ sessions = [] }) => {
               },
             }}
             height="auto"
+            slotMinTime="09:00:00"
+            slotMaxTime="21:00:00"
             selectConstraint={{
               start: new Date().toISOString().split("T")[0], // Today
               end: "2100-12-31", // Far future

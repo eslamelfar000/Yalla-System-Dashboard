@@ -86,6 +86,11 @@ const QualityCalendarView = () => {
     let [_, hours, minutes, period] = match;
     hours = parseInt(hours);
 
+        // Handle hours 13+ as 24-hour format regardless of period
+    if (hours >= 12 && period === "am") {
+      return `${hours.toString().padStart(2, "0")}:${minutes}`;
+    }
+
     if (period === "pm" && hours !== 12) {
       hours += 12;
     } else if (period === "am" && hours === 12) {
@@ -514,6 +519,8 @@ const QualityCalendarView = () => {
                 buttonText: "Week",
               },
             }}
+            slotMinTime="09:00:00"
+            slotMaxTime="21:00:00"
             height="auto"
             selectConstraint={{
               start: new Date().toISOString().split("T")[0],

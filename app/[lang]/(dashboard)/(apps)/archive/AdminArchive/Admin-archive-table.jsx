@@ -35,6 +35,7 @@ const AdminArchiveTable = ({ role }) => {
   const [selectedTeacher, setSelectedTeacher] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
   const [filters, setFilters] = useState({
     types: [],
     sessions: [],
@@ -113,8 +114,10 @@ const AdminArchiveTable = ({ role }) => {
   const prepareExportData = useCallback(() => {
     return archiveList.map((item) => ({
       "Student Name": item.student?.name || "N/A",
-      "Student Email": item.student?.email || "N/A",
-      "Student Phone": item.student?.phone || "N/A",
+      ...(role === "admin" && {
+        "Student Phone": item.student?.phone || "N/A",
+        "Student Email": item.student?.email || "N/A",
+      }),
       "Student ID": item.student?.id || "N/A",
       "Teacher Name": item.teacher?.name || "N/A",
       "Teacher Email": item.teacher?.email || "N/A",

@@ -60,13 +60,6 @@ function page() {
         </div>
 
         <div className="space-y-5">
-          <div className="flex flex-wrap items-center gap-4 mb-1">
-            <div className="flex-1">
-              <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
-                Coaching
-              </h3>
-            </div>
-          </div>
           <CoachingTableStatus
             action={"board"}
             selectedTeacher={selectedTeacher}

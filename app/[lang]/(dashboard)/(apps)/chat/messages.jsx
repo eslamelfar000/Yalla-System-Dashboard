@@ -396,7 +396,7 @@ const MessageItem = ({
                 <span className="text-xs text-default-500">{senderName}</span>
               )}
               <div className="flex items-center gap-1">
-                <div className="opacity-0 invisible group-hover:opacity-100 group-hover:visible">
+                {/* <div className="opacity-0 invisible group-hover:opacity-100 group-hover:visible">
                   {userRole === "teacher" && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -418,7 +418,7 @@ const MessageItem = ({
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
-                </div>
+                </div> */}
                 <div className="whitespace-pre-wrap break-all">
                   <div className="bg-primary text-primary-foreground text-sm py-2 px-3 rounded-2xl flex-1">
                     {renderTextWithLinks(safeMessageContent)}

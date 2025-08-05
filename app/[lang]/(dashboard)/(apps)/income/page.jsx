@@ -9,16 +9,26 @@ import IncomeChart from "./IncomeChart/income-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import UserStats from "../../(home)/dashboard/components/user-stats-chart";
 import { getUserRoleFromCookies } from "@/lib/auth-utils";
+import { useGetData } from "@/hooks/useGetData";
 
 function page() {
   const userRole = getUserRoleFromCookies();
   const [role, setRole] = useState(userRole);
+
+
+  const { data, isLoading, error } = useGetData({
+    endpoint: "dashboard/financial-dashboard",
+    enabledKey: ["financial-dashboard"],
+  });
+
+
+
   return (
     <div className="space-y-6">
       {role === "admin" ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-4">
-            <IncomeArea />
+            <IncomeArea data={data} isLoading={isLoading} error={error} />
           </div>
           <div className="grid grid-cols-3 gap-4 ">
             <div className="col-span-2">
