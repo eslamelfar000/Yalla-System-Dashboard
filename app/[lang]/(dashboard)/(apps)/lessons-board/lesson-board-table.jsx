@@ -74,16 +74,20 @@ const LessonBoardTable = () => {
       label: "ID",
     },
     {
-      key: "type",
-      label: "Type",
+      key: "reservations-count",
+      label: "Reservations Count",
     },
     {
-      key: "booked",
-      label: "Booked",
+      key: "total-lessons",
+      label: "Total Lessons",
     },
     {
       key: "progress",
       label: "Progress",
+    },
+    {
+      key: "actions",
+      label: "Actions",
     },
   ];
 
@@ -205,10 +209,7 @@ const LessonBoardTable = () => {
               ))
             ) : error ? (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="text-center py-8"
-                >
+                <TableCell colSpan={6} className="text-center py-8">
                   <div className="flex items-center justify-center text-default-500">
                     <Icon
                       icon="heroicons:exclamation-triangle"
@@ -220,10 +221,7 @@ const LessonBoardTable = () => {
               </TableRow>
             ) : !lessonsData || lessonsData.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="text-center py-8"
-                >
+                <TableCell colSpan={6} className="text-center py-8">
                   <div className="flex items-center justify-center text-default-500">
                     <Icon
                       icon="heroicons:document-text"
@@ -235,11 +233,11 @@ const LessonBoardTable = () => {
               </TableRow>
             ) : (
               lessonsData.map((item) => (
-                <Fragment key={item.student.id}>
+                <Fragment key={item.student?.id}>
                   <TableRow
-                    onClick={() => toggleRow(item.student.id)}
+                    onClick={() => toggleRow(item.student?.id)}
                     className={`cursor-pointer hover:bg-default-100 transition-all duration-300 ${
-                      collapsedRows.includes(item.student.id)
+                      collapsedRows.includes(item.student?.id)
                         ? "bg-default-100"
                         : ""
                     }`}
@@ -249,24 +247,35 @@ const LessonBoardTable = () => {
                         <div className="flex gap-3 items-center">
                           <Avatar className="rounded-full">
                             <AvatarImage
-                              src={fixImageUrl(item.student.image)}
+                              src={fixImageUrl(item.student?.image)}
                             />
                             <AvatarFallback>
-                              {getAvatarInitials(item.student.name)}
+                              {getAvatarInitials(item.student?.name)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
                             <span className="text-sm block text-card-foreground">
-                              {item.student.name}
+                              {item.student?.name || "Unknown Student"}
                             </span>
                           </div>
                         </div>
                       </div>
                     </TableCell>
 
-                    <TableCell>{item.student.id}</TableCell>
-                    <TableCell>{getStudentType(item.student)}</TableCell>
-                    <TableCell>{getBookedSessions(item.student)}</TableCell>
+                    <TableCell>{item.student?.id}</TableCell>
+
+                    <TableCell>
+                      <span className="text-sm bg-blue-100 text-blue-800 border border-blue-200 rounded-full px-3 py-1 font-medium">
+                        {item.reservations_count || 0} Reservations
+                      </span>
+                    </TableCell>
+
+                    <TableCell>
+                      <span className="text-sm bg-green-100 text-green-800 border border-green-200 rounded-full px-3 py-1 font-medium">
+                        {item.student?.sessions_count || 0} Lessons
+                      </span>
+                    </TableCell>
+
                     <TableCell>
                       <span className="text-sm bg-gray-100 dark:bg-gray-900 text-primary border border-primary rounded-full px-4 py-1 font-medium select-none">
                         {calculateProgress(item.student)}
@@ -276,7 +285,7 @@ const LessonBoardTable = () => {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Button
-                          onClick={() => toggleRow(item.student.id)}
+                          onClick={() => toggleRow(item.student?.id)}
                           size="icon"
                           variant="outline"
                           color="secondary"
@@ -288,7 +297,7 @@ const LessonBoardTable = () => {
                               "h-5 w-5 transition-all duration-300",
                               {
                                 "rotate-180": collapsedRows.includes(
-                                  item.student.id
+                                  item.student?.id
                                 ),
                               }
                             )}
@@ -297,15 +306,84 @@ const LessonBoardTable = () => {
                       </div>
                     </TableCell>
                   </TableRow>
-                  {collapsedRows.includes(item.student.id) && (
+                  {collapsedRows.includes(item.student?.id) && (
                     <TableRow>
                       <TableCell colSpan={6} className="">
-                        <LessonsStepsLineSpace
-                          lessons={item.lessons}
-                          reservationId={item.reservation_id}
-                          sessionStatus={item.reservation_status}
-                          handleSearchSubmit={handleSearchSubmit}
-                        />
+                        <div className="space-y-4">
+                          {item.reservations && item.reservations.length > 0 ? (
+                            item.reservations.map((reservation, index) => (
+                              <div
+                                key={reservation.reservation_id || index}
+                                className="border rounded-lg p-4 bg-gray-50"
+                              >
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-4">
+                                    <span className="text-sm font-medium text-gray-700">
+                                      Reservation #{reservation.reservation_id}
+                                    </span>
+                                    <span
+                                      className={cn(
+                                        "text-xs px-2 py-1 rounded-full font-medium",
+                                        {
+                                          "bg-blue-100 text-blue-800":
+                                            reservation.reservation_type ===
+                                            "trail",
+                                          "bg-green-100 text-green-800":
+                                            reservation.reservation_type ===
+                                            "paybefore",
+                                          "bg-orange-100 text-orange-800":
+                                            reservation.reservation_type ===
+                                            "payafter",
+                                          "bg-gray-100 text-gray-800":
+                                            !reservation.reservation_type,
+                                        }
+                                      )}
+                                    >
+                                      {reservation.reservation_type
+                                        ? reservation.reservation_type.toUpperCase()
+                                        : "N/A"}
+                                    </span>
+                                    <span
+                                      className={cn(
+                                        "text-xs px-2 py-1 rounded-full font-medium",
+                                        {
+                                          "bg-green-100 text-green-800":
+                                            reservation.reservation_status ===
+                                            "done",
+                                          "bg-yellow-100 text-yellow-800":
+                                            reservation.reservation_status ===
+                                            "pending",
+                                          "bg-red-100 text-red-800":
+                                            reservation.reservation_status ===
+                                            "cancelled",
+                                          "bg-gray-100 text-gray-800":
+                                            !reservation.reservation_status,
+                                        }
+                                      )}
+                                    >
+                                      {reservation.reservation_status
+                                        ? reservation.reservation_status.toUpperCase()
+                                        : "N/A"}
+                                    </span>
+                                    <span className="text-sm text-gray-600">
+                                      ${reservation.reservation_price || 0}
+                                    </span>
+                                  </div>
+                                </div>
+                                <LessonsStepsLineSpace
+                                  lessons={reservation.lessons || []}
+                                  reservationId={reservation.reservation_id}
+                                  sessionStatus={reservation.reservation_status}
+                                  handleSearchSubmit={handleSearchSubmit}
+                                />
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-4 text-gray-500">
+                              No reservations found for this student
+                            </div>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   )}
