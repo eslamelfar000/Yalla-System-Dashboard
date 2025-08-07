@@ -374,6 +374,7 @@ const LessonBoardTable = () => {
                                   lessons={reservation.lessons || []}
                                   reservationId={reservation.reservation_id}
                                   sessionStatus={reservation.reservation_status}
+                                  requestStatus={reservation.request_status}
                                   handleSearchSubmit={handleSearchSubmit}
                                 />
                               </div>

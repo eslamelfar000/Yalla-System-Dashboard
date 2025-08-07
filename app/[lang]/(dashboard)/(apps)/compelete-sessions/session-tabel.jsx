@@ -198,15 +198,15 @@ export function SessionsDataTable() {
     const params = [];
 
     if (selectedTeacher) {
-      params.push(`teacher_id=${selectedTeacher}`);
+      params.push(`&teacher_id=${selectedTeacher}`);
     }
 
     if (debouncedSearchValue) {
-      params.push(`search=${encodeURIComponent(debouncedSearchValue)}`);
+      params.push(`&search=${encodeURIComponent(debouncedSearchValue)}`);
     }
 
     if (params.length > 0) {
-      endpoint += `?${params.join("&")}`;
+      endpoint += `${params.join("&")}`;
     }
 
     return endpoint;

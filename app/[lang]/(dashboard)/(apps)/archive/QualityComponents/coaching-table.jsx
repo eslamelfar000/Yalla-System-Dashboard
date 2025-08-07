@@ -34,6 +34,7 @@ import LoadingButton from "@/components/Shared/loading-button";
 import Pagination from "@/components/Shared/Pagination/Pagination";
 import DownloadButton from "@/components/Shared/DownloadButton";
 import { usePathname } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 
 const CoachingTableStatus = ({ selectedTeacher, action, selectedMonth }) => {
   const [selectedCoaching, setSelectedCoaching] = useState(null);
@@ -63,7 +64,7 @@ const CoachingTableStatus = ({ selectedTeacher, action, selectedMonth }) => {
       return endpoint;
     } else {
       // Use coaching endpoint for other actions
-      let endpoint = `dashboard/coaching?page=${currentPage}&status=current`;
+      let endpoint = `dashboard/coaching?page=${currentPage}`;
       if (selectedTeacher) {
         endpoint += `&teacher_id=${selectedTeacher}`;
       }
@@ -121,16 +122,8 @@ const CoachingTableStatus = ({ selectedTeacher, action, selectedMonth }) => {
       label: "Session",
     },
     {
-      key: "id",
-      label: "ID",
-    },
-    {
       key: "date",
       label: "Date",
-    },
-    {
-      key: "purpose",
-      label: "Purpose",
     },
 
     ...(action === "qa-reports" || action === "board"
@@ -202,12 +195,14 @@ const CoachingTableStatus = ({ selectedTeacher, action, selectedMonth }) => {
         <h3 className="text-xl font-medium text-default-700 mb-2 opacity-60">
           Coaching
         </h3>
-        <DownloadButton
-          data={dataList}
-          prepareExportData={prepareExportData}
-          fileName="coaching-sessions"
-          disabled={isLoading}
-        />
+        {action === "archive" && (
+          <DownloadButton
+            data={dataList}
+            prepareExportData={prepareExportData}
+            fileName="coaching-sessions"
+            disabled={isLoading}
+          />
+        )}
       </div>
 
       <Card>
@@ -245,45 +240,67 @@ const CoachingTableStatus = ({ selectedTeacher, action, selectedMonth }) => {
                   <TableCell className="font-medium">
                     {item.teacher?.name || item.id}
                   </TableCell>
-                  <TableCell>{item.id}</TableCell>
                   <TableCell>
-                    {new Date(
-                      item.date || item.created_at
-                    ).toLocaleDateString()}
+                    {new Date(item.day || item.created_at).toLocaleDateString()}
                   </TableCell>
-                  <TableCell>{item.purpose || "N/A"}</TableCell>
-                  {action === "qa-reports" ||
-                    (action === "board" && (
-                      <TableCell>
-                        {item?.status === "done" ? (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className="w-8 h-8 text-green-500"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleCompleteCoaching(item)}
-                            disabled={item.completed}
-                          >
-                            <Icon
-                              icon="heroicons:check"
-                              className="w-4 h-4 mr-1"
-                            />
-                            Mark Done
-                          </Button>
-                        )}
-                      </TableCell>
-                    ))}
+                  {action === "qa-reports" && (
+                    <TableCell>
+                      {item?.status === "done" ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="w-8 h-8 text-green-500"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      ) : (
+                        <Badge
+                          variant={
+                            item?.status === "done" ? "success" : "warning"
+                          }
+                          className="text-xs"
+                        >
+                          Pending
+                        </Badge>
+                      )}
+                    </TableCell>
+                  )}
+                  {action === "board" && (
+                    <TableCell>
+                      {item?.status === "done" ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="w-8 h-8 text-green-500"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCompleteCoaching(item)}
+                          disabled={item.completed}
+                        >
+                          <Icon
+                            icon="heroicons:check"
+                            className="w-4 h-4 mr-1"
+                          />
+                          Mark Done
+                        </Button>
+                      )}
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}

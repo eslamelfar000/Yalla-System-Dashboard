@@ -24,6 +24,7 @@ const LessonsStepsLineSpace = ({
   handleSearchSubmit,
   reservationId,
   sessionStatus,
+  requestStatus,
 }) => {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -98,11 +99,16 @@ const LessonsStepsLineSpace = ({
     return lessonDateObj <= today;
   };
 
-  // Get lesson status based on date and status
+  // Get lesson status based on date, status, and request status
   const getLessonStatus = (lesson) => {
     const status = lesson.status?.toLowerCase();
     const lessonDate = parseLessonDate(lesson.date);
     const dateReached = isLessonDateReached(lessonDate);
+
+    // If request status is pending, disable all lessons regardless of date
+    if (requestStatus === "pending") {
+      return "locked"; // Disabled due to pending request
+    }
 
     if (!dateReached) {
       return "locked"; // Date hasn't arrived yet
@@ -135,6 +141,10 @@ const LessonsStepsLineSpace = ({
   // Check if lesson can be interacted with
   const canInteractWithLesson = (lesson) => {
     const status = getLessonStatus(lesson);
+    // If request status is pending, no lessons can be interacted with
+    if (requestStatus === "pending") {
+      return false;
+    }
     return status === "current"; // Only current lessons with reached dates can be completed
   };
 
@@ -142,6 +152,11 @@ const LessonsStepsLineSpace = ({
   const getStatusMessage = (lesson) => {
     const status = getLessonStatus(lesson);
     const lessonDate = parseLessonDate(lesson.date);
+
+    // If request status is pending, show specific message
+    if (requestStatus === "pending") {
+      return "Lessons disabled - Request is pending approval";
+    }
 
     switch (status) {
       case "current":
@@ -162,6 +177,14 @@ const LessonsStepsLineSpace = ({
 
   const handleLessonClick = (lesson) => {
     const status = getLessonStatus(lesson);
+
+    // If request status is pending, show specific message
+    if (requestStatus === "pending") {
+      toast.error(
+        "Lessons are disabled because the request is pending approval."
+      );
+      return;
+    }
 
     if (status === "done") {
       toast.success("This lesson is already completed!");
@@ -221,6 +244,14 @@ const LessonsStepsLineSpace = ({
 
           {/* Status Summary */}
           <div className="flex flex-wrap gap-4 text-sm">
+            {requestStatus === "pending" && (
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <span className="text-red-600 font-medium">
+                  Request Pending - Lessons Disabled
+                </span>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-primary rounded-full"></div>
               <span>Available: {statusCounts.current}</span>

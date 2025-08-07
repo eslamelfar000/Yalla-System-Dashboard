@@ -48,8 +48,8 @@ const ReportsTable = ({ selectedTeacher }) => {
     refetch,
   } = useGetData({
     endpoint: selectedTeacher
-      ? `dashboard/reports?send=pending&teacher_id=${selectedTeacher}&page=${currentPage}`
-      : `dashboard/reports?send=pending&page=${currentPage}`,
+      ? `dashboard/reports?teacher_id=${selectedTeacher}&page=${currentPage}`
+      : `dashboard/reports?page=${currentPage}`,
     queryKey: ["reports", selectedTeacher, currentPage],
   });
 

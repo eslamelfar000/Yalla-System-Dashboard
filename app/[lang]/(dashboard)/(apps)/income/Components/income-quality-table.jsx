@@ -29,7 +29,7 @@ import Pagination from "@/components/Shared/Pagination/Pagination";
 import SalaryAdjustmentPopover from "./salary-adjustment-popover";
 import { TrendingDown, TrendingUp } from "lucide-react";
 
-const columns = (type, selectedTeacher, onAddAdjustment) => [
+const columns = (type, selectedTeacher, onAddAdjustment, price) => [
   {
     accessorKey: "teacher-name",
     header: "Teacher Name",
@@ -82,8 +82,7 @@ const columns = (type, selectedTeacher, onAddAdjustment) => [
       <div className="font-medium text-card-foreground/80">
         <div className="flex space-x-3 rtl:space-x-reverse items-center">
           <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-            {/* {row?.original?.type || "N/A"} */}
-            Coaching
+            {row?.original?.coaching === 1 ? "Coaching" : "Review"}
           </span>
         </div>
       </div>
@@ -95,22 +94,25 @@ const columns = (type, selectedTeacher, onAddAdjustment) => [
     cell: ({ row }) => (
       <div className="font-medium text-card-foreground/80">
         <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-          {row?.original?.payment?.created_at || "N/A"}
+          {row?.original?.day || "N/A"}
         </span>
       </div>
     ),
   },
-  // {
-  //   accessorKey: "price",
-  //   header: "Price",
-  //   cell: ({ row }) => (
-  //     <div className="font-medium text-card-foreground/80">
-  //       <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
-  //         {row?.original?.price || "N/A"} $
-  //       </span>
-  //     </div>
-  //   ),
-  // },
+  {
+    accessorKey: "price",
+    header: "Price",
+    cell: ({ row }) => (
+      <div className="font-medium text-card-foreground/80">
+        <span className="text-sm opacity-70 font-[400] text-card-foreground whitespace-nowrap">
+          {row?.original?.coaching === 1
+            ? price?.coaching_price || "N/A"
+            : price?.review_price || "N/A"}{" "}
+          $
+        </span>
+      </div>
+    ),
+  },
   {
     accessorKey: "ded-raise",
     header: "Ded. | Raise",
@@ -260,6 +262,7 @@ export function IncomeQualityDataTable({
   });
 
   const incomeData = data?.data?.lessons || [];
+  const price = data?.data?.user || 0;
 
   const handleAddAdjustment = () => {
     refetch();
@@ -267,7 +270,7 @@ export function IncomeQualityDataTable({
 
   const table = useReactTable({
     data: incomeData,
-    columns: columns(type, selectedQuality, handleAddAdjustment),
+    columns: columns(type, selectedQuality, handleAddAdjustment, price),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
