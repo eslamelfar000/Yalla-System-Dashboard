@@ -76,6 +76,19 @@ const columns = [
     ),
   },
   {
+    accessorKey: "phone",
+    header: "Phone",
+    cell: ({ row }) => (
+      <div className="text-card-foreground/80">
+        <div className="flex space-x-3 rtl:space-x-reverse items-center">
+          <span className="text-sm text-gray-600">
+            {row?.original?.student?.phone || "N/A"}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+  {
     accessorKey: "booked",
     header: "Booked",
     cell: ({ row }) => (
@@ -119,19 +132,6 @@ const columns = [
           >
             {row?.original?.payment_type || "N/A"}
           </Badge>
-        </div>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "teacher_phone",
-    header: "Teacher Phone",
-    cell: ({ row }) => (
-      <div className="text-card-foreground/80">
-        <div className="flex space-x-3 rtl:space-x-reverse items-center">
-          <span className="text-sm text-gray-600">
-            {row?.original?.teacher?.phone || "N/A"}
-          </span>
         </div>
       </div>
     ),

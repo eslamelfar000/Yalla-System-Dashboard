@@ -44,8 +44,8 @@ const UsersTableStatus = ({ type }) => {
     refetch,
   } = useUsers(type, currentPage);
 
+
   const axiosInstance = useAxios();
-  const queryClient = useQueryClient();
 
   const columns = [
     {
@@ -161,7 +161,7 @@ const UsersTableStatus = ({ type }) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {!users || users?.length === 0
+            {!users || users?.data?.data?.length === 0
               ? handelEmpty()
               : users?.data?.data?.map((item) => (
                   <TableRow

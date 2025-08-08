@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     setIsAuthenticated(false);
-    router.push('/');
+    page.reload();
   };
 
   const checkRouteAccess = (route) => {

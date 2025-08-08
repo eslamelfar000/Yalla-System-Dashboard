@@ -11,7 +11,7 @@ const UserStats = ({ height = 350, data, isLoading, error }) => {
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
   const series = [
-    data?.reservation_types?.trial || data?.reservations?.types?.trial || 0,
+    data?.reservation_types?.trail || data?.reservations?.type?.trail || 0,
     data?.reservation_types?.paybefore ||
       data?.reservations?.type?.pay_before ||
       0,
@@ -19,6 +19,8 @@ const UserStats = ({ height = 350, data, isLoading, error }) => {
       data?.reservations?.type?.pay_after ||
       0,
   ];
+
+
 
   const options = {
     chart: {

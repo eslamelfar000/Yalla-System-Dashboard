@@ -30,6 +30,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 function AddTeacherComponent() {
   const [show, setShow] = useState(false);
+  const queryClient = useQueryClient();
   const strongPattern =
     /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/;
 
@@ -110,7 +111,12 @@ function AddTeacherComponent() {
       role: "teacher",
     };
 
-    createTeacher(teacherData);
+    createTeacher(teacherData, {
+      onSuccess: () => {
+        form.reset(); 
+        queryClient.invalidateQueries({ queryKey: ["users", "teacher"] });
+      },
+    });
   };
 
   return (

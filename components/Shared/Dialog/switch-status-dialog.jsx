@@ -35,8 +35,6 @@ const SwitchStatusDialog = ({
     }
   };
 
-  console.log(isNew, userId, userName);
-
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>

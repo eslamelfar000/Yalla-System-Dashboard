@@ -12,7 +12,7 @@ const TopContributer = ({ data, isLoading, error }) => {
 
   return (
     <Card className="h-full">
-      <CardHeader className="flex-row justify-between items-center gap-4 mb-0 border-none p-6">
+      <CardHeader className="flex-row justify-between items-center gap-4 mb-0 border-none p-6 mb-4">
         <CardTitle>Top Teacher</CardTitle>
         {/* <DashboardDropdown /> */}
       </CardHeader>

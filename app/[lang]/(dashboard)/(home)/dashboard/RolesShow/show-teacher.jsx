@@ -54,7 +54,7 @@ const ShowTeacher = ({ role }) => {
           <Card className="h-full flex flex-col">
             <CardHeader className="border-none p-6 pt-5 mb-20">
               <CardTitle className="text-lg font-semibold text-default-900 p-0">
-                Students Type
+                Reservation Type
               </CardTitle>
             </CardHeader>
             <CardContent>

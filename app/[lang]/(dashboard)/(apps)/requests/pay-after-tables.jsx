@@ -201,9 +201,9 @@ export function PayAfterDataTable() {
     endpoint: searchQuery
       ? `dashboard/requests?type=pay_after&name=${encodeURIComponent(
           searchQuery
-        )}`
-      : "dashboard/requests?type=pay_after",
-    queryKey: ["pay-after-requests", searchQuery],
+        )}&page=${currentPage}`
+      : `dashboard/requests?type=pay_after&page=${currentPage}`,
+    queryKey: ["pay-after-requests", searchQuery, currentPage],
   });
 
   const requests = requestsData?.data?.items || [];

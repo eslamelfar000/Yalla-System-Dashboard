@@ -49,13 +49,13 @@ const LogInForm = () => {
     setPasswordType((prev) => (prev === "text" ? "password" : "text"));
   };
 
-  const [type, setType] = React.useState("admin");
+  // const [type, setType] = React.useState("admin");
 
   const {
     register,
     handleSubmit,
     reset,
-    setValue,
+    // setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(schema),
@@ -66,25 +66,25 @@ const LogInForm = () => {
     },
   });
 
-  useEffect(() => {
-    setValue(
-      "login",
-      type === "admin"
-        ? "super@admin.com"
-        : type === "teacher"
-        ? "eslam5saber707@gmail.com	"
-        : "eslamsaber708@gmail.com"
-    );
+  // useEffect(() => {
+  //   setValue(
+  //     "login",
+  //     type === "admin"
+  //       ? "super@admin.com"
+  //       : type === "teacher"
+  //       ? "eslam5saber707@gmail.com	"
+  //       : "eslamsaber708@gmail.com"
+  //   );
 
-    setValue(
-      "password",
-      type === "admin"
-        ? "Eslam@000"
-        : type === "teacher"
-        ? "Eslam@000"
-        : "Eslam@555"
-    );
-  }, [type, setValue]);
+  //   setValue(
+  //     "password",
+  //     type === "admin"
+  //       ? "Eslam@000"
+  //       : type === "teacher"
+  //       ? "Eslam@000"
+  //       : "Eslam@555"
+  //   );
+  // }, [type, setValue]);
 
   const loginMutation = useMutate({
     method: "POST",
@@ -123,7 +123,7 @@ const LogInForm = () => {
         Enter your credentials to access your account.
       </div>
 
-      <div className="mt-5">
+      {/* <div className="mt-5">
         <Select value={type} onValueChange={(value) => setType(value)}>
           <SelectTrigger>
             <SelectValue placeholder="Select a role" />
@@ -134,7 +134,7 @@ const LogInForm = () => {
             <SelectItem value="quality">Quality</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </div> */}
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-5 2xl:mt-7">
         <div>

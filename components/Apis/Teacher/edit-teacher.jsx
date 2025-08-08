@@ -47,10 +47,9 @@ function EditTeacherComponent({ user, info }) {
         `dashboard/users/${user?.user_id}/change-is-new`
       );
       setIsNew(!isNew); // Only update state after successful request
-      queryClient.invalidateQueries(["users", "teacher"]);
+      queryClient.invalidateQueries({ queryKey: ["users", "teacher"] });
       toast.success("Status updated successfully");
     } catch (error) {
-      console.error("Is new request error:", error);
       toast.error(error?.response?.data?.msg || "Failed to update status");
     }
   };
@@ -131,8 +130,6 @@ function EditTeacherComponent({ user, info }) {
     form.reset(dummyData);
   }, [user]);
 
-  console.log(form.formState);
-
   const onSubmit = async (data) => {
     // Add role to the data
     const teacherData = {
@@ -140,7 +137,12 @@ function EditTeacherComponent({ user, info }) {
       role: "teacher",
     };
 
-    updateTeacher(teacherData);
+    updateTeacher(teacherData, {
+      onSuccess: () => {
+        form.reset();
+        queryClient.invalidateQueries({ queryKey: ["users", "teacher"] });
+      },
+    });
   };
 
   return (
